@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import os, glob, concurrent.futures, time, threading, math
-import sound_lib
-import sound_lib.sample
-import sound_lib.output
-import sound_lib.stream
+from .sound_lib.output import Output
+from .sound_lib.sample import *
+from .sound_lib.stream import *
 from .key import k
 from .sound_positioning import *
 from .sound_lib.external.pybass import *
