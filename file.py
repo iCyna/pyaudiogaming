@@ -6,13 +6,17 @@ import shutil
 import base64
 from cryptography.fernet import Fernet
 import io
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
 
 class File:
-	def __init__(self, password: str, encode: bool = False):
+	def __init__(self, password: str, encode: bool = False, aes: bool = False):
 		self.key = self.generate_key(password)
 		self.cipher = self.dokey(self.key)
+		self.aes_key = hashlib.sha256(password.encode()).digest()  # Tạo khóa AES từ khóa Fernet
 		self.file_obj = None
 		self.encode = encode
+		self.aes = aes
 
 	@staticmethod
 	def generate_key(password: str) -> bytes:
@@ -27,7 +31,23 @@ class File:
 		Tạo đối tượng Fernet từ key.
 		"""
 		return Fernet(key)
+	def aes_encrypt(self, data: bytes) -> bytes:
+		"""
+		Mã hóa dữ liệu bằng AES.
+		"""
+		iv = os.urandom(16)
+		cipher = AES.new(self.aes_key, AES.MODE_CBC, iv)
+		encrypted_data = cipher.encrypt(pad(data, AES.block_size))
+		return iv + encrypted_data  # Ghép IV với dữ liệu đã mã hóa
 
+	def aes_decrypt(self, data: bytes) -> bytes:
+		"""
+		Giải mã dữ liệu bằng AES.
+		"""
+		iv = data[:16]
+		encrypted_data = data[16:]
+		cipher = AES.new(self.aes_key, AES.MODE_CBC, iv)
+		return unpad(cipher.decrypt(encrypted_data), AES.block_size)
 	def open(self, file_path, mode):
 		self.file_obj = open(file_path, mode)
 
@@ -45,13 +65,16 @@ class File:
 			data = str(data)
 		if self.encode:
 			data = self.cipher.encrypt(data.encode('utf-8'))
+			if self.aes: data = self.aes_encrypt(data)  # Mã hóa thêm bằng AES
 		with open(file_path, mode) as file:
 			file.write(data)
 
 	def load(self, file_path: str, mode="r+", type: str = ""):
 		with open(file_path, mode) as file:
 			data = file.read()
-		if self.encode: data = self.cipher.decrypt(data).decode('utf-8')
+		if self.encode:
+			if self.aes: data = self.aes_decrypt(data)
+			data = self.cipher.decrypt(data).decode('utf-8')
 		if type == "json":
 			return json.loads(data)
 		elif type == "pickle":
