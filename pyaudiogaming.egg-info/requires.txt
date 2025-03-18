@@ -1,0 +1,9 @@
+pygame
+cryptography
+libloader
+wxPython
+enum34
+pywin32
+nuitka
+socket
+requests

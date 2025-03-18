@@ -1,0 +1,21 @@
+Metadata-Version: 2.2
+Name: pyaudiogaming
+Version: 0.1.0
+Summary: A toolkit for audio-based games in Python
+Author-email: iCyna <phucnggo29@gmail.com>
+License: MIT
+Project-URL: Homepage, https://github.com/iCyna/pyaudiogaming
+Project-URL: Documentation, https://github.com/iCyna/pyaudiogaming/wiki
+Keywords: audio,game,python,toolkit
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Dist: pygame
+Requires-Dist: cryptography
+Requires-Dist: libloader
+Requires-Dist: wxPython
+Requires-Dist: enum34
+Requires-Dist: pywin32
+Requires-Dist: nuitka
+Requires-Dist: socket
+Requires-Dist: requests

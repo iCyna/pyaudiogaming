@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyaudiogaming"               # Tên thư viện (không được trùng với thư viện khác trên PyPI)
+version = "0.1.0"                    # Phiên bản của thư viện
+description = "A toolkit for audio-based games in Python"  # Mô tả ngắn
+readme = ""
+license = { text = "MIT" }
+authors = [{ name = "iCyna", email = "phucnggo29@gmail.com" }]
+keywords = ["audio", "game", "python", "toolkit"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = ["pygame", "cryptography", "libloader", "wxPython", "enum34", "pywin32", "nuitka", "requests"]
+
+[project.urls]
+Homepage = "https://github.com/iCyna/pyaudiogaming"
+Documentation = "https://github.com/iCyna/pyaudiogaming/wiki"
+
+[tool.setuptools.packages.find]
+where = ["."]
