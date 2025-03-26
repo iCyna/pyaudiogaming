@@ -1,6 +1,6 @@
 ﻿# -*- coding: utf-8 -*-
 #Basic window, timer, speech, menu handling...
-import pygame, wx, sys, time, inputBox
+import pygame, wx, sys, time, inputBox, ctypes
 from .accessible_output2.outputs.auto import *
 from copy import copy
 from pygame.locals import *
@@ -55,15 +55,15 @@ When user presses alt+f4 or the x icon, this function attempts to shut down the 
 				if self.history_index > 0:
 					self.history_index -= 1
 					self.saync(self.speech_history[self.history_index])
-			if self.keyPressed(k.right_bkt.value):  # Next history item
+			elif self.keyPressed(k.right_bkt.value):  # Next history item
 				if self.history_index < len(self.speech_history) - 1:
 					self.history_index += 1
 					self.saync(self.speech_history[self.history_index])
 			if (self.keyPressing(k.lshift.value) or self.keyPressing(k.rshift.value)) and self.keyPressed(k.left_bkt.value):
 				self.history_index = 0
 				self.saync(self.speech_history[self.history_index])
-			if (self.keyPressing(k.lshift.value) or self.keyPressing(k.rshift.value)) and self.keyPressed(k.right_bkt.value):
-				self.history_index = len(self.speech_history)
+			elif (self.keyPressing(k.lshift.value) or self.keyPressing(k.rshift.value)) and self.keyPressed(k.right_bkt.value):
+				self.history_index = len(self.speech_history)-1
 				self.saync(self.speech_history[self.history_index])
 		except IndexError:pass
 
@@ -166,5 +166,13 @@ When user presses alt+f4 or the x icon, this function attempts to shut down the 
 	def messageGui(self, title, message, type=inputBox.INFO):
 		i=inputBox.dialogMessage(title, message, type)
 		return i
+
+	def beep(self,frequency, duration):
+		ctypes.windll.kernel32.Beep(frequency, duration)
+
+	def beep_progress_bar(self, progress, duration=120):
+		frequency = 200 + int((progress / 100) * (1500 - 200))
+		self.beep(frequency, duration)
+
 	#end input
 #end class singletonWindow
