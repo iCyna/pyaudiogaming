@@ -263,9 +263,8 @@ class SoundBase:
 			return 0
 		try:
 			# Channel bytes translated natively into raw float seconds, up-scaled to integer ms
-			return int(self.handle.bytes_to_seconds(handle.get_position()) * 1000)
-		except:
-			return 0
+			return int(self.handle.bytes_to_seconds(self.handle.get_position()) * 1000)
+		except Exception as e: print(e);return 0
 
 	@position.setter
 	def position(self, ms_value):
@@ -273,9 +272,9 @@ class SoundBase:
 			return
 		try:
 			seconds = float(ms_value) / 1000.0
-			byte_target = self,handle.seconds_to_bytes(seconds)
+			byte_target = self.handle.seconds_to_bytes(seconds)
 			self.handle.set_position(byte_target)
-		except:pass
+		except Exception as e: print(e)
 
 	def seek(self, ms_value):
 		self.position = ms_value
