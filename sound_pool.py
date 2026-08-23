@@ -12,6 +12,7 @@ from .sound_lib.instrument import SoundFont, MIDIStream, MIDIFileStream
 from .sound_lib.recording import *
 from .sound_lib.encoder import *
 from .sound_fx import *
+from .sound_lib.external import pybassmix as bassmix
 from .soft import get_openal_audio, initialize_openal_audio
 
 def output(period=10, bbuffer=500, ThreeD=False, sample_rate=44100):
@@ -346,6 +347,189 @@ class SoundBase:
 		self.handle.slide_attribute("pan", float(final_pan) / 100, fatime)
 		self.handle.slide_attribute("frequency", (float(final_pitch) / 100) * self.freq, fatime)
 		#except: pass
+class mixer(SoundBase):
+
+  def __init__(self):
+    super().__init__()
+    self.sound_token = utils.token(max=25)
+    buffer.hSound_poolbuffers[self.sound_token] = self
+    self.handle = None
+    self.freq = 44100
+    self.chans = 2
+    self.paused = False
+    self.boolfadein = False
+    self.sources = {}  # Storage for active source channels in the mixer
+
+  def _get_raw_handle(self, obj):
+    """Extracts native C handle integer from sound/musical/channel objects or int."""
+    if obj is None:
+      return 0
+    if hasattr(obj, "dedata") and obj.dedata:
+      obj = obj.dedata
+    if hasattr(obj, "handle") and obj.handle:
+      obj = obj.handle
+    if hasattr(obj, "handle"):
+      obj = obj.handle
+    if hasattr(obj, "value"):
+      return ctypes.c_ulong(obj.value).value
+    return ctypes.c_ulong(int(obj)).value
+
+  def create(
+      self,
+      frequency=44100,
+      channels=2,
+      flags=bassmix.BASS_MIXER_NONSTOP | bassmix.BASS_MIXER_RESUME,
+  ):
+    """Initializes a new Mixer Stream."""
+    self.close()
+    self.freq = frequency
+    self.chans = channels
+
+    # Create mixer stream via pybassmix API
+    raw_handle = bassmix.BASS_Mixer_StreamCreate(frequency, channels, flags)
+    if not raw_handle:
+      return False
+
+    # Wrap raw handle into sound_lib Channel to inherit SoundBase methods
+    if hasattr(sound_lib, "channel") and hasattr(sound_lib.channel, "Channel"):
+      self.handle = sound_lib.channel.Channel(raw_handle)
+    else:
+      from .sound_lib.stream import Stream as BaseStream
+
+      self.handle = BaseStream(handle=raw_handle)
+
+    return True
+
+  def add(self, source, flags=0, start=None, length=None):
+    """Plugs an audio source channel into the Mixer (Source must be initialized with decode=True)."""
+    if not self.handle:
+      return False
+
+    raw_source = self._get_raw_handle(source)
+    if not raw_source:
+      return False
+
+    mixer_handle = self._get_raw_handle(self.handle)
+
+    if start is not None and length is not None:
+      res = bassmix.BASS_Mixer_StreamAddChannelEx(
+          mixer_handle, raw_source, flags, start, length
+      )
+    else:
+      res = bassmix.BASS_Mixer_StreamAddChannel(mixer_handle, raw_source, flags)
+
+    if bool(res):
+      self.sources[raw_source] = source
+      return True
+    return False
+
+  def remove(self, source):
+    """Detaches an audio source channel from the Mixer."""
+    raw_source = self._get_raw_handle(source)
+    if raw_source in self.sources:
+      del self.sources[raw_source]
+    return bool(bassmix.BASS_Mixer_ChannelRemove(raw_source))
+
+  def pause_channel(self, source, paused=True):
+    """Pauses or unpauses an individual source channel within the Mixer."""
+    raw_source = self._get_raw_handle(source)
+    flag = bassmix.BASS_MIXER_PAUSE if paused else 0
+    return (
+        bassmix.BASS_Mixer_ChannelFlags(
+            raw_source, flag, bassmix.BASS_MIXER_PAUSE
+        )
+        != -1
+    )
+
+  def set_channel_pos(self, source, ms_value):
+    """Sets playback position of a source channel in the mixer (in milliseconds)."""
+    raw_source = self._get_raw_handle(source)
+    if not raw_source:
+      return False
+    sec = float(ms_value) / 1000.0
+    byte_target = sound_lib.main.BASS_ChannelSeconds2Bytes(raw_source, sec)
+    return bool(
+        bassmix.BASS_Mixer_ChannelSetPosition(raw_source, byte_target, 0)
+    )
+
+  def get_channel_pos(self, source):
+    """Retrieves current playback position of a source channel in the mixer (in milliseconds)."""
+    raw_source = self._get_raw_handle(source)
+    byte_pos = bassmix.BASS_Mixer_ChannelGetPosition(raw_source, 0)
+    if byte_pos == -1:
+      return 0
+    sec = sound_lib.main.BASS_ChannelBytes2Seconds(raw_source, byte_pos)
+    return int(sec * 1000)
+
+  def get_channel_level(self, source):
+    """Retrieves peak level of a source channel (requires BASS_MIXER_BUFFER flag when added)."""
+    raw_source = self._get_raw_handle(source)
+    return bassmix.BASS_Mixer_ChannelGetLevel(raw_source)
+
+  def set_matrix(self, source, matrix_data):
+    """Applies a routing matrix to a source channel (matrix_data: 2D list or flat float list)."""
+    raw_source = self._get_raw_handle(source)
+    flat_list = []
+    if isinstance(matrix_data[0], (list, tuple)):
+      for row in matrix_data:
+        flat_list.extend(row)
+    else:
+      flat_list = matrix_data
+
+    arr = (ctypes.c_float * len(flat_list))(*flat_list)
+    return bool(
+        bassmix.BASS_Mixer_ChannelSetMatrix(
+            raw_source, ctypes.cast(arr, ctypes.POINTER(ctypes.c_float))
+        )
+    )
+
+  def set_envelope(self, source, env_type, nodes):
+    """Applies an automated envelope curve (Volume/Pan/Freq) to a source channel."""
+    raw_source = self._get_raw_handle(source)
+    c_nodes = []
+    for node in nodes:
+      if isinstance(node, (tuple, list)):
+        c_node = bassmix.BASS_MIXER_NODE()
+        c_node.pos = node[0]
+        c_node.value = float(node[1])
+        c_nodes.append(c_node)
+      else:
+        c_nodes.append(node)
+
+    arr = (bassmix.BASS_MIXER_NODE * len(c_nodes))(*c_nodes)
+    return bool(
+        bassmix.BASS_Mixer_ChannelSetEnvelope(
+            raw_source,
+            env_type,
+            ctypes.cast(arr, ctypes.POINTER(bassmix.BASS_MIXER_NODE)),
+            len(c_nodes),
+        )
+    )
+
+  def play(self):
+    if self.handle:
+      self.handle.play()
+
+  def stop(self):
+    if self.handle and self.handle.is_playing:
+      self.handle.stop()
+      self.handle.set_position(0)
+
+  def close(self):
+    try:
+      if self.handle and self.playing:
+        self.handle.stop()
+      for raw_src in list(self.sources.keys()):
+        bassmix.BASS_Mixer_ChannelRemove(raw_src)
+      self.sources.clear()
+
+      if self.handle:
+        self.handle.free()
+        self.handle = None
+      if self.sound_token in buffer.hSound_poolbuffers:
+        del buffer.hSound_poolbuffers[self.sound_token]
+    except Exception:
+      pass
 
 class record(SoundBase):
 	def __init__(self):

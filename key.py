@@ -79,6 +79,7 @@ class k(Enum):
 	quote = K_QUOTE          
 	backslash = K_BACKSLASH
 	dot = K_PERIOD
+	period = K_PERIOD
 	comma = K_COMMA            
 	semicolon = K_SEMICOLON
 	minus = K_MINUS           
