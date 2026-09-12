@@ -44,6 +44,7 @@ BASS_BFX_CHAN7 = 64
 BASS_BFX_CHAN8 = 128
 
 #DSP effects
+BASS_FX_BFX_PITCHSHIFT = 0x10015
 (
  BASS_FX_BFX_ROTATE,
  BASS_FX_BFX_ECHO,
@@ -65,7 +66,7 @@ BASS_BFX_CHAN8 = 128
  BASS_FX_BFX_COMPRESSOR2,
  BASS_FX_BFX_VOLUME_ENV,
  BASS_FX_BFX_BQF,
- BASS_FX_BFX_FREEVERB
+ BASS_FX_BFX_FREEVERB,
 ) = range(0x10000, 0x10000+21)
 
 #BiQuad filters
@@ -257,6 +258,15 @@ class BASS_BFX_ENV_NODE(ctypes.Structure):
   ('val', ctypes.c_float), #node value
  ]
 
+BASS_FX_BFX_PITCHSHIFT = 0x10015
+class BASS_BFX_PITCHSHIFT(ctypes.Structure):
+    _fields_ = [
+        ('fPitchShift', ctypes.c_float),  # Tỉ lệ cao độ (1.0 = gốc)
+        ('fSemitones', ctypes.c_float),   # Bán cung (-60.0 .. +60.0)
+        ('lFFTsize', ctypes.c_long),      # Kích thước FFT (1024, 2048, 4096...)
+        ('lOsamp', ctypes.c_long),        # Overlap (4, 8, 16...)
+        ('lChannel', ctypes.c_int),       # Kênh (BASS_BFX_CHANALL = -1)
+    ]
 #Volume envelope
 class BASS_BFX_VOLUME_ENV(ctypes.Structure):
  _fields_ = [

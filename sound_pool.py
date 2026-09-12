@@ -12,7 +12,7 @@ from .sound_lib.instrument import SoundFont, MIDIStream, MIDIFileStream
 from .sound_lib.recording import *
 from .sound_lib.encoder import *
 from .sound_fx import *
-from .sound_lib.external import pybassmix as bassmix
+from .sound_lib.external import pybassvst, pybassmix as bassmix
 from .soft import get_openal_audio, initialize_openal_audio
 
 def output(period=10, bbuffer=500, ThreeD=False, sample_rate=44100):
@@ -172,6 +172,44 @@ class SoundBase:
 			return False
 		self.handle.set_volume(float(value) / 100)
 
+	def _ensure_pitch_fx(self):
+		if not self.handle:
+			return False
+		if self._pitch_shift_fx is not None:
+			return True
+
+		c_handle = self._get_raw_channel_handle()
+		if not c_handle:
+			return False
+		try:
+			# BASS_FX_BFX_PITCHSHIFT = 0x10015
+			self._pitch_shift_fx = self.handle.set_fx(0x10015, priority=0)
+			return True
+		except Exception:
+			self._pitch_shift_fx = None
+			return False
+
+	def set_tone(self, semitones, fft_size=2048, osamp=8):
+		self._tone_semitones = float(semitones)
+		if not self._ensure_pitch_fx():
+			return False
+
+		try:
+			params = BASS_BFX_PITCHSHIFT()
+			params.fPitchShift = 1.0
+			params.fSemitones = float(semitones)
+			params.lFFTsize = int(fft_size)
+			params.lOsamp = int(osamp)
+			params.lChannel = -1  # BASS_BFX_CHANALL
+
+			self.handle.set_fx_setparam(self._pitch_shift_fx, params)
+			return True
+		except Exception as ex:
+			print(f"[PitchShift Error]: {ex}")
+			return False
+
+	def get_tone(self):
+		return self._tone_semitones
 	@property
 	def pitch(self):
 		if not self.handle:
@@ -347,6 +385,187 @@ class SoundBase:
 		self.handle.slide_attribute("pan", float(final_pan) / 100, fatime)
 		self.handle.slide_attribute("frequency", (float(final_pitch) / 100) * self.freq, fatime)
 		#except: pass
+
+class vst(SoundBase):
+	"""
+	VST Class inheriting from SoundBase. 
+	Handles Virtual Studio Technology (VSTi instruments and VST DSP effects).
+	"""
+	def __init__(self):
+		super().__init__()
+		self.sound_token = utils.token(max=25)
+		buffer.hSound_poolbuffers[self.sound_token] = self
+		self.handle = None
+		self.vst_handle = None
+		self._target_channel = None
+		self.freq = 44100
+		self.chans = 2
+		self.paused = False
+
+	def create_instrument(self, dll_path, frequency=44100, channels=2, flags=0):
+		"""
+		Initializes a new VSTi (Virtual Instrument) audio stream.
+		"""
+		self.close()
+		self.freq = frequency
+		self.chans = channels
+
+		encoded_path = dll_path.encode('utf-8') if isinstance(dll_path, str) else dll_path
+		raw_vst_handle = pybassvst.BASS_VST_ChannelCreate(frequency, channels, encoded_path, flags)
+		
+		if not raw_vst_handle:
+			return False
+
+		from .sound_lib.stream import Stream as BaseStream
+		self.handle = BaseStream(handle=raw_vst_handle)
+		self.vst_handle = raw_vst_handle
+		return True
+
+	def set_dsp(self, target_stream, dll_path, priority=0):
+		"""
+		Assigns a VST plugin as a DSP effect to an active audio stream.
+		"""
+		if not target_stream or not hasattr(target_stream, "handle"):
+			return False
+
+		raw_channel = target_stream.handle.handle if hasattr(target_stream.handle, "handle") else target_stream.handle
+		if hasattr(raw_channel, "value"):
+			raw_channel = raw_channel.value
+
+		encoded_path = dll_path.encode('utf-8') if isinstance(dll_path, str) else dll_path
+		self.vst_handle = pybassvst.BASS_VST_ChannelSetDSP(raw_channel, encoded_path, 0, priority)
+		
+		if self.vst_handle:
+			self.handle = target_stream.handle
+			self._target_channel = raw_channel 
+			return True
+		return False
+
+	def remove_dsp(self):
+		"""
+		Safely detaches and removes the VST DSP effect from the host channel.
+		"""
+		if not self.vst_handle or not self._target_channel:
+			return False
+			
+		success = pybassvst.BASS_VST_ChannelRemoveDSP(self._target_channel, self.vst_handle)
+		if success:
+			self.vst_handle = None
+			self._target_channel = None
+			self.handle = None
+		return bool(success)
+
+	def get_info(self):
+		"""
+		Retrieves internal architecture information of the currently loaded VST plugin.
+		Returns a BASS_VST_INFO structure or None if failed.
+		"""
+		if not self.vst_handle:
+			return None
+			
+		info = pybassvst.BASS_VST_INFO()
+		if pybassvst.BASS_VST_GetInfo(self.vst_handle, ctypes.byref(info)):
+			return info
+		return None
+
+	def send_midi(self, midi_channel, midi_event, midi_velocity):
+		"""
+		Sends a raw MIDI event (e.g., Note On/Off) to the loaded VSTi.
+		"""
+		if not self.vst_handle:
+			return False
+		return bool(pybassvst.BASS_VST_ProcessEvent(self.vst_handle, midi_channel, midi_event, midi_velocity))
+
+	def set_param(self, index, value):
+		"""
+		Adjusts a specific parameter of the VST plugin by its index.
+		"""
+		if not self.vst_handle:
+			return False
+		return bool(pybassvst.BASS_VST_SetParam(self.vst_handle, int(index), float(value)))
+
+	def get_param(self, index):
+		"""
+		Retrieves the current value of a specific VST parameter.
+		"""
+		if not self.vst_handle:
+			return 0.0
+		return pybassvst.BASS_VST_GetParam(self.vst_handle, int(index))
+
+	def set_program(self, index):
+		"""
+		Switches the active preset/program of the VST plugin.
+		"""
+		if not self.vst_handle:
+			return False
+		return bool(pybassvst.BASS_VST_SetProgram(self.vst_handle, int(index)))
+
+	def set_bypass(self, state):
+		"""
+		Bypasses (disables/enables) the VST effect without removing it.
+		"""
+		if not self.vst_handle:
+			return False
+		return bool(pybassvst.BASS_VST_SetBypass(self.vst_handle, ctypes.c_byte(1 if state else 0)))
+
+	def get_chunk(self, is_preset=True):
+		"""
+		Retrieves the raw chunk data (preset/bank configuration) from the VST.
+		"""
+		if not self.vst_handle:
+			return None
+			
+		chunk_ptr = ctypes.c_void_p()
+		length = pybassvst.BASS_VST_GetChunk(self.vst_handle, ctypes.c_byte(1 if is_preset else 0), ctypes.byref(chunk_ptr))
+		if length > 0 and chunk_ptr:
+			return ctypes.string_at(chunk_ptr, length)
+		return None
+
+	def set_chunk(self, chunk_bytes, is_preset=True):
+		"""
+		Applies raw chunk data (preset/bank configuration) back to the VST.
+		"""
+		if not self.vst_handle or not chunk_bytes:
+			return False
+			
+		return bool(pybassvst.BASS_VST_SetChunk(self.vst_handle, ctypes.c_byte(1 if is_preset else 0), chunk_bytes, len(chunk_bytes)))
+
+	def play(self):
+		"""
+		Starts playback of the VST stream.
+		"""
+		if self.handle:
+			self.handle.play()
+
+	def stop(self):
+		"""
+		Stops playback and resets position to the beginning.
+		"""
+		if self.handle and self.handle.is_playing:
+			self.handle.stop()
+			self.handle.set_position(0)
+
+	def close(self):
+		"""
+		Safely frees the VST architecture and internal stream instances from memory.
+		"""
+		try:
+			if self.handle and self.playing:
+				self.handle.stop()
+			
+			if self.vst_handle:
+				pybassvst.BASS_VST_ChannelFree(self.vst_handle)
+				self.vst_handle = None
+
+			if self.handle:
+				self.handle.free()
+				self.handle = None
+				
+			if self.sound_token in buffer.hSound_poolbuffers:
+				del buffer.hSound_poolbuffers[self.sound_token]
+		except Exception:
+			pass
+
 class mixer(SoundBase):
 
   def __init__(self):
