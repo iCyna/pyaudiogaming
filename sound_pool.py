@@ -43,6 +43,7 @@ def input():
 
 class SoundBase:
 	def __init__(self):
+		self.dedata=None
 		self.active_fx_handles = {}
 
 	def setPaused(self, p):
@@ -415,9 +416,7 @@ class vst(SoundBase):
 		
 		if not raw_vst_handle:
 			return False
-
-		from .sound_lib.stream import Stream as BaseStream
-		self.handle = BaseStream(handle=raw_vst_handle)
+		self.handle = sound_lib.channel.Channel(raw_vst_handle)
 		self.vst_handle = raw_vst_handle
 		return True
 

@@ -13,7 +13,6 @@ class Auto(Output):
                 self.outputs.append(output())
             except OutputError:
                 pass
-        print(self.outputs)
 
     def get_first_available_output(self):
         """
