@@ -14,6 +14,7 @@ from .sound_lib.encoder import *
 from .sound_fx import *
 from .sound_lib.external import pybassvst, pybassmix as bassmix
 from .soft import get_openal_audio, initialize_openal_audio
+from .sound_lib.external import pybass_fx
 
 def output(period=10, bbuffer=500, ThreeD=False, sample_rate=44100):
 	# initialize output device
@@ -45,6 +46,7 @@ class SoundBase:
 	def __init__(self):
 		self.dedata=None
 		self.active_fx_handles = {}
+		self.mono=False
 
 	def setPaused(self, p):
 		if self.paused == p:
@@ -1031,10 +1033,18 @@ class sound(SoundBase):
 		self.paused = False
 		self.boolfadein = False
 
-	def stream(self,filename, draw=False, mono=False, ThreeD=False, decode=False, autofree=False):
+	def stream(self, filename, draw=False, mono=False, ThreeD=False, decode=False, autofree=False):
 		if self.handle:
 			self.close()
-		if ThreeD: mono=True
+			
+		# Chỉ nạp thông số vào self khi thực sự gọi stream
+		self.filename = filename
+		self.draw = draw
+		self.mono = mono
+		self.autofree = autofree
+		self.is_tempo = False
+
+		if ThreeD: mono = True
 		if draw:
 			handle = sound_lib.stream.PushStream()
 		else:
@@ -1043,19 +1053,18 @@ class sound(SoundBase):
 			else:
 				if not utils.is_url(filename):
 					handle = sound_lib.stream.FileStream(file=filename, mono=mono, decode=decode, autofree=autofree)
-				else: handle = sound_lib.stream.URLStream(url=filename, mono=mono, decode=decode, autofree=autofree)
-		if ThreeD: self.dedata=handle
-		else: self.handle=handle
+				else: 
+					handle = sound_lib.stream.URLStream(url=filename, mono=mono, decode=decode, autofree=autofree)
+					
+		if ThreeD: 
+			self.dedata = handle
+		else: 
+			self.handle = handle
+			
 		self.freq = int(handle.get_frequency())
 		try:
-			if handle: return int(handle.bytes_to_seconds(handle.get_length())*1000)
+			if handle: return int(handle.bytes_to_seconds(handle.get_length()) * 1000)
 		except: return 0
-
-	def push(self, data):
-		try:
-			if self.handle is None or not self.handle: return
-			self.handle.push(data)
-		except:pass
 
 	def load(self, filename="", mono=False):
 		if self.handle:
@@ -1175,6 +1184,104 @@ class sound(SoundBase):
 		if self.play3d(): return
 		else:
 			self.handle.play()
+	def _ensure_tempo(self):
+		if getattr(self, "is_tempo", False):
+			return True
+
+		was_playing = self.playing
+		current_pos = self.position
+		current_vol = self.volume
+		current_pitch = getattr(self, 'pitch', 100)
+		current_pan = self.pan
+		active_fxs = list(self.active_fx_handles.keys())
+
+		# 1. TẠO STREAM TẠM TRƯỚC (Tránh xoá luồng cũ nếu lỡ lỗi)
+		if self.draw:
+			new_dedata = sound_lib.stream.PushStream(decode=True)
+			# TRICK QUAN TRỌNG: Nhồi một xíu âm thanh rỗng vào để BASS_FX không bị ngợp/tịt ngòi
+			new_dedata.push(b'\x00' * 8192)
+		else:
+			if self.filename in buffer.hstreambuffers:
+				new_dedata = sound_lib.stream.FileStream(mem=True, file=buffer.hstreambuffers[self.filename]["buffer"], length=buffer.hstreambuffers[self.filename]["len"], mono=self.mono, decode=True, autofree=self.autofree)
+			else:
+				if not utils.is_url(self.filename):
+					new_dedata = sound_lib.stream.FileStream(file=self.filename, mono=self.mono, decode=True, autofree=self.autofree)
+				else: 
+					new_dedata = sound_lib.stream.URLStream(url=self.filename, mono=self.mono, decode=True, autofree=self.autofree)
+
+		raw_source = new_dedata.handle if hasattr(new_dedata, 'handle') else new_dedata
+		if hasattr(raw_source, 'value'): raw_source = raw_source.value
+
+		tempo_handle = pybass_fx.BASS_FX_TempoCreate(raw_source, 0x10000)
+		if not tempo_handle:
+			# NẾU TẠO THẤT BẠI: Giữ nguyên hiện trạng, không làm mất tiếng của stream cũ!
+			new_dedata.free()
+			return False
+			
+		# 2. ĐÃ TẠO THÀNH CÔNG: Mới bắt đầu xoá stream cũ
+		if self.handle:
+			self.handle.stop()
+			self.handle.free()
+		if self.dedata:
+			self.dedata.free()
+			
+		self.dedata = new_dedata
+		self.handle = sound_lib.channel.Channel(tempo_handle)
+		self.is_tempo = True
+
+		if was_playing:
+			self.handle.play()
+		self.position = current_pos
+		self.volume = current_vol
+		self.pitch = current_pitch
+		self.pan = current_pan
+		for fx_key in active_fxs:
+			self.setfx(fx_key)
+		return True
+
+	def get_tempo(self):
+		if not getattr(self, "is_tempo", False) or not self.handle: return 0.0
+		return self.handle.get_attribute(65536)
+
+	def set_tempo(self, value):
+		# Chặn việc chuyển đổi tốn kém nếu giá trị vẫn là 0
+		if float(value) == 0.0 and not getattr(self, "is_tempo", False): return
+		if self._ensure_tempo():
+			self.handle.set_attribute(65536, float(value))
+
+	def get_tone(self):
+		if not getattr(self, "is_tempo", False) or not self.handle: return 0.0
+		return self.handle.get_attribute(65537)
+
+	def set_tone(self, value, fft_size=2048, osamp=8):
+		if float(value) == 0.0 and not getattr(self, "is_tempo", False): return
+		if self._ensure_tempo():
+			self.handle.set_attribute(65537, float(value))
+
+	def get_tempo_freq(self):
+		if not getattr(self, "is_tempo", False) or not self.handle: return 0.0
+		return self.handle.get_attribute(65538)
+
+	def set_tempo_freq(self, value):
+		if float(value) == 0.0 and not getattr(self, "is_tempo", False): return
+		if self._ensure_tempo():
+			self.handle.set_attribute(65538, float(value))
+
+	def push(self, data):
+		try:
+			if getattr(self, "is_tempo", False) and self.dedata:
+				self.dedata.push(data)
+				# Tự động đánh thức nếu BASS_FX bị thiếu dữ liệu dẫn đến khựng/Stalled
+				if self.handle and not getattr(self, "paused", False):
+					if self.handle.is_stalled or self.handle.is_stopped:
+						self.handle.play()
+			else:
+				if self.handle is None or not self.handle: return
+				self.handle.push(data)
+				if not getattr(self, "paused", False):
+					if self.handle.is_stalled or self.handle.is_stopped:
+						self.handle.play()
+		except: pass
 
 def playsingle(filename, volume=100, pitch=100, pan=0, mono=False):
 	# play sound o more easily
