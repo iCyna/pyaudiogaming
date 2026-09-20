@@ -165,3 +165,53 @@ BASS_Encode_ServerInit = func_type(ctypes.c_ulong, HENCODE, ctypes.c_char_p, cty
 #BOOL BASSENCDEF(BASS_Encode_ServerKick)(HENCODE handle, const char *client);
 BASS_Encode_ServerKick = func_type(ctypes.c_byte, HENCODE, ctypes.c_char_p)(('BASS_Encode_ServerKick', bassenc_module))
 
+# --- Additional Encoders (MP3, OGG, FLAC, etc.) ---
+# BASSENC add-ons wrapper implementation
+
+# Try to load BASS_Encode_MP3
+try:
+    bassenc_mp3_module = system.load_dll('bassenc_mp3')
+    
+    # HENCODE BASSDEF(BASS_Encode_MP3_Start)(DWORD handle, const char *options, DWORD flags, ENCODEPROC *proc, void *user);
+    BASS_Encode_MP3_Start = func_type(HENCODE, ctypes.c_ulong, ctypes.c_char_p, ctypes.c_ulong, ENCODEPROC, ctypes.c_void_p)(('BASS_Encode_MP3_Start', bassenc_mp3_module))
+    
+    # HENCODE BASSDEF(BASS_Encode_MP3_StartFile)(DWORD handle, const char *options, DWORD flags, const char *file);
+    BASS_Encode_MP3_StartFile = func_type(HENCODE, ctypes.c_ulong, ctypes.c_char_p, ctypes.c_ulong, ctypes.c_char_p)(('BASS_Encode_MP3_StartFile', bassenc_mp3_module))
+except OSError:
+    pass # bassenc_mp3 library not found
+
+# Try to load BASS_Encode_OGG
+try:
+    bassenc_ogg_module = system.load_dll('bassenc_ogg')
+    
+    # HENCODE BASSDEF(BASS_Encode_OGG_Start)(DWORD handle, const char *options, DWORD flags, ENCODEPROC *proc, void *user);
+    BASS_Encode_OGG_Start = func_type(HENCODE, ctypes.c_ulong, ctypes.c_char_p, ctypes.c_ulong, ENCODEPROC, ctypes.c_void_p)(('BASS_Encode_OGG_Start', bassenc_ogg_module))
+    
+    # HENCODE BASSDEF(BASS_Encode_OGG_StartFile)(DWORD handle, const char *options, DWORD flags, const char *file);
+    BASS_Encode_OGG_StartFile = func_type(HENCODE, ctypes.c_ulong, ctypes.c_char_p, ctypes.c_ulong, ctypes.c_char_p)(('BASS_Encode_OGG_StartFile', bassenc_ogg_module))
+except OSError:
+    pass # bassenc_ogg library not found
+    
+# Try to load BASS_Encode_FLAC
+try:
+    bassenc_flac_module = system.load_dll('bassenc_flac')
+    
+    # HENCODE BASSDEF(BASS_Encode_FLAC_Start)(DWORD handle, const char *options, DWORD flags, ENCODEPROC *proc, void *user);
+    BASS_Encode_FLAC_Start = func_type(HENCODE, ctypes.c_ulong, ctypes.c_char_p, ctypes.c_ulong, ENCODEPROC, ctypes.c_void_p)(('BASS_Encode_FLAC_Start', bassenc_flac_module))
+    
+    # HENCODE BASSDEF(BASS_Encode_FLAC_StartFile)(DWORD handle, const char *options, DWORD flags, const char *file);
+    BASS_Encode_FLAC_StartFile = func_type(HENCODE, ctypes.c_ulong, ctypes.c_char_p, ctypes.c_ulong, ctypes.c_char_p)(('BASS_Encode_FLAC_StartFile', bassenc_flac_module))
+except OSError:
+    pass # bassenc_flac library not found
+
+# Try to load BASS_Encode_OPUS
+try:
+    bassenc_opus_module = system.load_dll('bassenc_opus')
+    
+    # HENCODE BASSDEF(BASS_Encode_OPUS_Start)(DWORD handle, const char *options, DWORD flags, ENCODEPROC *proc, void *user);
+    BASS_Encode_OPUS_Start = func_type(HENCODE, ctypes.c_ulong, ctypes.c_char_p, ctypes.c_ulong, ENCODEPROC, ctypes.c_void_p)(('BASS_Encode_OPUS_Start', bassenc_opus_module))
+    
+    # HENCODE BASSDEF(BASS_Encode_OPUS_StartFile)(DWORD handle, const char *options, DWORD flags, const char *file);
+    BASS_Encode_OPUS_StartFile = func_type(HENCODE, ctypes.c_ulong, ctypes.c_char_p, ctypes.c_ulong, ctypes.c_char_p)(('BASS_Encode_OPUS_StartFile', bassenc_opus_module))
+except OSError:
+    pass # bassenc_opus library not found

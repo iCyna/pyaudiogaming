@@ -154,4 +154,5 @@ def load_dll(name, ot="all", WinDLL=False):
 	except Exception as e:
 		last_error = e
 
-	raise OSError(f"Cannot load library {filename}: {last_error}")
+	#raise OSError(f"Cannot load library {filename}: {last_error}")
+	print(f"Cannot load library {filename}: {last_error}")
