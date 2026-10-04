@@ -2,110 +2,70 @@
 # copyright 2026 belong ihcyna (Labubu)<phucnggo29@gmail.com>.
 #keys callback value
 
-import secrets
-import string
-import random
-from copy import copy
-from enum import Enum, auto
 from pygame.locals import *
-
-class k(Enum):
-	s = K_s
-	a = K_a
-	d = K_d
-	f = K_f
-	g = K_g
-	h = K_h
-	j = K_j
-	k = K_k
-	l = K_l
-	q = K_q
-	w = K_w
-	e = K_e
-	r = K_r
-	t = K_t
-	y = K_y
-	u = K_u
-	i = K_i
-	o = K_o
-	p = K_p
-	z = K_z
-	x = K_x
-	c = K_c
-	v = K_v
-	b = K_b
-	n = K_n
-	m = K_m
-	left = K_LEFT
-	right = K_RIGHT
-	up = K_UP
-	down = K_DOWN
-	home = K_HOME
-	end = K_END
-	page_up = K_PAGEUP
-	page_down = K_PAGEDOWN
-	enter = K_RETURN
-	f1 = K_F1
-	f2 = K_F2
-	f3 = K_F3
-	f4 = K_F4
-	f5 = K_F5
-	f6 = K_F6
-	f7 = K_F7
-	f8 = K_F8
-	f9 = K_F9
-	f10 = K_F10
-	f11 = K_F11
-	f12 = K_F12
-	backspace = K_BACKSPACE
-	jlit = K_DELETE
-	lshift = K_LSHIFT
-	rshift = K_RSHIFT
-	shift = lshift or rshift
-	lalt = K_LALT
-	ralt = K_RALT
-	lcontrol = K_LCTRL
-	rcontrol = K_RCTRL
-	space = K_SPACE
-	tab = K_TAB
-	exit = K_ESCAPE
-	print_screen = K_PRINT
-	sys_req = K_SYSREQ
-	insert = K_INSERT
-	menu = K_MENU
-	capslock = K_CAPSLOCK
-	left_bkt = K_LEFTBRACKET  # Phím [
-	right_bkt = K_RIGHTBRACKET # Phím ]
-	quote = K_QUOTE          
-	backslash = K_BACKSLASH
-	dot = K_PERIOD
-	period = K_PERIOD
-	comma = K_COMMA            
-	semicolon = K_SEMICOLON
-	minus = K_MINUS           
-	equal =K_EQUALS
-	grave = K_BACKQUOTE        
-	slash = K_SLASH 
-	one=K_1
-	two=K_2
-	three=K_3
-	four=K_4
-	five=K_5
-	six=K_6
-	seven=K_7
-	eight=K_8
-	nine=K_9
-	zero=K_0
-
-	def eq(self, other):
-		return self.value == other
-	@property
-	def int(self):
-		return self.value
-	def __eq__(self, other):
-		if isinstance(other, int):
-			return self.int == other
-		return super().__eq__(other)
+ksum = {
+	"a": K_a, "b": K_b, "c": K_c, "d": K_d, "e": K_e, "f": K_f,
+	"g": K_g, "h": K_h, "i": K_i, "j": K_j, "k": K_k, "l": K_l,
+	"m": K_m, "n": K_n, "o": K_o, "p": K_p, "q": K_q, "r": K_r,
+	"s": K_s, "t": K_t, "u": K_u, "v": K_v, "w": K_w, "x": K_x,
+	"y": K_y, "z": K_z,
+	"0": K_0, "zero": K_0,
+	"1": K_1, "one": K_1,
+	"2": K_2, "two": K_2,
+	"3": K_3, "three": K_3,
+	"4": K_4, "four": K_4,
+	"5": K_5, "five": K_5,
+	"6": K_6, "six": K_6,
+	"7": K_7, "seven": K_7,
+	"8": K_8, "eight": K_8,
+	"9": K_9, "nine": K_9,
+	"left": K_LEFT,
+	"right": K_RIGHT,
+	"up": K_UP,
+	"down": K_DOWN,
+	"home": K_HOME,
+	"end": K_END,
+	"page_up": K_PAGEUP, "pageup": K_PAGEUP,
+	"page_down": K_PAGEDOWN, "pagedown": K_PAGEDOWN,
+	"f1": K_F1, "f2": K_F2, "f3": K_F3, "f4": K_F4, "f5": K_F5,
+	"f6": K_F6, "f7": K_F7, "f8": K_F8, "f9": K_F9, "f10": K_F10,
+	"f11": K_F11, "f12": K_F12, "f13": K_F13, "f14": K_F14, "f15": K_F15,
+	"enter": K_RETURN, "return": K_RETURN, "\n": K_RETURN,
+	"backspace": K_BACKSPACE,
+	"jlit": K_DELETE, "delete": K_DELETE, "del": K_DELETE,
+	"lshift": K_LSHIFT,
+	"rshift": K_RSHIFT,
+	"shift": K_LSHIFT, # Mặc định lấy phím shift trái
+	"lalt": K_LALT,
+	"ralt": K_RALT,
+	"alt": K_LALT,
+	"lcontrol": K_LCTRL, "lctrl": K_LCTRL,
+	"rcontrol": K_RCTRL, "rctrl": K_RCTRL,
+	"control": K_LCTRL, "ctrl": K_LCTRL,
+	"space": K_SPACE, " ": K_SPACE,
+	"tab": K_TAB, "\t": K_TAB,
+	"exit": K_ESCAPE, "escape": K_ESCAPE, "esc": K_ESCAPE,
+	"print_screen": K_PRINT, "prtsc": K_PRINT,
+	"sys_req": K_SYSREQ,
+	"insert": K_INSERT, "ins": K_INSERT,
+	"menu": K_MENU,
+	"capslock": K_CAPSLOCK, "caps": K_CAPSLOCK,
+	"left_bkt": K_LEFTBRACKET, "[": K_LEFTBRACKET,
+	"right_bkt": K_RIGHTBRACKET, "]": K_RIGHTBRACKET,
+	"quote": K_QUOTE, "'": K_QUOTE,
+	"backslash": K_BACKSLASH, "\\": K_BACKSLASH,
+	"dot": K_PERIOD, "period": K_PERIOD, ".": K_PERIOD,
+	"comma": K_COMMA, ",": K_COMMA,
+	"semicolon": K_SEMICOLON, ";": K_SEMICOLON,
+	"minus": K_MINUS, "-": K_MINUS,
+	"equal": K_EQUALS, "=": K_EQUALS,
+	"grave": K_BACKQUOTE, "`": K_BACKQUOTE, "~": K_BACKQUOTE,
+	"slash": K_SLASH, "/": K_SLASH,
+	"kp0": K_KP0, "kp1": K_KP1, "kp2": K_KP2, "kp3": K_KP3, "kp4": K_KP4,
+	"kp5": K_KP5, "kp6": K_KP6, "kp7": K_KP7, "kp8": K_KP8, "kp9": K_KP9,
+	"kp_period": K_KP_PERIOD, "kp_divide": K_KP_DIVIDE, "kp_multiply": K_KP_MULTIPLY,
+	"kp_minus": K_KP_MINUS, "kp_plus": K_KP_PLUS, "kp_enter": K_KP_ENTER, "kp_equals": K_KP_EQUALS
+}
 
 def token(min=4, max=12):
 	from . import utils

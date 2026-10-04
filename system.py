@@ -49,7 +49,7 @@ def get_platform():
 	if system == "windows":
 		result["os"] = "windows"
 	elif system == "linux":
-		if "ANDROID_ROOT" in os.environ:
+		if "ANDROID_ROOT" in os.environ or "ANDROID_ARGUMENT" in os.environ or "ANDROID_DATA" in os.environ:
 			result["os"] = "android"
 			if "generic" in os.environ.get("BUILD_FINGERPRINT", "").lower():
 				result["is_emulator"] = True
@@ -78,9 +78,11 @@ def get_arch_dir():
 	bit = arch.get("bit", 64)
 	machine = arch.get("machine", "").lower()
 
-	if os_name == "windows" or os_name=="macos":
+	if os_name == "windows":
 		arch_dir = "x64" if bit == 64 else "x86"
 
+	elif os_name=="macos":
+		arch_dir="mac"
 	elif os_name == "linux":
 		if "aarch64" in machine or "arm64" in machine:
 			arch_dir = "aarch64"

@@ -1,8 +1,7 @@
 from __future__ import absolute_import
-from libloader.com import load_com
 from .base import Output, OutputError
+from libloader.com import load_com
 import pywintypes
-
 
 class WindowEyes(Output):
     """Speech output supporting the WindowEyes screen reader"""

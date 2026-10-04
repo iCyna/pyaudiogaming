@@ -1,361 +1,255 @@
 # -*- coding: utf-8 -*-
-#Idea from Yukio Nozawa and continue by ihcyna(Labubu)
+# Idea from Yukio Nozawa and continue by ihcyna(Labubu)
 
-import pygame
-from pygame.locals import *
-from .key import *
+from . import key
 from .sound_pool import *
 from .timer import *
-
-STR_TO_KEY={
-	"A": K_a,
-	"B": K_b,
-	"C": K_c,
-	"D": K_d,
-	"E": K_e,
-	"F": K_f,
-	"G": K_g,
-	"H": K_h,
-	"I": K_i,
-	"J": K_j,
-	"K": K_k,
-	"L": K_l,
-	"M": K_m,
-	"N": K_n,
-	"O": K_o,
-	"P": K_p,
-	"Q": K_q,
-	"R": K_r,
-	"S": K_s,
-	"T": K_t,
-	"U": K_u,
-	"V": K_v,
-	"W": K_w,
-	"X": K_x,
-	"Y": K_y,
-	"Z": K_z,
-	"0": K_0,
-	"1": K_1,
-	"2": K_2,
-	"3": K_3,
-	"4": K_4,
-	"5": K_5,
-	"6": K_6,
-	"7": K_7,
-	"8": K_8,
-	"9": K_9
-}
 
 class menu:
 	"""A simple nonblocking menu class."""
 	def __init__(self):
 		self.init = self.initialize
+
 	def __del__(self):
 		pass
-	def initialize(self,wnd,ttl="no title", items=None, cursorSound=None, enterSound=None, cancelSound=None, openSound=None, keyRead=True):
-		"""
-		Initializes the menu with window instance, title and initial menu items. Requires a singletonWindow instance for this menu to work. Menu items should be a sequence of strings (not an array). the "#" character is used as the menu delimitor. 
 
-		:param wnd: Window to which this menu is bound.
-		:type wnd: SingletonWindow
-		:param ttl: Menu title.
-		:type ttl: str
-		:param items: Default items.
-		:type items: list
-		:param CursorSound: Sample instance played when user cycles through the menu items.
-		:type enterSound: sound_lib.sample
-		:param enterSound: Sample instance played when user presses enter on a menu item.
-		:type enterSound: sound_lib.sample
-		:param cancelSound: Sample instance played when user cancels the menu.
-		:type enterSound: sound_lib.sample
-		"""
-		self.wnd=wnd
-		self.title=ttl
-		self.items=[]
-		self.shortcuts=[]
+	def initialize(self, wnd, ttl="no title", items=None, cursorSound=None, enterSound=None, cancelSound=None, openSound=None, keyRead=False):
+		self.wnd = wnd
+		self.title = ttl
+		self.items = [] # Stores tuple: (display_text, shortcut_str, shortcut_key)
 		self.find_key = "&"
-		self.auto_enter_fMatched=False
+		self.auto_hotkey = True
+		self.auto_enter_fMatched = False
 		self.use_shortcut = True
+		self.match_cursor = True # True to wrap around edges
+		
+		# Cursor & Navigation
+		self.cursor = 0
+		self.keyRead = keyRead
+		self.holdTimer = Timer()
+		self.lastHold = 0
+		self.up_key = "up"
+		self.down_key = "down"
+		self.lshift = None
+		self.rshift = None
+		
+		# Sounds
+		self.cursorSound = cursorSound
+		self.enterSound = enterSound
+		self.cancelSound = cancelSound
+		self.openSound = openSound
+		self.edgeSound = None
+		self.betweenSound = None # Played when wrapping around (end to start / start to end)
+		self.removeSound = None
+		self.modifySound = None
+		self.insertSound = None
+		self.previousCursorSound = None
+		self.nextCursorSound = None
+
 		if items:
-			if isinstance(items, str):self.append(items)
+			if isinstance(items, str): self.append(items)
 			elif isinstance(items, list):
 				for i in items: self.append(i)
-		self.cursor=0
-		self.cursorSound=cursorSound
-		self.enterSound=enterSound
-		self.cancelSound=cancelSound
-		self.openSound = openSound
-		self.keyRead=keyRead
-		self.holdTimer=Timer()
-		self.lastHold=0
-		self.code={"exit": -1}
-		self.up_key=k.up.value
-		self.down_key=k.down.value
-		self.lshift=None
-		self.rshift=None
 
-	def append(self,lst, shortcut=True):
-		"""Adds one or multiple menu items. By setting shortcut false, you can skip parsing for shortcut key registration."""
-		shortcut=self.use_shortcut
-		self.items.append(self.append_internal(lst,shortcut))
-		return
-		#end single append
-		for elem in lst:
-			self.items.append(self.append_internal(elem,shortcut))
-
-	def insert(self,index,item):
-		"""Inserts an item at the specified position.
-
-		:param index: Index to add.
-		:type index: int
-		:item: Item to add.
-		:type item: str
-		"""
-		self.items.insert(index,self.append_internal(item))
-
-	def append_internal(self,elem,processShortcut=True):
-		"""Parses and makes a single item tuple. Called from append.
-
-		:param elem: Element to add.
-		"""
-		if not processShortcut: return (elem, None, None)
-		shortcut, shortcut_str=self.parseShortcut(elem)
-		if shortcut:
-			elem=elem[0:len(elem)-2]
-			self.shortcuts.append((shortcut,len(self.items)))
-		#end if shortcut registration
-		return (elem,shortcut_str,shortcut)
-
-	def parseShortcut(self,elem):
-		"""Parses the menu item string and returns shortcut keycode and string if detected. Otherwise, set both as None.
-		:param elem: Element to parse.
-		"""
-		shortcut=None
-		shortcut_str=None
-		l=len(elem)
-		if l<=3: return None, None
-		last=elem[l-2:l].upper()
-		if last[0]==self.find_key:
+	def parseShortcut(self, elem):
+		"""Parses shortcut using the find_key. Returns (display_name, shortcut_str, shortcut_keycode)"""
+		if not self.use_shortcut or not isinstance(elem, str):
+			return (elem, None, None)
+		
+		idx = elem.find(self.find_key)
+		if idx != -1 and idx + 1 < len(elem):
+			shortcut_str = elem[idx + 1].lower()
+			display_elem = elem[:idx] + elem[idx + 1:]
+			shortcut_key = None
 			try:
-				cmd=STR_TO_KEY[last[1]]
-			except KeyError:
+				# Assumes key.ksum holds the string-to-keycode mapping
+				shortcut_key = key.ksum.get(shortcut_str)
+			except AttributeError:
 				pass
-			else:
-				shortcut=cmd
-				shortcut_str=last[1]
-			#end else
-		#end if shortcut input exists
-		return shortcut, shortcut_str
+			return (display_elem, shortcut_str, shortcut_key)
+		return (elem, None, None)
 
-	def remove(self,index):
-		"""Deletes the item at the specified index.
+	def append(self, elem):
+		"""Adds a menu item."""
+		self.items.append(self.parseShortcut(elem))
 
-		:param index: index to delete.
-		:type index: int
-		"""
-		for elem in self.shortcuts[:]:
-			if elem[1] == index: self.shortcuts.remove(elem)
-		self.items.pop(index)
+	def insert(self, index, elem):
+		"""Inserts an item at the specified position."""
+		self.items.insert(index, self.parseShortcut(elem))
+		if self.insertSound: playsingle(self.insertSound)
 
-	def modify(self,index,new):
-		"""Modifies the existing menu item.
+	def remove(self, index):
+		"""Deletes the item at the specified index."""
+		if 0 <= index < len(self.items):
+			self.items.pop(index)
+			if index <= self.cursor and self.cursor > 0:
+				self.cursor -= 1
+			if self.removeSound: playsingle(self.removeSound)
 
-		:param index: Index to modify.
-		:type index: int
-		:param new: New menu item
-		:type new: str
-		"""
-		self.remove(index)
-		self.insert(index,new)
+	def modify(self, index, new_elem):
+		"""Modifies an existing menu item."""
+		if 0 <= index < len(self.items):
+			self.items[index] = self.parseShortcut(new_elem)
+			if self.modifySound: playsingle(self.modifySound)
 
 	def open(self):
-		"""Starts the menu. You should call frameUpdate() to keep the menu operate after this. """
-		if len(self.items)==0: return
-		if self.title:
-			self.wnd.say("%s, %s" % (self.title, self.getReadStr()))
-		elif not self.title:
-			self.wnd.say("%s" % (self.getReadStr()))
-		if self.openSound is not None: playsingle(self.openSound)
+		"""Starts the menu."""
+		if not self.items: return
+		say_str = f"{self.title}, {self.getReadStr()}" if self.title else self.getReadStr()
+		self.wnd.say(say_str)
+		if self.openSound: playsingle(self.openSound)
+
+	def jumpCursor(self, c, wrap=None):
+		"""Jumps to a specific cursor position, handling sounds, edge hits, and wrap-arounds."""
+		if not self.items: return
+		wrap = self.match_cursor if wrap is None else wrap
+		old_c = self.cursor
+		max_idx = len(self.items) - 1
+		is_wrap = False
+
+		if c < 0:
+			c = max_idx if wrap else 0
+			is_wrap = wrap and max_idx > 0
+		elif c > max_idx:
+			c = 0 if wrap else max_idx
+			is_wrap = wrap and max_idx > 0
+
+		self.cursor = c
+		self.holdTimer.restart()
+
+		# Determine the correct sound to play
+		sound = None
+		if is_wrap:
+			sound = self.betweenSound or self.edgeSound or self.cursorSound
+		elif (c == 0 and old_c == 0) or (c == max_idx and old_c == max_idx):
+			sound = self.edgeSound or self.cursorSound
+		elif c < old_c:
+			sound = self.previousCursorSound or self.cursorSound
+		elif c > old_c:
+			sound = self.nextCursorSound or self.cursorSound
+		else:
+			sound = self.cursorSound # Default fallback
+
+		if sound: playsingle(sound)
+		self.wnd.say(self.getReadStr())
+
+	def moveTo(self, c):
+		"""Alias for jumpCursor to maintain backward compatibility."""
+		if self.lastHold < 2: self.lastHold += 1
+		self.jumpCursor(c)
 
 	def frameUpdate(self):
-		"""The frame updating function for this menu. You should call your window's frameUpdate prior to call this function. Returns None for no action, -1 for cancellation and 0-based index for being selected. """
-		up=self.wnd.keyPressing(self.up_key)
-		dn=self.wnd.keyPressing(self.down_key)
-		lalt = self.wnd.keyPressing(K_LALT)
-		use_shift = (self.lshift is not None and self.wnd.keyPressing(self.lshift)) or (self.rshift is not None and self.wnd.keyPressing(self.rshift))
-		processArrows=False
-		if not up and not dn: self.lastHold=0
-		if self.lastHold==0: processArrows=True
-		if self.lastHold==1 and self.holdTimer.elapsed>=600:
-			processArrows=True
-		#end 600 ms hold
-		if self.lastHold==2 and self.holdTimer.elapsed>=50:
-			processArrows=True
-		#end 50 ms hold
-		if processArrows:
-			if not self.lshift and up:
-				self.moveTo(self.cursor-1)
-			elif self.lshift and self.wnd.keyPressing(self.lshift) and up:
-				self.moveTo(self.cursor-1)
-			elif dn:
-				self.moveTo(self.cursor+1)
+		"""The frame updating function for this menu. Call your window's frameUpdate prior to this."""
+		if not self.items: return None
+		
+		up = self.wnd.keyPressing(self.up_key)
+		dn = self.wnd.keyPressing(self.down_key)
+		
+		processArrows = False
+		if not up and not dn: 
+			self.lastHold = 0
+		if self.lastHold == 0: 
+			processArrows = True
+		elif self.lastHold == 1 and self.holdTimer.elapsed >= 600:
+			processArrows = True
+		elif self.lastHold == 2 and self.holdTimer.elapsed >= 50:
+			processArrows = True
 
-		#end arrow keys
-			if self.wnd.keyPressed(K_HOME) and self.cursor!=0: self.moveTo(0)
-			if self.wnd.keyPressed(K_END) and self.cursor!=len(self.items): self.moveTo(len(self.items)-1)
-		if self.wnd.keyPressed(K_PAGEUP):
-			n=int(len(self.items)/20)
-			if n>0: self.moveTo(self.cursor-n)
-		#end pageup
-		if self.wnd.keyPressed(K_PAGEDOWN):
-			n=int(len(self.items)/20)
-			if n>0: self.moveTo(self.cursor+n)
-		#end pagedown
-		if self.wnd.keyPressed(K_SPACE): self.moveTo(self.cursor)
-		if self.wnd.keyPressed(K_F12) or self.wnd.keyPressing(K_LCTRL) and self.wnd.keyPressed(K_c): copy.copy(getString(getCursorPos()))
-		if self.wnd.keyPressed(K_ESCAPE):
+		# Process Navigation
+		if processArrows:
+			if up: self.moveTo(self.cursor - 1)
+			elif dn: self.moveTo(self.cursor + 1)
+
+		if self.wnd.keyPressed("home") and self.cursor != 0: 
+			self.jumpCursor(0, wrap=False)
+		if self.wnd.keyPressed("end") and self.cursor != len(self.items) - 1: 
+			self.jumpCursor(len(self.items) - 1, wrap=False)
+			
+		page_step = max(1, int(len(self.items) / 20))
+		if self.wnd.keyPressed("page_up"): self.moveTo(self.cursor - page_step)
+		if self.wnd.keyPressed("page_down"): self.moveTo(self.cursor + page_step)
+
+		if self.wnd.keyPressed("esc"):
 			self.cancel()
 			return -1
-		#end cancel
-		if self.wnd.keyPressed(K_RETURN):
+			
+		if self.wnd.keyPressed("enter"):
 			self.enter()
 			return self.cursor
-		#end enter
-		if len(self.shortcuts)>0:
-			for command in STR_TO_KEY.values():
-				if self.wnd.keyPressed(command): return self.processShortcut(command)
-			#end shortcut
-		#end at least one shortcut is active
+
+		# Shortcut Processing
+		if self.use_shortcut:
+			for command in getattr(key, 'ksum', {}):
+				if self.wnd.keyPressed(command.lower()):
+					return self.processShortcut(key.ksum[command])
+					
 		return None
-	#end frameUpdate
 
-	def processShortcut(self,code):
-		"""Search for the shortcut actions that is associated with the given command. Returns the index if one item is matched and instantly selected, otherwise None. This method may move focus or trigger the enter event as the result of searching.
+	def processShortcut(self, code):
+		"""Search for shortcut matches dynamically in self.items (avoids maintaining a 2nd list)."""
+		matched_indices = [i for i, item in enumerate(self.items) if item[2] == code]
+		if not matched_indices: return None
 
-		:param code: key code.
-		:type code: int
-		"""
-		matched=[]
-		for elem in self.shortcuts:
-			if elem[0]==code: matched.append(elem)
-		#end for
-		if len(matched)==0: return
-		if len(matched)==1:
-			self.cursor=matched[0][1]
+		if len(matched_indices) == 1:
+			self.jumpCursor(matched_indices[0])
 			if self.auto_enter_fMatched: self.enter()
 			return self.cursor
-		#end instant selection
-		i=self.cursor
-		found=False
-		while i<len(self.items)-1:
-			i+=1
-			if self.items[i][2]==code:
-				found=True
-				break
-			#end if
-		#end while
-		if found:
-			self.moveTo(i)
-			return None
-		#end if found at the lower column
-		#Research from the top
-		i=-1
-		while i<len(self.items)-1:
-			i+=1
-			if self.items[i][2]==code:
-				found=True
-				break
-		if found:
-			self.moveTo(i)
-			return None
-		#end research
-	#end processShortcut
+
+		# Cycle through matched shortcuts downward
+		for idx in matched_indices:
+			if idx > self.cursor:
+				self.jumpCursor(idx)
+				return None
+				
+		# If at the end, cycle back to the first matched item
+		self.jumpCursor(matched_indices[0])
+		return None
 
 	def cancel(self):
-		"""Internal function which is triggered when canceling the menu. """
-		if self.cancelSound is not None: playsingle(self.cancelSound)
+		if self.cancelSound: playsingle(self.cancelSound)
 
 	def enter(self):
-		"""Internal function which is triggered when selecting an option. """
-		if self.enterSound is not None and self.cursor >=0: playsingle(self.enterSound)
+		if self.enterSound and self.cursor >= 0: playsingle(self.enterSound)
 
 	def getCursorPos(self):
-		"""Returns the current cursor position. """
 		return self.cursor
 
-	def getString(self,index):
-		"""Retrieves the menu item string at the specified index. Returns empty string when out of bounds.
-
-		:param index: Index.
-		:rtype: str
-		"""
-		if index<0 or index>=len(self.items): return ""
-		return self.items[index][0]
-
-	def moveTo(self,c):
-		"""Moves the menu cursor to the specified position and reads out the cursor. It also sets the lastHold status, which triggers key repeats. I decided not to use pygame key repeat functions. """
-		if self.lastHold<2: self.lastHold+=1
-		if c<2 and len(self.items)==1:c=0
-		elif c<0 or c>len(self.items)-1: return
-		self.holdTimer.restart()
-		if self.cursorSound is not None: playsingle(self.cursorSound)
-		self.cursor=c
-		self.wnd.say(self.getReadStr())
-	#end moveTo
+	def getString(self, index):
+		if 0 <= index < len(self.items):
+			return self.items[index][0]
+		return ""
 
 	def getReadStr(self):
-		"""Returns a string which should be used as readout string for the current cursor.
-
-:rtype: str
-"""
-		s=self.items[self.cursor][0]
-		if self.keyRead:
-			if self.items[self.cursor][1] is not None: s+=", "+self.items[self.cursor][1]
+		if not self.items: return ""
+		s = self.items[self.cursor][0]
+		shortcut = self.items[self.cursor][1]
+		if self.keyRead and shortcut: 
+			s += f", {shortcut}"
 		return s
 
-	def getTitle(self):
-		if self.title is not None: return self.title
-
-	def setTitle(self, newTitle):
-		self.title = newTitle
-
-	def getOpenSound(self):
-		if self.openSound is not None: return self.openSound
-
-	def setOpenSound(self, newSoundOpen):
-		self.openSound = newSoundOpen
-
-	def getCancelSound(self):
-		return self.cancelSound
-
-	def setCancelSound(self, newCancelSound):
-		self.cancelSound=newCancelSound
-		return newCancelSound
-
-	def getEnterSound(self, newEnterSound):
-		return self.enterSound
-
-	def setEnterSound(self, newEnterSound):
-		self.enterSound = newEnterSound
-		return newEnterSound
-
 	def hotkey(self, line):
-		#retrieves the first character and you can use it to make suitable shortcut characters for lists or auto-added documents
-		hotkey = line[0].upper()
-		return hotkey
+		return line[0].upper() if line else ""
 
 	def Len(self):
-		#Returns the length of items and displays it as an int
-		return int(len(self.items))
+		return len(self.items)
+
 	def exit(self):
-		return wld.keyPressed(k.exit.value)
-	def isLast(self,index):
-		"""Retrieves if the given index is the last item of the menu. This is particularly useful when you want to bind the last action to exit or close.
+		return self.wnd.keyPressed("exit")
 
-		:param index: index.
-		:type index: int
-		:rtype: bool
-		"""
-		return self.cursor==len(self.items)-1
+	def isLast(self, index):
+		return self.cursor == len(self.items) - 1
 
-#end class menu
+	# Getters & Setters
+	def getTitle(self): return self.title
+	def setTitle(self, newTitle): self.title = newTitle
+	
+	def getOpenSound(self): return self.openSound
+	def setOpenSound(self, newSound): self.openSound = newSound
+	
+	def getCancelSound(self): return self.cancelSound
+	def setCancelSound(self, newSound): self.cancelSound = newSound
+	
+	def getEnterSound(self): return self.enterSound
+	def setEnterSound(self, newSound): self.enterSound = newSound
+
+# end class menu

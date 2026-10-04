@@ -1,7 +1,6 @@
 from __future__ import absolute_import
-import platform
-
-if platform.system() == "Windows":
+from pyaudiogaming import system as s
+if s.get_platform()["os"] == "windows":
     from libloader import com
     from libloader.com import load_com
 
@@ -32,11 +31,12 @@ if platform.system() == "Windows":
 
     # import sapi4
 
-if platform.system() == "Darwin":
+if s.get_platform()["os"] == "macos" or s.get_platform() == "ios":
     from . import voiceover
 
-if platform.system() == "Linux":
+if s.get_platform()["os"] == "linux":
     from . import speech_dispatcher
     from . import e_speak
-
+if s.get_platform()["os"] == "android":
+    from . import android_tts
 from . import auto
