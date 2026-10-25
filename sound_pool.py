@@ -3,9 +3,8 @@
 # copyright 2026 belong ihcyna (Labubu)<phucnggo29@gmail.com>.
 #some of idea from other elsewhere
 
-import time
 import math
-import threading
+import os
 import ctypes
 from . import system, sound_lib, utils, buffer
 from .sound_lib.instrument import SoundFont, MIDIStream, MIDIFileStream
@@ -13,27 +12,40 @@ from .sound_lib.recording import *
 from .sound_lib.encoder import *
 from .sound_fx import *
 from .sound_lib.external import pybassvst, pybassmix as bassmix
-from .soft import get_openal_audio, initialize_openal_audio
 from .sound_lib.external import pybass_fx
 
-def output(period=10, bbuffer=500, ThreeD=False, sample_rate=44100):
-	# initialize output device
+_hrtf = None
+_hrtf_sample_rate = None
 
+
+def _initialize_hrtf(sample_rate=None):
+	"""Load the native HRTF add-on only when spatial audio is requested."""
+	global _hrtf, _hrtf_sample_rate
+	if _hrtf is None:
+		from .sound_lib.external import pybass_hrtf
+		_hrtf = pybass_hrtf
+	if sample_rate is None:
+		device = buffer.hAudiobuffers.get("output")
+		sample_rate = getattr(device, "frequency", 44100)
+	if _hrtf_sample_rate is None:
+		# Resolve bundled dependencies explicitly instead of relying on the cwd.
+		if not _hrtf.BASS_HRTF_InitEx(int(sample_rate), os.fsencode(system.get_path("bass")), os.fsencode(system.get_path("phonon")), None, 0x040403):
+			raise RuntimeError("BASS_HRTF_Init failed; check bass_hrtf and phonon libraries")
+		_hrtf_sample_rate = int(sample_rate)
+	elif int(sample_rate) != _hrtf_sample_rate:
+		raise RuntimeError("HRTF is already initialized with a different sample rate")
+	return _hrtf
+
+
+def output(period=10, bbuffer=500, ThreeD=False, sample_rate=44100):
+	# BASS and HRTF must use the same output sample rate.
 	sound_lib.main.BASS_SetConfig(sound_lib.main.BASS_CONFIG_UPDATEPERIOD, period)
 	sound_lib.main.BASS_SetConfig(sound_lib.main.BASS_CONFIG_BUFFER, bbuffer)
-	o = sound_lib.output.Output()
+	o = sound_lib.output.Output(frequency=sample_rate)
 	buffer.hAudiobuffers["output"] = o
 	buffer.hfxbuffers["basic"] = Basic()
 	if ThreeD:
-		try:
-			import phonon
-			phonon.phonon_audio_settings.samplingRate = sample_rate
-			phonon.initialize_phonon()
-			buffer.soft = phonon # Đặt phonon làm 3D engine
-		except Exception as e:
-			# Fallback về OpenAL nếu tải Phonon thất bại
-			if initialize_openal_audio(sample_rate=sample_rate):
-				buffer.soft = get_openal_audio()
+		_initialize_hrtf(sample_rate)
 	return o
 
 def input():
@@ -315,7 +327,8 @@ class SoundBase:
 			return 0
 		try:
 			# Channel bytes translated natively into raw float seconds, up-scaled to integer ms
-			return int(self.handle.bytes_to_seconds(self.handle.get_position()) * 1000)
+			channel = self.dedata if getattr(self, "_hrtf_stream", False) else self.handle
+			return int(channel.bytes_to_seconds(channel.get_position()) * 1000)
 		except Exception as e: print(e);return 0
 
 	@position.setter
@@ -324,15 +337,25 @@ class SoundBase:
 			return
 		try:
 			seconds = float(ms_value) / 1000.0
-			byte_target = self.handle.seconds_to_bytes(seconds)
-			self.handle.set_position(byte_target)
+			channel = self.dedata if getattr(self, "_hrtf_stream", False) else self.handle
+			byte_target = channel.seconds_to_bytes(seconds)
+			channel.set_position(byte_target)
+			if getattr(self, "_hrtf_stream", False):
+				_hrtf.BASS_HRTF_Reset(self.handle.handle)
 		except Exception as e: print(e)
 
 	def seek(self, ms_value):
 		self.position = ms_value
 
 	def set3d(self,  listener_x,  listener_y,  listener_z,  source_x,  source_y,  source_z, rotation=0, head=180, pan_step=2.5,  volume_step=2.5, behind_pitch_decrease=0,  behind_volume_decrease=0, pitch_step=1,  pitch_range=92, pan_range=70, start_pan=0, start_volume=100, start_pitch=100, soft=False):
-		self.math3d(listener_x,  listener_y,  listener_z,  source_x,  source_y,  source_z,  pan_step,  volume_step, behind_pitch_decrease,  behind_volume_decrease, pitch_step,  pitch_range, pan_range, start_pan, start_volume, start_pitch, soft=soft)
+		"""Position a sound; ThreeD streams use native HRTF automatically.
+
+		World axes: +X right, +Y forward, +Z up. Rotation is clockwise
+		in degrees from +Y. ``head`` is retained for call compatibility.
+		"""
+		if soft or getattr(self, "_hrtf_stream", False):
+			return self.set3dsoft(listener_x, listener_y, listener_z, source_x, source_y, source_z, rotation=rotation, start_volume=start_volume, volume_step=volume_step, start_pitch=start_pitch)
+		self.math3d(listener_x, listener_y, listener_z, source_x, source_y, source_z, pan_step, volume_step, behind_pitch_decrease, behind_volume_decrease, pitch_step, pitch_range, pan_range, start_pan, start_volume, start_pitch, soft=False)
 
 	def math3d(self,  listener_x,  listener_y,  listener_z,  source_x,  source_y,  source_z,  pan_step,  volume_step, behind_pitch_decrease,  behind_volume_decrease, pitch_step,  pitch_range, pan_range, start_pan, start_volume, start_pitch, soft,):
 		delta_x = source_x - listener_x
@@ -360,13 +383,16 @@ class SoundBase:
 		# Clamp pitch
 		final_pitch = max(min(final_pitch, start_pitch+1), pitch_range)
 		final_pan = max(min(final_pan, pan_range), -pan_range)
-		if soft: self.set3dsoft(listener_x, listener_y, listener_z, source_x, source_y, source_z)
+		if soft or getattr(self, "_hrtf_stream", False):
+			return self.set3dsoft(listener_x, listener_y, listener_z, source_x, source_y, source_z, start_volume=start_volume, volume_step=volume_step, start_pitch=start_pitch)
 		self.volume = final_volume
 		self.pitch = final_pitch
 		self.pan = final_pan
 		#except: pass
 
 	def slide3d(self,  listener_x,  listener_y,  listener_z,  source_x,  source_y,  source_z, fatime, rotation=0, head=180, pan_step=2.5,  volume_step=2.5, behind_pitch_decrease=0,  behind_volume_decrease=0, pitch_step=1,  pitch_range=92, pan_range=75, start_pan=0, start_volume=100, start_pitch=100):
+		if getattr(self, "_hrtf_stream", False):
+			return self.set3dsoft(listener_x, listener_y, listener_z, source_x, source_y, source_z, rotation=rotation, start_volume=start_volume, volume_step=volume_step, start_pitch=start_pitch)
 		self.math3dslide(listener_x,  listener_y,  listener_z,  source_x,  source_y,  source_z,  pan_step,  volume_step, behind_pitch_decrease,  behind_volume_decrease, pitch_step,  pitch_range, pan_range, start_pan, start_volume, start_pitch, fatime=fatime)
 
 	def math3dslide(self,  listener_x,  listener_y,  listener_z,  source_x,  source_y,  source_z,  pan_step,  volume_step, behind_pitch_decrease,  behind_volume_decrease, pitch_step,  pitch_range, pan_range, start_pan, start_volume, start_pitch, fatime):
@@ -1038,7 +1064,8 @@ class sound(SoundBase):
 		buffer.hSound_poolbuffers[self.sound_token] = self
 		self.handle = None
 		self.dedata=None
-		self._3d = 	None
+		self._3d = None
+		self._hrtf_stream = False
 		self.freq = 44100
 		self.paused = False
 		self.boolfadein = False
@@ -1054,24 +1081,35 @@ class sound(SoundBase):
 		self.autofree = autofree
 		self.is_tempo = False
 
-		if ThreeD: mono = True
+		if ThreeD:
+			_initialize_hrtf()
+			mono = True
+		self.mono = mono
+		source_flags = 0x100 if ThreeD else 0  # BASS_SAMPLE_FLOAT required by HRTF
+		source_decode = decode or ThreeD
+		source_autofree = autofree and not ThreeD
 		if draw:
-			handle = sound_lib.stream.PushStream()
+			handle = sound_lib.stream.PushStream(chans=1 if mono else 2, flags=source_flags, decode=source_decode, autofree=source_autofree)
 		else:
 			if filename in buffer.hstreambuffers:
-				handle = sound_lib.stream.FileStream(mem=True, file=buffer.hstreambuffers[filename]["buffer"], length=buffer.hstreambuffers[filename]["len"], mono=mono, decode=decode, autofree=autofree)
+				handle = sound_lib.stream.FileStream(mem=True, file=buffer.hstreambuffers[filename]["buffer"], length=buffer.hstreambuffers[filename]["len"], mono=mono, flags=source_flags, decode=source_decode, autofree=source_autofree)
 			else:
 				if not utils.is_url(filename):
-					handle = sound_lib.stream.FileStream(file=filename, mono=mono, decode=decode, autofree=autofree)
+					handle = sound_lib.stream.FileStream(file=filename, mono=mono, flags=source_flags, decode=source_decode, autofree=source_autofree)
 				else: 
-					handle = sound_lib.stream.URLStream(url=filename, mono=mono, decode=decode, autofree=autofree)
+					handle = sound_lib.stream.URLStream(url=filename, mono=mono, flags=source_flags, decode=source_decode, autofree=source_autofree)
 					
-		if ThreeD: 
-			self.dedata = handle
-		else: 
-			self.handle = handle
+		self.handle = handle
+		if ThreeD:
+			try:
+				self._attach_hrtf()
+			except Exception:
+				handle.free()
+				self.handle = None
+				raise
 			
-		self.freq = int(handle.get_frequency())
+		self.freq = int(self.handle.get_frequency())
+		buffer.hSound_poolbuffers[self.sound_token] = self
 		try:
 			if handle: return int(handle.bytes_to_seconds(handle.get_length()) * 1000)
 		except: return 0
@@ -1097,7 +1135,27 @@ class sound(SoundBase):
 	def sample(self, filename):
 		return sound_lib.sample.Sample(filename)
 
+	def _attach_hrtf(self):
+		if self._hrtf_stream:
+			return
+		hrtf = _initialize_hrtf()
+		source = self.handle
+		if not source:
+			raise RuntimeError("Load a ThreeD stream before setting its HRTF position")
+		raw = source.handle
+		if hasattr(raw, "value"):
+			raw = raw.value
+		# Source is owned by this object; do not pass BASS_STREAM_AUTOFREE.
+		rendered = hrtf.BASS_HRTF_StreamCreate(raw, 0)
+		if not rendered:
+			raise RuntimeError("BASS_HRTF_StreamCreate failed; use stream(..., ThreeD=True)")
+		self.dedata = source
+		self.handle = sound_lib.stream.BaseStream(rendered)
+		self._hrtf_stream = True
+
 	def play_wait(self):
+		if self._hrtf_stream:
+			self.dedata.looping = False
 		self.handle.looping = False
 		if self.boolfadein: self.handle.set_volume(0)
 		self.handle.play_blocking()
@@ -1105,98 +1163,77 @@ class sound(SoundBase):
 	def play_looped(self):
 		if self.boolfadein: self.handle.set_volume(0)
 		if self.play3d(loop=True): return
-		else:
-			self.handle.looping = True
-			self.handle.play()
+		self.handle.looping = True
+		self.handle.play()
 
-	def set3dsoft(self, *coords, **kwargs):
-		self._3d = coords
+	def set3dsoft(self, listener_x, listener_y, listener_z, source_x, source_y, source_z,
+	              rotation=0, start_volume=100, volume_step=2.5, start_pitch=100):
+		"""Update native HRTF direction and distance without a Python PCM callback.
+
+		Use ``stream(..., ThreeD=True)`` (or a mono float decoding stream).
+		Distance fades linearly using volume_step percent per world unit.
+		"""
+		self._attach_hrtf()
+		dx, dy, dz = source_x-listener_x, source_y-listener_y, source_z-listener_z
+		angle = math.radians(rotation)
+		x = dx * math.cos(angle) - dy * math.sin(angle)
+		forward = dx * math.sin(angle) + dy * math.cos(angle)
+		distance = math.sqrt(dx*dx + dy*dy + dz*dz)
+		attenuation = max(0.0, min(1.0, 1.0-distance*float(volume_step)/100.0))
+		# Steam Audio uses +Y up and -Z forward.
+		if not _hrtf.BASS_HRTF_Set3D(self.handle.handle, x, dz, -forward, attenuation, 1):
+			raise RuntimeError("BASS_HRTF_Set3D failed")
+		self._3d = (listener_x, listener_y, listener_z, source_x, source_y, source_z)
+		self.pan = 0
+		self.volume = max(0, min(100, start_volume))
+		self.pitch = start_pitch
+		return True
 
 	def stop(self):
-		if self.handle and self.handle.is_playing:
+		if self.handle:
 			self.handle.stop()
+		if self._hrtf_stream:
+			self.position = 0
+		elif self.handle:
 			self.handle.set_position(0)
-		if self.dedata:
-			self.dedata.set_position(0)
+			if self.dedata:
+				self.dedata.set_position(0)
 
 	def close(self):
+		# Free the renderer before its decoding source.
 		try:
-			if self.handle and self.playing:
+			if self.handle:
 				self.handle.stop()
-			if self.sound_token and hasattr(buffer, 'soft') and buffer.soft:
-				if hasattr(buffer.soft, 'free_token'):
-					buffer.soft.free_token(self.sound_token)
-			if self.dedata: 
-				self.dedata.free()
-				self.dedata = None
-			if self.handle: 
 				self.handle.free()
-				self.handle = None
-			if self.sound_token in buffer.hSound_poolbuffers:
-				del buffer.hSound_poolbuffers[self.sound_token]
-		except Exception as e: 
-			pass
-
-	def _callback(self, handle, buffer_ptr, length, user):
-		if length <= 0: return 0
-		
-		is_phonon = hasattr(buffer, 'soft') and buffer.soft and hasattr(buffer.soft, 'phonon_dsp')
-		
-		if is_phonon:
-			frames = length // 8
-			if frames <= 0: return 0
-			
-			source_handle = self.dedata if self.dedata else self.handle
-			if not source_handle: return -2147483648
-			raw_pcm = source_handle.get_data(length=(frames * 4) | 0x40000000)
-		else:
-			frames = length // 4
-			if frames <= 0: return 0
-			raw_pcm = self.get_data(frame_size=frames, data_type="raw")
-
-		if not raw_pcm:
-			if hasattr(buffer, 'soft') and buffer.soft and hasattr(buffer.soft, 'free_token'):
-				buffer.soft.free_token(self.sound_token)
-			return -2147483648 
-
-		if not self._3d: return 0
-		lx, ly, lz, sx, sy, sz = self._3d
-		
-		if is_phonon:
-			# Phonon tính vị trí nguồn âm tương đối so với Listener
-			rel_x = sx - lx
-			rel_y = sy - ly
-			rel_z = sz - lz
-			audio_data = buffer.soft.phonon_dsp(raw_pcm, rel_x, rel_y, rel_z, 2.5, 1)
-		else:
-			audio_data = buffer.soft.process_sound(self.sound_token, raw_pcm, frames, self.freq, lx, ly, lz, sx, sy, sz)
-			
-		if audio_data:
-			copy_length = min(length, len(audio_data))
-			if copy_length > 0:
-				ctypes.memmove(buffer_ptr, audio_data, copy_length)
-				return copy_length
-			
-		return 0
+		finally:
+			self.handle = None
+			try:
+				if self.dedata:
+					self.dedata.free()
+			finally:
+				self.dedata = None
+				self._hrtf_stream = False
+				self._3d = None
+				self.active_fx_handles.clear()
+				buffer.hSound_poolbuffers.pop(self.sound_token, None)
 
 	def play3d(self, loop=False):
-		if self._3d:
-			if not self.handle:
-				from .sound_lib.stream import Stream as BaseStream
-				is_phonon = hasattr(buffer, 'soft') and buffer.soft and hasattr(buffer.soft, 'phonon_dsp')
-				flags = 256 if is_phonon else 0
-				self.handle = BaseStream(freq=self.freq, chans=2, flags=flags, proc=self._callback)
-			self.handle.looping = loop
-			self.handle.play()
-			return True
-		return False
+		if not self._hrtf_stream:
+			return False
+		self.dedata.looping = loop
+		self.handle.play()
+		return True
+
 	def play(self):
 		if self.play3d(): return
-		else:
-			self.handle.play()
+		self.handle.play()
+
 	def _ensure_tempo(self):
 		if getattr(self, "is_tempo", False):
 			return True
+
+		if self._hrtf_stream:
+			raise RuntimeError("Tempo conversion is not supported on HRTF streams")
 
 		was_playing = self.playing
 		current_pos = self.position
@@ -1279,7 +1316,7 @@ class sound(SoundBase):
 
 	def push(self, data):
 		try:
-			if getattr(self, "is_tempo", False) and self.dedata:
+			if (getattr(self, "is_tempo", False) or self._hrtf_stream) and self.dedata:
 				self.dedata.push(data)
 				# Tự động đánh thức nếu BASS_FX bị thiếu dữ liệu dẫn đến khựng/Stalled
 				if self.handle and not getattr(self, "paused", False):
