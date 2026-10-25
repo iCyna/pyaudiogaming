@@ -201,6 +201,14 @@ class Channel (FlagObject):
 		"""Removes a link between two MOD music or stream channels."""
 		return bass_call(BASS_ChannelRemoveLink, self.handle, handle)
 
+	def set_dsp(self, proc, user=None, priority=0):
+		"""Sets up a user DSP function on a stream, MOD music, or recording channel."""
+		return bass_call(BASS_ChannelSetDSP, self.handle, proc, user, priority)
+
+	def remove_dsp(self, dsp_handle):
+		"""Removes a DSP function from a stream, MOD music, or recording channel."""
+		return bass_call(BASS_ChannelRemoveDSP, self.handle, dsp_handle)
+
 	def __iadd__(self, other):
 		"""Convenience method to link this channel to another.  Calls set_link on the passed in item's handle"""
 		self.set_link(other.handle)

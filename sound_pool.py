@@ -299,6 +299,16 @@ class SoundBase:
 		except:
 			return False
 
+	def set_dsp(self, proc, user=0, priority=0):
+		"""Sets up a user DSP function on the sound channel."""
+		if self.handle:
+			return self.handle.set_dsp(proc, user, priority)
+
+	def remove_dsp(self, dsp_handle):
+		"""Removes a DSP function from the sound channel."""
+		if self.handle:
+			return self.handle.remove_dsp(dsp_handle)
+
 	@property
 	def position(self):
 		if not self.handle:

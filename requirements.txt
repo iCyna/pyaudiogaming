@@ -1,9 +1,8 @@
-pycriptodome
+pycryptodome
 cryptography
+libloader
+platform-utils
 pygame
 pyinstaller
 winpaths
 wxPython
-zstandard
-plyer
-libloader

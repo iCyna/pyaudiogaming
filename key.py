@@ -58,7 +58,7 @@ ksum = {
 	"comma": K_COMMA, ",": K_COMMA,
 	"semicolon": K_SEMICOLON, ";": K_SEMICOLON,
 	"minus": K_MINUS, "-": K_MINUS,
-	"equal": K_EQUALS, "=": K_EQUALS,
+	"equal": K_EQUALS, "equals": K_EQUALS, "=": K_EQUALS,
 	"grave": K_BACKQUOTE, "`": K_BACKQUOTE, "~": K_BACKQUOTE,
 	"slash": K_SLASH, "/": K_SLASH,
 	"kp0": K_KP0, "kp1": K_KP1, "kp2": K_KP2, "kp3": K_KP3, "kp4": K_KP4,
