@@ -33,9 +33,9 @@ def get_path(name):
 	name=name+get_ext()
 	arch_dir = get_arch_dir()
 	if arch_dir:
-		return os.path.join(module_path(), "lib", arch_dir, name)
+		return os.path.join(embedded_data_path(), "lib", arch_dir, name)
 	else:
-		return os.path.join(module_path(), "lib", name)
+		return os.path.join(embedded_data_path(), "lib", name)
 
 def get_platform():
 	system = platform.system().lower()
