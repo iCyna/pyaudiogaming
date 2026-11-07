@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 from builtins import range
-from libloader.com import load_com
+from ..com import load_com
 from .base import Output
 
 import logging

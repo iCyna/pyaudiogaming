@@ -2,12 +2,22 @@
 # copyright 2025 belong ihcyna (Labubu)<phucnggo29@gmail.com>.
 #wx gui app of pyaudiogaming
 
-import wx
+from . import inputBox
+wx = None
 
 
 class Window:
+    def __new__(cls, title="wxPython App", size=(400, 300)):
+        global wx
+        if inputBox.system.get_platform()["os"] in ("linux", "macos"):
+            try: return QtWindow(title, size)
+            except ImportError: return AudioWindow(title, size)
+        wx = inputBox.check()
+        if wx is None: return AudioWindow(title, size)
+        return super().__new__(cls)
+
     def __init__(self, title="wxPython App", size=(400, 300)):
-        self.app = wx.App(False)
+        self.app = wx.GetApp() or wx.App(False)
         self.frame = wx.Frame(None, title=title, size=size)
         self.panel = wx.Panel(self.frame)
         self.elements = {}
@@ -76,3 +86,100 @@ class Window:
         """Hiển thị giao diện."""
         self.frame.Show()
         self.app.MainLoop()
+
+
+class AudioWindow:
+    """SDL audio controls when native wx controls are unavailable."""
+    def __init__(self, title, size):
+        from . import vb
+        from .utils import get_window
+        if get_window() is None:
+            raise RuntimeError("Initialize window.Window before using audio GUI controls")
+        self.form = vb.form(config={"label": title})
+        self.elements = {}
+
+    def button(self, label, handler, font=None, color=None):
+        item = self.form.add(label, callback=lambda form, item: handler(item), config={"label": label})
+        self.elements[label] = item
+        return item
+
+    def input(self, label, value="", font=None):
+        item = self.form.add(label, "input", value, config={"label": label})
+        self.elements[label] = item
+        return item
+
+    def print(self, text, font=None, color=None):
+        self.form.wnd.say(text)
+        return text
+
+    def remove(self, label):
+        item = self.elements.pop(label, None)
+        if item: self.form.items.remove(item)
+        self.form.cursor = max(0, min(self.form.cursor, len(self.form.items) - 1))
+
+    def edit(self, label, font=None, color=None): return self.elements.get(label)
+    def frameUpdate(self): return self.form.run()
+
+
+class QtWindow:
+    """Lazy native Qt widgets for Linux and macOS."""
+    def __init__(self, title, size):
+        from PySide6 import QtWidgets
+        self.qt = QtWidgets
+        self.app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+        self.frame = QtWidgets.QWidget()
+        self.frame.setWindowTitle(title)
+        self.frame.resize(*size)
+        self.layout = QtWidgets.QVBoxLayout(self.frame)
+        self.elements = {}
+
+    def _add(self, label, widget, font=None, color=None):
+        widget.setAccessibleName(label)
+        if font is not None: widget.setFont(font)
+        if color is not None:
+            from PySide6.QtGui import QColor, QPalette
+            palette = widget.palette()
+            palette.setColor(QPalette.ColorRole.WindowText, QColor(color))
+            palette.setColor(QPalette.ColorRole.Text, QColor(color))
+            widget.setPalette(palette)
+        self.layout.addWidget(widget)
+        self.elements[label] = widget
+        return widget
+
+    def button(self, label, handler, font=None, color=None):
+        widget = self._add(label, self.qt.QPushButton(label), font, color)
+        widget.clicked.connect(lambda checked=False: handler(widget))
+        return widget
+
+    def print(self, text, font=None, color=None):
+        return self._add(text, self.qt.QLabel(text), font, color)
+
+    def input(self, label, value="", font=None):
+        caption = self.qt.QLabel(label)
+        widget = self._add(label, self.qt.QLineEdit(value), font)
+        caption.setBuddy(widget)
+        self.layout.insertWidget(self.layout.count() - 1, caption)
+        widget._caption = caption
+        return widget
+
+    def remove(self, label):
+        widget = self.elements.pop(label, None)
+        if widget is not None:
+            if hasattr(widget, "_caption"): widget._caption.deleteLater()
+            widget.deleteLater()
+
+    def edit(self, label, font=None, color=None):
+        widget = self.elements.get(label)
+        if widget is not None:
+            if font is not None: widget.setFont(font)
+            if color is not None:
+                from PySide6.QtGui import QColor, QPalette
+                palette = widget.palette()
+                palette.setColor(QPalette.ColorRole.WindowText, QColor(color))
+                palette.setColor(QPalette.ColorRole.Text, QColor(color))
+                widget.setPalette(palette)
+        return widget
+
+    def frameUpdate(self):
+        self.frame.show()
+        return self.app.exec()

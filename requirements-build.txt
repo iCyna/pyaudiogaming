@@ -1,0 +1,3 @@
+# Install only when building executables.
+pyinstaller
+# Optional alternatives: nuitka, cx-Freeze

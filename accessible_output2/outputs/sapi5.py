@@ -1,9 +1,10 @@
 from __future__ import absolute_import
 from collections import OrderedDict
-from libloader.com import load_com
+from ..com import load_com
 from .base import Output, OutputError
 import pywintypes
 import logging
+from xml.sax.saxutils import escape
 log = logging.getLogger(__name__)
 
 SVSFDefault = 0
@@ -31,18 +32,42 @@ class SAPI5(Output):
 	def __init__(self):
 		try:
 			self.object = load_com("SAPI.SPVoice")
-			self._voices = self._available_voices()
-		except pywintypes.com_error:
-			raise OutputError
+			self._voices = None
+		except (pywintypes.com_error, AttributeError) as error:
+			raise OutputError(f"Cannot initialize SAPI5: {error}") from error
 		self._pitch = 0
 
 	def _available_voices(self):
-		_voices = OrderedDict()
-		for v in self.object.GetVoices():
-			_voices[v.GetDescription()] = v
-		return _voices
+		voices = OrderedDict()
+		self.voice_error = None
+		try:
+			tokens = self.object.GetVoices()
+			for i in range(tokens.Count):
+				token = tokens.Item(i)
+				voices[token.GetDescription()] = token
+		except pywintypes.com_error as error:
+			# Some installed engines break SAPI's combined enumerator.
+			self.voice_error = str(error)
+			log.debug("SAPI voice enumeration failed: %s", error)
+			import winreg
+			path = r"SOFTWARE\Microsoft\Speech\Voices\Tokens"
+			for hive, label in ((winreg.HKEY_CURRENT_USER, "HKEY_CURRENT_USER"), (winreg.HKEY_LOCAL_MACHINE, "HKEY_LOCAL_MACHINE")):
+				try:
+					with winreg.OpenKey(hive, path) as root:
+						for i in range(winreg.QueryInfoKey(root)[0]):
+							try:
+								token = load_com("SAPI.SpObjectToken")
+								token.SetId(label + "\\" + path + "\\" + winreg.EnumKey(root, i))
+								voices[token.GetDescription()] = token
+							except (pywintypes.com_error, OSError): continue
+				except OSError: continue
+		if not voices:
+			token = self.object.Voice
+			voices[token.GetDescription()] = token
+		return voices
 
 	def list_voices(self):
+		if self._voices is None: self._voices = self._available_voices()
 		return list(self._voices.keys())
 
 	def get_voice(self):
@@ -50,6 +75,7 @@ class SAPI5(Output):
 
 	def set_voice(self, value):
 		log.debug("Setting SAPI5 voice to \"%s\"" % value)
+		if self._voices is None: self._voices = self._available_voices()
 		self.object.Voice = self._voices[value]
 		# For some reason SAPI5 does not reset audio after changing the voice
 		# By setting the audio device after changing voices seems to fix this
@@ -78,11 +104,9 @@ class SAPI5(Output):
 		self.object.Volume = value
 
 	def speak(self, text, interrupt=False):
-		if interrupt:
-			self.silence()
 		# We need to do the pitch in XML here
-		textOutput = "<pitch absmiddle=\"%d\">%s</pitch>" % (round(self._pitch), text.replace("<", "&lt;"))
-		self.object.Speak(textOutput, SVSFlagsAsync | SVSFIsXML)
+		textOutput = "<pitch absmiddle=\"%d\">%s</pitch>" % (round(self._pitch), escape(str(text)))
+		self.object.Speak(textOutput, SVSFlagsAsync | SVSFIsXML | (SVSFPurgeBeforeSpeak if interrupt else 0))
 	
 	def silence(self):
 		self.object.Speak("", SVSFlagsAsync | SVSFPurgeBeforeSpeak)

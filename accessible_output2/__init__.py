@@ -21,13 +21,7 @@ def get_output_classes():
     return sorted(classes, key=lambda c: c.priority)
 
 def find_datafiles():
-    import platform
-    from glob import glob
-    import accessible_output2
-
-    if platform.system() != "Windows":
-        return []
-    path = os.path.join(accessible_output2.__path__[0], "lib", "*.dll")
-    results = glob(path)
-    dest_dir = os.path.join("accessible_output2", "lib")
-    return [(dest_dir, results)]
+    from pathlib import Path
+    root = Path(system.module_path()) / "lib" / system.get_arch_dir()
+    files = [str(path) for path in root.glob("*" + system.get_ext())]
+    return [(str(Path("lib") / system.get_arch_dir()), files)] if files else []

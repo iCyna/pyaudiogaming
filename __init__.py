@@ -1,4 +1,4 @@
-from . import sound_lib, window, sound_fx, menu, timer, key, gui, inputBox, accessible_output2, file, soft, utils
+from . import accessible_output2, sound_modules
 
 def __del__():
 	pygame.quit()

@@ -1,0 +1,3 @@
+# Optional native desktop controls.
+wxPython; sys_platform == "win32"
+PySide6; sys_platform == "linux" or sys_platform == "darwin"

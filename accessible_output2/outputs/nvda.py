@@ -21,13 +21,8 @@ class NVDA(Output):
         self.helper_lib = None
 
     def NVDAHelperLoader(self):
-        li=None
-        li=system.get_arch()["bit"]
-        arm = system.get_arch()["is arm"]
-        if li == 32 or li == 64:pass
-        elif arm:
-            li="64A"
-        else: raise Error("Cannot load NVDA helper remote")
+        arch = system.get_arch()
+        li = "64A" if arch["is arm"] and arch["bit"] == 64 else arch["bit"]
         self.helper_lib = system.load_dll(f"nvdaHelperRemote{li}", ot="windows", WinDLL=True)
         try:
             if self.helper_lib:

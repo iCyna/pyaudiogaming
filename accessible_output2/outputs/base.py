@@ -1,5 +1,5 @@
 from pyaudiogaming.accessible_output2 import load_library
-import platform
+from ... import system
 
 
 class OutputError(Exception):
@@ -39,7 +39,7 @@ class Output(object):
     example: SAPI5 is a system output, while NVDA is not."""
 
     def __init__(self):
-        self.is_32bit = platform.architecture()[0] == "32bit"
+        self.is_32bit = system.get_arch()["bit"] == 32
         if self.lib32 and self.is_32bit:
             self.lib = load_library(self.lib32, cdll=self.cdll)
         elif self.lib64:

@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 import pyaudiogaming.accessible_output2
 from .base import Output, OutputError
+from time import monotonic
 
 
 class Auto(Output):
@@ -8,20 +9,32 @@ class Auto(Output):
     def __init__(self):
         output_classes = pyaudiogaming.accessible_output2.get_output_classes()
         self.outputs = []
+        self.errors = {}
+        self._selected = None
+        self._next_probe = 0.0
         for output in output_classes:
             try:
                 self.outputs.append(output())
-            except OutputError:
-                pass
+            except (OutputError, OSError, ImportError, RuntimeError, AttributeError) as error:
+                self.errors[output.name] = str(error);print(self.outputs)
 
     def get_first_available_output(self):
         """
         Finds the ffirst available output.
         This is automatically called in braille, output and speak.
         """
+        now = monotonic()
+        if self._selected is not None and now < self._next_probe:
+            return self._selected
+        self._selected = None
+        self._next_probe = now + 0.25
         for output in self.outputs:
-            if output.is_active():
-                return output
+            try:
+                if output.is_active():
+                    self._selected = output
+                    return output
+            except (OSError, RuntimeError, AttributeError):
+                continue
         return None
 
     def speak(self, *args, **kwargs):
@@ -39,7 +52,7 @@ class Auto(Output):
     def silence(self):
         output = self.get_first_available_output()
         if output:
-            if output.silence:
+            if hasattr(output, "silence"):
                 output.silence()
 
     def get_volume(self):
