@@ -40,6 +40,7 @@ PCM_LIMIT, CACHE_LIMIT, SYNC_PRELOAD_LIMIT, MMAP_LIMIT = 100 * 1024 * 1024, 256 
 sound_initialized, master_output, default_mixer, last_channel, _clean_counter = False, None, None, None, 0
 preload_mutex = threading.RLock()
 sound_preloads, encoded_preloads, mem_buffers, ptr_lookup, sample_cache, _path_cache = {}, {}, {}, {}, {}, {}
+spak_registry, spak_archives = {}, {}
 _IS_WIN = (os.name == "nt" or sys.platform.startswith("win"))
 
 FLAG_MAP = {
@@ -222,18 +223,70 @@ def extract_raw_bytes(data):
 		if isinstance(val, (bytes, bytearray, memoryview)): return bytes(val)
 	raise TypeError(f"Expected bytes-like object, got {type(data).__name__}")
 
-def save_mem_buffer(key, data_bytes, target="both"):
+def _norm_vpath(p):
+	# Normalize virtual paths across Windows/POSIX so slash and ./ differences never miss
+	if not isinstance(p, str): return str(p)
+	s = p.replace("\\", "/").strip()
+	while s.startswith("./"): s = s[2:]
+	while "//" in s: s = s.replace("//", "/")
+	return s.strip("/")
+
+def save_mem_buffer(key, data_bytes, target="both", aliases=None):
 	# Store zero-copy C-buffer in memory and register pointer lookup
 	raw = extract_raw_bytes(data_bytes)
 	size, c_buf = len(raw), ctypes.c_char_p(raw)
 	ptr = ctypes.cast(c_buf, ctypes.c_void_p)
 	entry = {"buffer": ptr, "raw": (raw, c_buf), "len": size, "time": time.monotonic()}
+	norm_k = _norm_vpath(key) if isinstance(key, str) else key
+	low_k = norm_k.lower() if isinstance(norm_k, str) else norm_k
 	with preload_mutex:
-		mem_buffers[key] = entry
+		for k in (key, norm_k, low_k):
+			mem_buffers[k] = entry
 		if ptr.value: ptr_lookup[ptr.value] = entry
-		if target in ("hstream", "both"): global_buffer.hstreambuffers[key] = entry
-		if target in ("hsample", "both"): global_buffer.hsamplebuffers[key] = entry
+		if target in ("hstream", "both"):
+			for k in (key, norm_k, low_k): global_buffer.hstreambuffers[k] = entry
+		if target in ("hsample", "both"):
+			for k in (key, norm_k, low_k): global_buffer.hsamplebuffers[k] = entry
+		if aliases:
+			for al in aliases:
+				al_norm = _norm_vpath(al)
+				al_low = al_norm.lower()
+				for k in (al, al_norm, al_low):
+					mem_buffers[k] = entry
+					if target in ("hstream", "both"): global_buffer.hstreambuffers[k] = entry
+					if target in ("hsample", "both"): global_buffer.hsamplebuffers[k] = entry
 	return entry
+
+def register_spak_lazy(primary_key, aliases, loader_fn, target="both", archive_obj=None):
+	# Register on-demand .spak entry for O(1) seek+decrypt when first requested by sound.load / sound.stream
+	norm_primary = _norm_vpath(primary_key)
+	all_keys = {primary_key, norm_primary, norm_primary.lower()}
+	if aliases:
+		for al in aliases:
+			al_norm = _norm_vpath(al)
+			all_keys.add(al); all_keys.add(al_norm); all_keys.add(al_norm.lower())
+	desc = {"primary": primary_key, "aliases": tuple(all_keys), "loader": loader_fn, "target": target, "entry": None}
+	with preload_mutex:
+		if archive_obj is not None and getattr(archive_obj, "spak_path", None):
+			spak_archives[archive_obj.spak_path] = archive_obj
+		for k in all_keys:
+			spak_registry[k] = desc
+	return desc
+
+def _resolve_spak_lazy(key):
+	norm_k = _norm_vpath(key)
+	with preload_mutex:
+		desc = spak_registry.get(key) or spak_registry.get(norm_k) or spak_registry.get(norm_k.lower())
+		if desc is None: return None
+		if desc["entry"] is not None: return desc["entry"]
+	raw_bytes = desc["loader"]()
+	if raw_bytes is None: return None
+	with preload_mutex:
+		if desc["entry"] is None:
+			desc["entry"] = save_mem_buffer(desc["primary"], raw_bytes, target=desc["target"], aliases=desc["aliases"])
+		for k in desc["aliases"]:
+			spak_registry.pop(k, None)
+		return desc["entry"]
 
 def resolve_memory_source(src):
 	# Resolve key, dict, c_void_p, ctypes array, or bytes into (ptr, length, keep_alive_ref)
@@ -255,10 +308,19 @@ def resolve_memory_source(src):
 	if isinstance(src, ctypes.Array):
 		return ctypes.cast(src, ctypes.c_void_p), ctypes.sizeof(src), src
 	if isinstance(src, str):
+		norm_src = _norm_vpath(src)
+		low_src = norm_src.lower()
 		with preload_mutex:
-			entry = mem_buffers.get(src) or global_buffer.hsamplebuffers.get(src) or global_buffer.hstreambuffers.get(src)
+			entry = (
+				mem_buffers.get(src) or mem_buffers.get(norm_src) or mem_buffers.get(low_src)
+				or global_buffer.hsamplebuffers.get(src) or global_buffer.hsamplebuffers.get(norm_src) or global_buffer.hsamplebuffers.get(low_src)
+				or global_buffer.hstreambuffers.get(src) or global_buffer.hstreambuffers.get(norm_src) or global_buffer.hstreambuffers.get(low_src)
+			)
 			if isinstance(entry, dict) and "buffer" in entry and "len" in entry:
 				return entry["buffer"], entry["len"], entry.get("raw", entry["buffer"])
+		entry = _resolve_spak_lazy(src)
+		if isinstance(entry, dict) and "buffer" in entry and "len" in entry:
+			return entry["buffer"], entry["len"], entry.get("raw", entry["buffer"])
 	return None
 
 def get_cached_sample(filename, flags=0, max_chans=64):
@@ -318,21 +380,36 @@ def load_sound_file(filename, key=None, target="hstream"):
 	return save_mem_buffer(cache_key, data, target=target)
 
 def get_mem_buffer(key):
-	with preload_mutex: return mem_buffers.get(key) or global_buffer.hstreambuffers.get(key) or global_buffer.hsamplebuffers.get(key)
+	norm_k = _norm_vpath(key) if isinstance(key, str) else key
+	with preload_mutex:
+		entry = (
+			mem_buffers.get(key) or mem_buffers.get(norm_k)
+			or global_buffer.hstreambuffers.get(key) or global_buffer.hstreambuffers.get(norm_k)
+			or global_buffer.hsamplebuffers.get(key) or global_buffer.hsamplebuffers.get(norm_k)
+		)
+		if entry is not None: return entry
+	return _resolve_spak_lazy(key) if isinstance(key, str) else None
 
 def free_mem_buffer(key):
+	norm_k = _norm_vpath(key) if isinstance(key, str) else key
 	with preload_mutex:
-		entry = mem_buffers.pop(key, None)
+		entry = mem_buffers.pop(key, None) or mem_buffers.pop(norm_k, None)
 		if entry and entry.get("buffer") and entry["buffer"].value: ptr_lookup.pop(entry["buffer"].value, None)
-		global_buffer.hstreambuffers.pop(key, None); global_buffer.hsamplebuffers.pop(key, None)
+		global_buffer.hstreambuffers.pop(key, None); global_buffer.hstreambuffers.pop(norm_k, None)
+		global_buffer.hsamplebuffers.pop(key, None); global_buffer.hsamplebuffers.pop(norm_k, None)
+		spak_registry.pop(key, None); spak_registry.pop(norm_k, None)
 
 def clear_all_buffers():
 	with preload_mutex:
 		for entry in sample_cache.values():
 			if entry[0]: bass.BASS_SampleFree(entry[0])
 		for pre in list(encoded_preloads.values()) + list(sound_preloads.values()): pre.close()
+		for arc in list(spak_archives.values()):
+			try: arc.close()
+			except Exception: pass
 		encoded_preloads.clear(); sound_preloads.clear(); sample_cache.clear()
 		mem_buffers.clear(); ptr_lookup.clear(); _path_cache.clear()
+		spak_registry.clear(); spak_archives.clear()
 		global_buffer.hstreambuffers.clear(); global_buffer.hsamplebuffers.clear()
 
 class MixerNode:

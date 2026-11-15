@@ -402,9 +402,15 @@ class WindowBase:
         from . import inputBox
         return inputBox.dialogMessage(title, message, inputBox.INFO if type is None else type)
 
-    def load_sound(self, name, h="hstream"): return control.load_sound_file(name, key=name, target=h)
-    def sound_cast(self, name, data, h="hstream"): return control.save_mem_buffer(name, data, target=h)
+    def load_sound(self, name, h="both"): return control.load_sound_file(name, key=name, target=h)
+    def sound_cast(self, name, data, h="both"): return control.save_mem_buffer(name, data, target=h)
     cast_sound = sound_cast
+    def make_spak(self, source, output_path=None, password="", **kwargs):
+        from . import utils
+        return utils.make_spak(source, output_path=output_path, password=password, **kwargs)
+    def load_spak(self, spak_path, password="", mode="lazy", target="both", **kwargs):
+        from . import utils
+        return utils.load_spak(spak_path, password=password, mode=mode, target=target, **kwargs)
 
     def beep(self, frequency, duration):
         if system.get_platform()["os"] == "windows":

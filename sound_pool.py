@@ -246,7 +246,8 @@ class SoundBase:
 		self.active_fx_handles, self.mono, self.freq, self.paused = {}, False, 44100, False
 		self._pitch_shift_fx, self._tone_semitones, self._hrtf_stream, self._hrtf_dsp, self._3d = None, 0.0, False, 0, None
 		self.user_volume_offset, self.user_pan_offset, self.user_pitch_offset = 0.0, 0.0, 0.0
-		self._last_vol, self._last_pan, self._last_pitch = None, None, None
+		self._last_vol, self._last_pan, self._last_pitch, self._last_hrtf_args = None, None, None, None
+		self._fade_state, self._slide3d_key, self._slide3d_start, self._slide3d_info = {}, None, 0.0, None
 
 	@property
 	def channel(self): return self.handle
@@ -258,6 +259,33 @@ class SoundBase:
 		except Exception: return 0
 
 	def _resolve_attr(self, attr): return ATTR_MAP.get(attr, attr) if isinstance(attr, str) else int(attr)
+
+	def _norm_attr_name(self, attr_type):
+		t = attr_type.lower() if isinstance(attr_type, str) else "volume"
+		if t in ("volume", "vol"): return "volume"
+		if t in ("pitch", "frequency", "freq"): return "pitch"
+		if t == "pan": return "pan"
+		return t
+
+	def is_fading(self, attr_type=None):
+		if not self._fade_state: return False
+		now = time.monotonic()
+		for k in list(self._fade_state.keys()):
+			sv, tv, st_t, dur = self._fade_state[k]
+			if now - st_t >= dur: self._fade_state.pop(k, None)
+		if attr_type is None: return bool(self._fade_state)
+		return self._norm_attr_name(attr_type) in self._fade_state
+
+	def get_faded_value(self, attr_type="volume", default_val=100.0):
+		nt = self._norm_attr_name(attr_type)
+		info = self._fade_state.get(nt)
+		if not info: return float(default_val)
+		sv, tv, st_t, dur = info
+		el = time.monotonic() - st_t
+		if dur <= 0.0 or el >= dur:
+			self._fade_state.pop(nt, None)
+			return float(tv)
+		return float(sv + (tv - sv) * max(0.0, min(1.0, el / dur)))
 
 	def set_mixer(self, target_mixer=None):
 		raw = self._get_raw_channel_handle()
@@ -283,7 +311,8 @@ class SoundBase:
 		if not self._hrtf_dsp: return False
 		raw = self._get_raw_channel_handle()
 		if _hrtf and raw: _hrtf.BASS_HRTF_DetachDSP(raw)
-		self._hrtf_dsp = 0; return True
+		self._hrtf_dsp, self._last_hrtf_args = 0, None
+		return True
 
 	def set_hrtf_enabled(self, enabled=True):
 		raw = self._get_raw_channel_handle()
@@ -302,26 +331,41 @@ class SoundBase:
 				else: bass.BASS_ChannelPlay(self.handle, False)
 
 	def fade(self, fadetime, value=0, type="volume"):
-		if self.handle and self.playing:
-			t = type.lower() if isinstance(type, str) else "volume"
-			attr = self._resolve_attr(t)
-			if t in ("volume", "vol"):
-				v = max(0.0, min(100.0, float(value))) / 100.0
-			elif t == "pan":
-				v = max(-100.0, min(100.0, float(value))) / 100.0
-			elif t in ("pitch", "frequency", "freq"):
-				v = (float(value) / 100.0) * float(self.freq)
+		if self.handle:
+			nt = self._norm_attr_name(type)
+			attr = self._resolve_attr(nt)
+			target_v = float(value)
+			ft_ms = int(max(0, fadetime))
+			if nt == "volume":
+				cur_v = self._last_vol if self._last_vol is not None else float(self.volume or 0.0)
+				target_v = max(0.0, min(100.0, target_v))
+				v = target_v / 100.0
+				self._last_vol = target_v if ft_ms == 0 else None
+			elif nt == "pan":
+				cur_v = self._last_pan if self._last_pan is not None else float(self.pan or 0.0)
+				target_v = max(-100.0, min(100.0, target_v))
+				v = target_v / 100.0
+				self._last_pan = target_v if ft_ms == 0 else None
+			elif nt == "pitch":
+				cur_v = self._last_pitch if self._last_pitch is not None else float(self.pitch or 100.0)
+				v = (target_v / 100.0) * float(self.freq)
+				self._last_pitch = target_v if ft_ms == 0 else None
 			else:
-				v = float(value)
-			bass.BASS_ChannelSlideAttribute(self.handle, attr, ctypes.c_float(v), int(max(0, fadetime)))
+				cur_v, v = target_v, target_v
+			if ft_ms > 0:
+				if nt in self._fade_state: cur_v = self.get_faded_value(nt, cur_v)
+				self._fade_state[nt] = (float(cur_v), float(target_v), time.monotonic(), ft_ms / 1000.0)
+				bass.BASS_ChannelSlideAttribute(self.handle, attr, ctypes.c_float(v), ft_ms)
+			else:
+				self._fade_state.pop(nt, None)
+				bass.BASS_ChannelSetAttribute(self.handle, attr, ctypes.c_float(v))
 
 	def fadeout(self, fadetime, value=0, type="volume"):
-		if self.handle and self.playing:
-			v = float(value) / 100.0 if type in ("volume", "vol", "pan") and abs(value) > 1.0 else float(value)
+		if self.handle:
 			return self.fade(fadetime, value, type=type)
 
 	def fadein(self, fadetime, value=100, type="volume"):
-		if self.handle and self.playing:
+		if self.handle:
 			return self.fade(fadetime, value, type=type)
 
 	def setfx(self, fx_key, priority=0):
@@ -370,9 +414,12 @@ class SoundBase:
 	@property
 	def volume(self):
 		if not self.handle: return False
+		if "volume" in self._fade_state: return self.get_faded_value("volume", self._last_vol or 0.0)
+		if self._last_vol is not None: return self._last_vol
 		val = ctypes.c_float(0.0)
 		bass.BASS_ChannelGetAttribute(self.handle, BASS_ATTRIB_VOL, ctypes.byref(val))
-		return val.value * 100.0
+		self._last_vol = val.value * 100.0
+		return self._last_vol
 
 	@volume.setter
 	def volume(self, value):
@@ -385,9 +432,12 @@ class SoundBase:
 	@property
 	def pitch(self):
 		if not self.handle: return False
+		if "pitch" in self._fade_state: return self.get_faded_value("pitch", self._last_pitch or 100.0)
+		if self._last_pitch is not None: return self._last_pitch
 		val = ctypes.c_float(0.0)
 		bass.BASS_ChannelGetAttribute(self.handle, BASS_ATTRIB_FREQ, ctypes.byref(val))
-		return (val.value / self.freq) * 100.0
+		self._last_pitch = (val.value / self.freq) * 100.0
+		return self._last_pitch
 
 	@pitch.setter
 	def pitch(self, value):
@@ -400,9 +450,12 @@ class SoundBase:
 	@property
 	def pan(self):
 		if not self.handle: return False
+		if "pan" in self._fade_state: return self.get_faded_value("pan", self._last_pan or 0.0)
+		if self._last_pan is not None: return self._last_pan
 		val = ctypes.c_float(0.0)
 		bass.BASS_ChannelGetAttribute(self.handle, BASS_ATTRIB_PAN, ctypes.byref(val))
-		return val.value * 100.0
+		self._last_pan = val.value * 100.0
+		return self._last_pan
 
 	@pan.setter
 	def pan(self, value):
@@ -418,6 +471,9 @@ class SoundBase:
 		if bassmix.BASS_Mixer_ChannelGetMixer(self.handle):
 			return bass.BASS_ChannelIsActive(self.handle) == BASS_ACTIVE_PLAYING and not (bassmix.BASS_Mixer_ChannelFlags(self.handle, 0, 0) & control.BASS_MIXER_CHAN_PAUSE)
 		return bass.BASS_ChannelIsActive(self.handle) == BASS_ACTIVE_PLAYING
+
+	@property
+	def is_playing(self): return self.playing
 
 	@property
 	def stopped(self): return not self.handle or bass.BASS_ChannelIsActive(self.handle) == BASS_ACTIVE_STOPPED
@@ -456,6 +512,9 @@ class SoundBase:
 	          pitch_step=1, pitch_range=92, pan_range=70,
 	          start_pan=0, start_volume=100, start_pitch=100,
 	          soft=False, mix_pan_with_hrtf=False, bilinear=True):
+		if "volume" in self._fade_state: start_volume = self.get_faded_value("volume", start_volume)
+		if "pitch" in self._fade_state: start_pitch = self.get_faded_value("pitch", start_pitch)
+		if "pan" in self._fade_state: start_pan = self.get_faded_value("pan", start_pan)
 		if soft or self._hrtf_stream or self._hrtf_dsp:
 			return self.set3dsoft(
 				listener_x, listener_y, listener_z, source_x, source_y, source_z,
@@ -482,7 +541,10 @@ class SoundBase:
 		dx, dy, dz = self._compute_rotated_delta(listener_x, listener_y, listener_z, source_x, source_y, source_z, rotation)
 		dist = math.sqrt(dx * dx + dy * dy + dz * dz)
 		atten = 1.0 if volume_step <= 0 else max(0.0, 1.0 - dist * (float(volume_step) / 100.0))
-		if not _initialize_hrtf().BASS_HRTF_Set3D(raw, dx, dy, dz, float(atten), 1 if bilinear else 0): return False
+		hrtf_key = (round(dx, 2), round(dy, 2), round(dz, 2), round(atten, 3), bool(bilinear))
+		if self._last_hrtf_args != hrtf_key:
+			if not _initialize_hrtf().BASS_HRTF_Set3D(raw, dx, dy, dz, float(atten), 1 if bilinear else 0): return False
+			self._last_hrtf_args = hrtf_key
 		self._3d = (listener_x, listener_y, listener_z, source_x, source_y, source_z)
 		f_vol, f_pan, f_pitch = float(start_volume) + self.user_volume_offset, float(start_pan) + self.user_pan_offset, float(start_pitch) + self.user_pitch_offset
 		if pan_step != 0.0: f_pan = max(min(f_pan + dx * float(pan_step), float(pan_range)), -float(pan_range))
@@ -507,6 +569,97 @@ class SoundBase:
 		self.volume = max(min((start_volume + self.user_volume_offset) - (horiz_dist + delta_z * 0.5) * volume_step, 100.0), 0.0)
 		self.pitch = start_pitch + self.user_pitch_offset
 		return True
+
+	@property
+	def is_sliding3d(self):
+		info = self._slide3d_info
+		if not info: return False
+		if info.get("mode") == "once" and self._slide3d_start:
+			return (time.monotonic() - self._slide3d_start) * 1000.0 < float(info.get("fadetime", 1000))
+		return True
+
+	def slide3d(self, *args, **kwargs):
+		if len(args) >= 9:
+			listener_x, listener_y, listener_z = args[0], args[1], args[2]
+			from_x, from_y, from_z = args[3], args[4], args[5]
+			to_x, to_y, to_z = args[6], args[7], args[8]
+			fadetime = args[9] if len(args) > 9 else kwargs.get("fadetime", 1000)
+			mode = args[10] if len(args) > 10 else kwargs.get("mode", "loop")
+		elif len(args) >= 6:
+			from_x, from_y, from_z = args[0], args[1], args[2]
+			to_x, to_y, to_z = args[3], args[4], args[5]
+			fadetime = args[6] if len(args) > 6 else kwargs.get("fadetime", 1000)
+			mode = args[7] if len(args) > 7 else kwargs.get("mode", "loop")
+			listener = kwargs.get("listener")
+			if listener and len(listener) >= 3:
+				listener_x, listener_y, listener_z = listener[0], listener[1], listener[2]
+			elif self._3d and len(self._3d) >= 3:
+				listener_x, listener_y, listener_z = self._3d[0], self._3d[1], self._3d[2]
+			else:
+				listener_x, listener_y, listener_z = 0.0, 0.0, 0.0
+		else:
+			return (0.0, 0.0, 0.0)
+		rotation = kwargs.get("rotation", 0)
+		start_pan = kwargs.get("start_pan", 0)
+		start_volume = kwargs.get("start_volume", 100)
+		start_pitch = kwargs.get("start_pitch", 100)
+		pan_step = kwargs.get("pan_step", 2.5)
+		volume_step = kwargs.get("volume_step", 2.5)
+		behind_pitch_decrease = kwargs.get("behind_pitch_decrease", 0)
+		behind_volume_decrease = kwargs.get("behind_volume_decrease", 0)
+		pitch_step = kwargs.get("pitch_step", 1)
+		pitch_range = kwargs.get("pitch_range", 92)
+		pan_range = kwargs.get("pan_range", 70)
+		soft = kwargs.get("soft", False)
+		mix_pan_with_hrtf = kwargs.get("mix_pan_with_hrtf", False)
+		bilinear = kwargs.get("bilinear", True)
+		fx, fy, fz = float(from_x), float(from_y), float(from_z)
+		tx, ty, tz = float(to_x), float(to_y), float(to_z)
+		dur_ms = max(1, int(fadetime or 1000))
+		s_mode = str(mode or "loop").lower()
+		s_key = (fx, fy, fz, tx, ty, tz, dur_ms, s_mode)
+		now = time.monotonic()
+		if self._slide3d_key != s_key:
+			self._slide3d_key = s_key
+			self._slide3d_start = now
+		el_ms = max(0.0, (now - self._slide3d_start) * 1000.0)
+		if s_mode in ("once", "group_event"):
+			ratio = min(1.0, el_ms / float(dur_ms))
+		elif s_mode == "pingpong":
+			cyc = (el_ms / float(dur_ms)) % 2.0
+			ratio = cyc if cyc <= 1.0 else (2.0 - cyc)
+		else:
+			ratio = (el_ms % float(dur_ms)) / float(dur_ms)
+		cx = fx + (tx - fx) * ratio
+		cy = fy + (ty - fy) * ratio
+		cz = fz + (tz - fz) * ratio
+		self._slide3d_info = {
+			"from": (fx, fy, fz), "to": (tx, ty, tz), "fadetime": dur_ms, "mode": s_mode,
+			"pos": (cx, cy, cz), "start_pan": start_pan, "start_volume": start_volume, "start_pitch": start_pitch,
+			"pan_step": pan_step, "volume_step": volume_step, "soft": soft
+		}
+		self.set3d(
+			listener_x, listener_y, listener_z, cx, cy, cz,
+			rotation=rotation, pan_step=pan_step, volume_step=volume_step,
+			behind_pitch_decrease=behind_pitch_decrease, behind_volume_decrease=behind_volume_decrease,
+			pitch_step=pitch_step, pitch_range=pitch_range, pan_range=pan_range,
+			start_pan=start_pan, start_volume=start_volume, start_pitch=start_pitch,
+			soft=soft, mix_pan_with_hrtf=mix_pan_with_hrtf, bilinear=bilinear
+		)
+		return (cx, cy, cz)
+
+	def update_slide3d(self, listener_x, listener_y, listener_z, rotation=0):
+		info = self._slide3d_info
+		if not info: return None
+		fx, fy, fz = info["from"]
+		tx, ty, tz = info["to"]
+		return self.slide3d(
+			listener_x, listener_y, listener_z, fx, fy, fz, tx, ty, tz,
+			fadetime=info["fadetime"], mode=info["mode"], rotation=rotation,
+			start_pan=info.get("start_pan", 0), start_volume=info.get("start_volume", 100),
+			start_pitch=info.get("start_pitch", 100), pan_step=info.get("pan_step", 2.5),
+			volume_step=info.get("volume_step", 2.5), soft=info.get("soft", False)
+		)
 
 
 class vst(SoundBase):
@@ -714,7 +867,7 @@ class sound(SoundBase):
 		buffer.hSound_poolbuffers[self.sound_token] = self
 		self.preload_ref, self._sample_handle, self._sample_cached, self._memory_ref = None, None, False, None
 
-	def stream(self, filename, draw=False, mono=False, ThreeD=False, decode=False, autofree=False, use_dsp_hrtf=False, preload=True, **kwargs):
+	def stream(self, filename, draw=False, mono=False, ThreeD=False, decode=False, autofree=False, use_dsp_hrtf=False, preload=False, **kwargs):
 		# Zero-stutter direct streaming using zero-copy preload/mmap or BASS_ASYNCFILE
 		if self.handle: self.close()
 		buffer.hSound_poolbuffers[self.sound_token] = self
@@ -828,7 +981,8 @@ class sound(SoundBase):
 		control.sound_preloads_clean()
 		self.handle, self.dedata, self._sample_handle, self._memory_ref = None, None, None, None
 		self._sample_cached, self._hrtf_stream, self.paused = False, False, False
-		self._last_vol, self._last_pan, self._last_pitch = None, None, None
+		self._last_vol, self._last_pan, self._last_pitch, self._last_hrtf_args = None, None, None, None
+		self._fade_state.clear(); self._slide3d_key, self._slide3d_info = None, None
 		self.active_fx_handles.clear()
 		buffer.hSound_poolbuffers.pop(self.sound_token, None)
 
