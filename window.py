@@ -389,6 +389,8 @@ class WindowBase:
 
     def say(self, text, i=True, split=False): self.speech.say(text, i=i, split=split)
     def saync(self, text): self.speech.saync(text)
+    def say3d(self, text, lx, ly, lz, sx, sy, sz, i=True, **kwargs): self.speech.say3d(text, lx, ly, lz, sx, sy, sz, i=i, **kwargs)
+    speech3d = say3d
 
     def input(self, title, message, password=False, dir=False, file=False):
         from . import inputBox

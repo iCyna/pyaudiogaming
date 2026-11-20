@@ -16,5 +16,6 @@ hSound_poolbuffers={}
 hrecordthreadbuffers={}
 hmidibuffers={}
 hspeechwrapper=None
+nvda_use_ssml = False
 soft=None
 wx=None

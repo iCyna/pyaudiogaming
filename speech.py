@@ -40,6 +40,16 @@ class Speech:
 		"""tts speech no log"""
 		self.speech.output(str(string), interrupt=i)
 
+	def say3d(self, text, lx, ly, lz, sx, sy, sz, i=True, **kwargs):
+		if text is None or text == "":
+			return
+		string = str(text)
+		self.speech.speak3d(string, lx, ly, lz, sx, sy, sz, interrupt=i, **kwargs)
+		self.speech_history.append(string)
+		self.history_index = len(self.speech_history)
+
+	speech3d = say3d
+
 	def get_speech_volume(self): return self.speech.get_volume()
 	def set_speech_volume(self, value): return self.speech.set_volume(value)
 	def get_speech_pitch(self): return self.speech.get_pitch()
@@ -48,6 +58,33 @@ class Speech:
 	def set_speech_rate(self, value): return self.speech.set_rate(value)
 	def get_speech_voice(self): return self.speech.get_voice()
 	def set_speech_voice(self, type): return self.speech.set_voice(type)
+	def get_speech_pan(self): return self.speech.get_pan()
+	def set_speech_pan(self, value): return self.speech.set_pan(value)
+	def get_speech_sound_pitch(self): return self.speech.get_sound_pitch()
+	def set_speech_sound_pitch(self, value): return self.speech.set_sound_pitch(value)
+	def get_speech_output_device(self): return self.speech.get_output_device()
+	def set_speech_output_device(self, device): return self.speech.set_output_device(device)
+	def get_speech_sound(self): return self.speech.get_sound()
+	def get_speech_mono(self): return self.speech.get_mono()
+	def set_speech_mono(self, value): return self.speech.set_mono(value)
+	def get_speech_hrtf(self): return self.speech.get_hrtf()
+	def set_speech_hrtf(self, value): return self.speech.set_hrtf(value)
+	def get_speech_fx(self): return self.speech.get_fx()
+	def set_speech_fx(self, value): return self.speech.set_fx(value)
+	def set_speech_zone_fx_provider(self, provider): return self.speech.set_zone_fx_provider(provider)
+	def list_speech_fx(self): return self.speech.list_fx()
+	def get_speech_auto_pause(self): return self.speech.get_auto_pause()
+	def set_speech_auto_pause(self, enabled): return self.speech.set_auto_pause(enabled)
+	def list_voices(self): return self.speech.list_voices()
+	get_speech_voices = list_voices
+	def get_outputs(self, active_only=False): return self.speech.get_outputs(active_only=active_only)
+	get_screen_readers = get_outputs
+	def get_output(self): return self.speech.get_output()
+	get_screen_reader = get_output
+	def get_active_screen_reader(self): return self.speech.get_active_output()
+	def set_output(self, name=None): return self.speech.set_output(name)
+	set_screen_reader = set_output
+	def get_capabilities(self): return self.speech.get_capabilities()
 
 def say(text, i=True, split=False, log=True):
 	from . import buffer

@@ -2,8 +2,21 @@ from __future__ import absolute_import
 import os
 import platform
 import ctypes
+import re
+from xml.sax.saxutils import escape
 from pyaudiogaming import system
 from .base import Output
+
+_PUNCT_PAUSE_RE = re.compile(r"(?<!\d)([,;:.!?]+(?:\s+[,;:.!?]+)*)(?=\s|$)")
+_PUNCT_SPLIT_RE = re.compile(r"(?<!\d)[,;:.!?]+\s+\S")
+_PUNCT_PAUSE_MS = {
+    ",": 150,
+    ";": 250,
+    ":": 250,
+    ".": 350,
+    "!": 350,
+    "?": 350,
+}
 
 
 class NVDA(Output):
@@ -15,10 +28,16 @@ class NVDA(Output):
     argtypes = {
         "nvdaController_brailleMessage": (ctypes.c_wchar_p,),
         "nvdaController_speakText": (ctypes.c_wchar_p,),
+        "nvdaController_speakSsml": (ctypes.c_wchar_p, ctypes.c_int, ctypes.c_int, ctypes.c_bool),
+        "nvdaController_setOnSsmlMarkReachedCallback": (ctypes.c_void_p,),
     }
+    has_auto_pause = True
+
     def __init__(self):
         super(NVDA, self).__init__()
         self.helper_lib = None
+        self.auto_pause = True
+        self._mark_callback_ref = None
 
     def NVDAHelperLoader(self):
         arch = system.get_arch()
@@ -49,9 +68,73 @@ class NVDA(Output):
     def braille(self, text, **options):
         self.lib.nvdaController_brailleMessage(text)
 
+    def get_auto_pause(self):
+        return self.auto_pause
+
+    def set_auto_pause(self, enabled):
+        self.auto_pause = bool(enabled)
+
+    @staticmethod
+    def _text_to_ssml(text):
+        parts = []
+        last = 0
+        for match in _PUNCT_PAUSE_RE.finditer(text):
+            token = match.group(1)
+            parts.append(escape(text[last:match.end()]))
+            ms = max((_PUNCT_PAUSE_MS.get(ch, 150) for ch in token if ch in _PUNCT_PAUSE_MS), default=200)
+            parts.append(f'<break time="{ms}ms"/>')
+            last = match.end()
+        parts.append(escape(text[last:]))
+        return f"<speak>{''.join(parts)}</speak>"
+
+    def speak_ssml(self, ssml, symbol_level=-1, priority=0, asynchronous=True):
+        if not self.lib or not hasattr(self.lib, "nvdaController_speakSsml"):
+            return False
+        try:
+            return self.lib.nvdaController_speakSsml(str(ssml), int(symbol_level), int(priority), bool(asynchronous)) == 0
+        except Exception:
+            return False
+
+    def set_on_ssml_mark_reached(self, callback):
+        if not self.lib or not hasattr(self.lib, "nvdaController_setOnSsmlMarkReachedCallback"):
+            return False
+        if callback is None:
+            self._mark_callback_ref = None
+            return self.lib.nvdaController_setOnSsmlMarkReachedCallback(None) == 0
+        cb_type = ctypes.WINFUNCTYPE(ctypes.c_int, ctypes.c_wchar_p)
+        self._mark_callback_ref = cb_type(lambda name: int(bool(callback(name))))
+        return self.lib.nvdaController_setOnSsmlMarkReachedCallback(self._mark_callback_ref) == 0
+
+    def is_speaking(self):
+        if not self.lib or not hasattr(self.lib, "nvdaController_isSpeaking"):
+            return None
+        speaking = ctypes.c_bool(False)
+        if self.lib.nvdaController_isSpeaking(ctypes.byref(speaking)) == 0:
+            return bool(speaking.value)
+        return None
+
+    def get_process_id(self):
+        if not self.lib or not hasattr(self.lib, "nvdaController_getProcessId"):
+            return None
+        pid = ctypes.c_ulong(0)
+        if self.lib.nvdaController_getProcessId(ctypes.byref(pid)) == 0:
+            return int(pid.value)
+        return None
+
     def speak(self, text, interrupt=False):
         if interrupt:
             self.silence()
+        text = str(text)
+        from pyaudiogaming import buffer
+        if (
+            self.auto_pause
+            and getattr(buffer, "nvda_use_ssml", False)
+            and _PUNCT_SPLIT_RE.search(text)
+            and self.lib
+            and hasattr(self.lib, "nvdaController_speakSsml")
+        ):
+            if self.speak_ssml(self._text_to_ssml(text), symbol_level=-1, priority=0, asynchronous=True):
+                return
         self.lib.nvdaController_speakText(text)
 
     def silence(self):

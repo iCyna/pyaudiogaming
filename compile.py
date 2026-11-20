@@ -10,6 +10,7 @@ import glob
 import ast
 import sysconfig
 import subprocess
+import zipfile
 from pathlib import Path
 
 # Chặn đứng ngay lập tức nếu tiến trình con của Briefcase/Gradle vô tình gọi ngược vào file này
@@ -40,8 +41,17 @@ PORTABLE_HOME = ROOT / "include" / "android" / "toolchain"
 
 # Danh sách các file trình biên dịch cần loại trừ tuyệt đối khi copy vào project Android
 EXCLUDE_BUILD_FILES = {
-	"compile.py", "compile_2.py", "builder.py", "android_build.py", "setup.py"
+	"compile.py", "compile_2.py", "builder.py", "android_build.py", "setup.py",
+	"buildapp.py", "buildtranslation.py", "@build.py"
 }
+
+EXCLUDE_DIRS = {
+	"__pycache__", "android", "build", "dist", "venv", ".venv", "env", ".git", ".idea", ".vscode", "logs"
+}
+
+DESKTOP_BIN_PATTERNS = (
+	"*.dll", "*.exe", "*.pyd", "*.dylib", "*.chm", "*.pdb", "*.lib", "*.exp", "*.obj", "*.a", "*.bat", "*.cmd"
+)
 
 
 def _save_text(content, path):
@@ -87,6 +97,19 @@ def _get_portable_env():
 	env["BRIEFCASE_HOME"] = str(PORTABLE_HOME)
 	env["GRADLE_USER_HOME"] = str(gradle_home)
 	env["PYAG_BUILDING_ANDROID"] = "1"
+
+	tools_dir = PORTABLE_HOME / "tools"
+	if tools_dir.is_dir():
+		for jdk_cand in sorted(tools_dir.glob("java*"), reverse=True):
+			if (jdk_cand / "bin").is_dir():
+				env["JAVA_HOME"] = str(jdk_cand)
+				env["PATH"] = str(jdk_cand / "bin") + os.pathsep + env.get("PATH", "")
+				break
+		sdk_cand = tools_dir / "android_sdk"
+		if sdk_cand.is_dir():
+			env["ANDROID_HOME"] = str(sdk_cand)
+			env["ANDROID_SDK_ROOT"] = str(sdk_cand)
+
 	return env
 
 
@@ -123,14 +146,15 @@ def _run_briefcase(args_list, cwd, env):
 
 def _normalize_abis(arch=None):
 	raw = arch if isinstance(arch, list) else [arch or "arm64-v8a"]
+	# Lưu ý: nhiều người dùng để arch="x64" từ cấu hình Windows, trên đt Android cần ưu tiên arm64-v8a
 	aliases = {
 		"a64": "arm64-v8a",
 		"arm64": "arm64-v8a",
 		"aarch64": "arm64-v8a",
+		"x64": "arm64-v8a",
 		"arm": "armeabi-v7a",
 		"armv7": "armeabi-v7a",
-		"a86": "x86",
-		"x64": "x86_64"
+		"a86": "x86"
 	}
 	abis = []
 	for a in raw:
@@ -141,6 +165,14 @@ def _normalize_abis(arch=None):
 	abis = list(dict.fromkeys(abis))
 	if any(a not in ABIS for a in abis):
 		raise ValueError(f"Unsupported Android ABI: {abis}")
+	if sys.version_info >= (3, 12):
+		supported_64 = [a for a in abis if a in ("arm64-v8a", "x86_64")]
+		if supported_64 != abis:
+			print(
+				f"[BeeWare] Notice: Python {sys.version_info.major}.{sys.version_info.minor} on Android "
+				f"only supports 64-bit ABIs. Adjusting ABIs {abis} -> {supported_64 or ['arm64-v8a']}"
+			)
+			abis = supported_64 or ["arm64-v8a"]
 	return abis
 
 
@@ -148,6 +180,8 @@ def _collect_and_verify_libs(abis, app_root, staging_native_dir, package_lib_dir
 	if staging_native_dir.exists():
 		shutil.rmtree(staging_native_dir)
 	staging_native_dir.mkdir(parents=True, exist_ok=True)
+	if package_lib_dir.exists():
+		shutil.rmtree(package_lib_dir)
 
 	for abi in abis:
 		src_dirs = [
@@ -156,9 +190,7 @@ def _collect_and_verify_libs(abis, app_root, staging_native_dir, package_lib_dir
 			app_root / "pyaudiogaming" / "lib" / abi
 		]
 		target_jni = staging_native_dir / abi
-		target_pkg = package_lib_dir / abi
 		target_jni.mkdir(parents=True, exist_ok=True)
-		target_pkg.mkdir(parents=True, exist_ok=True)
 
 		copied_files = set()
 		for sdir in src_dirs:
@@ -168,7 +200,6 @@ def _collect_and_verify_libs(abis, app_root, staging_native_dir, package_lib_dir
 				fname = so_file.name
 				lib_fname = fname if fname.startswith("lib") else f"lib{fname}"
 				shutil.copy2(so_file, target_jni / lib_fname)
-				shutil.copy2(so_file, target_pkg / lib_fname)
 				copied_files.add(lib_fname)
 
 		for required in ("libbass.so", "libbassmix.so", "libbass_fx.so"):
@@ -177,6 +208,24 @@ def _collect_and_verify_libs(abis, app_root, staging_native_dir, package_lib_dir
 					f"Missing required Android library '{required}' for ABI '{abi}'. "
 					f"Expected inside: {ROOT / 'lib' / abi}"
 				)
+
+
+def _patch_android_manifest(manifest_path):
+	if not manifest_path.exists():
+		return
+	text = _load_text(manifest_path)
+	# Sửa các quyền bị thiếu tiền tố android.permission.
+	for short_perm in ("INTERNET", "ACCESS_NETWORK_STATE", "RECORD_AUDIO", "MODIFY_AUDIO_SETTINGS", "WAKE_LOCK"):
+		bad_tag = f'<uses-permission android:name="{short_perm}"/>'
+		good_tag = f'<uses-permission android:name="android.permission.{short_perm}"/>'
+		if bad_tag in text:
+			if good_tag in text:
+				text = text.replace(bad_tag, "")
+			else:
+				text = text.replace(bad_tag, good_tag)
+	if 'android:extractNativeLibs=' not in text and '<application' in text:
+		text = text.replace('<application', '<application\n        android:extractNativeLibs="true"', 1)
+	_save_text(text, manifest_path)
 
 
 def _inject_gradle_jnilibs(workspace, slug, staging_native_dir, abis):
@@ -197,18 +246,40 @@ def _inject_gradle_jnilibs(workspace, slug, staging_native_dir, abis):
 			so_list = [p.name for p in dst_abi.glob("*.so")]
 			print(f"[BeeWare] Injected {len(so_list)} native libraries into jniLibs/{abi}: {', '.join(so_list)}")
 
+	java_src_dir = ROOT / "include" / "android" / "java"
+	if java_src_dir.is_dir():
+		gradle_java_dir = gradle_app_dir / "src" / "main" / "java"
+		shutil.copytree(java_src_dir, gradle_java_dir, dirs_exist_ok=True)
+		java_files = [p.name for p in java_src_dir.rglob("*.java")]
+		if java_files:
+			print(f"[BeeWare] Injected Android native Java bridge: {', '.join(java_files)}")
+
+	_patch_android_manifest(gradle_app_dir / "src" / "main" / "AndroidManifest.xml")
+
 	build_gradle_path = gradle_app_dir / "build.gradle"
 	if build_gradle_path.exists():
 		gradle_text = _load_text(build_gradle_path)
 		marker = "// [PYAUDIOGAMING_JNILIBS_PATCH]"
-		if marker not in gradle_text:
-			abi_filters = ", ".join(f'"{a}"' for a in abis)
-			patch_block = f"""
+		if marker in gradle_text:
+			gradle_text = gradle_text.split(marker)[0].rstrip()
+
+		abi_filters = ", ".join(f'"{a}"' for a in abis)
+		patch_block = f"""
 {marker}
 android {{
     defaultConfig {{
+        targetSdkVersion 34
         ndk {{
+            abiFilters.clear()
             abiFilters {abi_filters}
+        }}
+        python {{
+            extractPackages "*"
+        }}
+    }}
+    buildTypes {{
+        release {{
+            signingConfig signingConfigs.debug
         }}
     }}
     packagingOptions {{
@@ -218,7 +289,93 @@ android {{
     }}
 }}
 """
-			_save_text(gradle_text + "\n" + patch_block, build_gradle_path)
+		_save_text(gradle_text + "\n" + patch_block, build_gradle_path)
+
+
+def _is_apk_signed(apk_path):
+	apk_path = Path(apk_path)
+	if not apk_path.is_file() or apk_path.name.lower().endswith("-unsigned.apk"):
+		return False
+	try:
+		with zipfile.ZipFile(apk_path, "r") as zf:
+			names = zf.namelist()
+			if any(
+				n.startswith("META-INF/") and n.upper().endswith((".RSA", ".DSA", ".EC"))
+				for n in names
+			):
+				return True
+		with apk_path.open("rb") as f:
+			size = apk_path.stat().st_size
+			read_len = min(size, 65536 + 1024)
+			f.seek(max(0, size - read_len))
+			tail = f.read()
+			if b"APK Sig Block 42" in tail:
+				return True
+	except Exception:
+		return False
+	return False
+
+
+def _ensure_apk_signed(apk_path, env):
+	apk_path = Path(apk_path)
+	if _is_apk_signed(apk_path):
+		return apk_path
+
+	print(f"[BeeWare] APK '{apk_path.name}' is unsigned. Signing with Android debug keystore...")
+	sdk_dir = PORTABLE_HOME / "tools" / "android_sdk"
+	signers = sorted(sdk_dir.glob("build-tools/*/apksigner.bat"), reverse=True) if sdk_dir.exists() else []
+	if not signers:
+		raise RuntimeError(f"APK '{apk_path}' is unsigned and apksigner was not found in {sdk_dir}")
+
+	keystore = Path.home() / ".android" / "debug.keystore"
+	if not keystore.exists():
+		keystore = PORTABLE_HOME / "debug.keystore"
+	if not keystore.exists():
+		keystore.parent.mkdir(parents=True, exist_ok=True)
+		keytool_cands = sorted((PORTABLE_HOME / "tools").glob("java*/bin/keytool.exe"), reverse=True)
+		keytool = str(keytool_cands[0]) if keytool_cands else "keytool"
+		subprocess.run(
+			[
+				keytool, "-genkeypair", "-v",
+				"-keystore", str(keystore),
+				"-storepass", "android",
+				"-alias", "androiddebugkey",
+				"-keypass", "android",
+				"-keyalg", "RSA",
+				"-keysize", "2048",
+				"-validity", "10000",
+				"-dname", "CN=Android Debug,O=Android,C=US"
+			],
+			env=env,
+			check=True
+		)
+
+	subprocess.run(
+		[
+			str(signers[0]), "sign",
+			"--ks", str(keystore),
+			"--ks-pass", "pass:android",
+			"--ks-key-alias", "androiddebugkey",
+			"--key-pass", "pass:android",
+			str(apk_path)
+		],
+		env=env,
+		check=True
+	)
+	return apk_path
+
+
+def _is_ignored_app_dir(item_path, root_path):
+	if item_path.resolve() == root_path.resolve():
+		return True
+	name_low = item_path.name.lower()
+	if name_low in EXCLUDE_DIRS or name_low in ("pyaudiogaming", "server", "lib", "include", "scripts"):
+		return True
+	if name_low.startswith((".", "#", "@", "venv")):
+		return True
+	if (item_path / "pyvenv.cfg").exists() or (item_path / "Lib" / "site-packages").exists():
+		return True
+	return False
 
 
 def prepare_android(project, name, data=(), arch=None, extra_reqs=()):
@@ -230,6 +387,8 @@ def prepare_android(project, name, data=(), arch=None, extra_reqs=()):
 	slug = re.sub(r"[^a-z0-9_]", "", str(name).lower().replace(" ", "_"))
 	slug = re.sub(r"_+", "_", slug).strip("_")
 	if not slug or not slug[0].isalpha():
+		slug = "app_" + slug
+	if slug in ("main", "test", "app", "sys", "os", "pyaudiogaming"):
 		slug = "app_" + slug
 	if any(c in str(name) for c in "\r\n"):
 		raise ValueError("Application name must be a single line")
@@ -250,27 +409,55 @@ def prepare_android(project, name, data=(), arch=None, extra_reqs=()):
 	for folder in ("sound_modules", "accessible_output2", "include", "utils"):
 		src_folder = ROOT / folder
 		if src_folder.is_dir():
-			ignore_fn = shutil.ignore_patterns("__pycache__", "*.pyc", "desktop.ini", "android", "compile*.py", "android_build.py", "builder.py")
+			ignore_fn = shutil.ignore_patterns(
+				"__pycache__", "*.pyc", "desktop.ini", "android",
+				"compile*.py", "android_build.py", "builder.py",
+				*DESKTOP_BIN_PATTERNS
+			)
 			shutil.copytree(src_folder, package / folder, dirs_exist_ok=True, ignore=ignore_fn)
 
 	app_root = entry.parent
 	for item in app_root.iterdir():
-		if item.is_file() and item.suffix == ".py" and item.name.lower() not in EXCLUDE_BUILD_FILES and not item.name.lower().startswith("compile"):
-			shutil.copy2(item, app_src / item.name)
-		elif item.is_dir() and (item / "__init__.py").exists() and item.resolve() != ROOT and item.name.lower() != "pyaudiogaming":
+		if item.is_file() and item.suffix == ".py":
+			fname_low = item.name.lower()
+			if (
+				fname_low not in EXCLUDE_BUILD_FILES
+				and not fname_low.startswith(("compile", "#", "@"))
+			):
+				shutil.copy2(item, app_src / item.name)
+		elif item.is_dir() and (item / "__init__.py").exists() and not _is_ignored_app_dir(item, ROOT):
 			shutil.copytree(
 				item,
 				app_src / item.name,
 				dirs_exist_ok=True,
-				ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "desktop.ini", "compile*.py", "android_build.py", "builder.py")
+				ignore=shutil.ignore_patterns(
+					"__pycache__", "*.pyc", "desktop.ini",
+					"compile*.py", "android_build.py", "builder.py",
+					"Lib", "Scripts", "Include",
+					*DESKTOP_BIN_PATTERNS
+				)
 			)
 
 	shutil.copy2(entry, app_src / "main.py")
+	shutil.copy2(entry, app_src / "_pyag_entry.py")
+
+	pygame_shim_src = ROOT / "pygame_shim"
+	if pygame_shim_src.is_dir():
+		shutil.copytree(
+			pygame_shim_src,
+			app_src / "pygame",
+			dirs_exist_ok=True,
+			ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "desktop.ini")
+		)
+		print("[BeeWare] Embedded native Android pygame shim into app package.")
 
 	_save_text("# Auto-generated package init\n", app_src / "__init__.py")
-	bootstrap_code = """# -*- coding: utf-8 -*-
+	bootstrap_code = r"""# -*- coding: utf-8 -*-
 import os
+import runpy
 import sys
+import threading
+import traceback
 
 _APP_DIR = os.path.dirname(os.path.abspath(__file__))
 if _APP_DIR not in sys.path:
@@ -279,6 +466,15 @@ try:
     os.chdir(_APP_DIR)
 except Exception:
     pass
+
+_ANDROID_UI = False
+try:
+    import pygame
+    if hasattr(pygame, "_android_bridge") and pygame._android_bridge.is_android_java_available():
+        _ANDROID_UI = bool(pygame._android_bridge.bootstrap_android())
+except Exception as _e:
+    print(f"[Bootstrap] Warning initializing Android pygame view: {_e}")
+    traceback.print_exc()
 
 try:
     from pyaudiogaming import system as _sys_chk
@@ -291,9 +487,33 @@ try:
 except Exception:
     pass
 
-import main
-if hasattr(main, "main") and callable(main.main):
-    main.main()
+
+def _show_android_status(msg, is_error=False):
+    try:
+        import pygame
+        if hasattr(pygame, "_android_bridge") and hasattr(pygame._android_bridge, "set_overlay_text"):
+            pygame._android_bridge.set_overlay_text(msg, is_error=is_error)
+    except Exception:
+        pass
+
+
+def _run_entry():
+    try:
+        _show_android_status("Starting application...", is_error=False)
+        runpy.run_module("_pyag_entry", run_name="__main__", alter_sys=True)
+    except SystemExit:
+        pass
+    except Exception:
+        tb = traceback.format_exc()
+        print(tb)
+        _show_android_status("Startup Error:\n" + tb, is_error=True)
+
+
+if _ANDROID_UI:
+    _GAME_THREAD = threading.Thread(target=_run_entry, name="PyAudioGamingMain", daemon=True)
+    _GAME_THREAD.start()
+else:
+    _run_entry()
 """
 	_save_text(bootstrap_code, app_src / "__main__.py")
 
@@ -301,6 +521,9 @@ if hasattr(main, "main") and callable(main.main):
 		relative = Path(value)
 		if relative.is_absolute() or ".." in relative.parts:
 			raise ValueError(f"Data must be a relative path inside the application: {value}")
+		if relative.suffix.lower() in (".dll", ".exe", ".pyd", ".dylib", ".lib", ".pdb"):
+			print(f"[BeeWare] Skipping desktop binary in Android data: {value}")
+			continue
 		original = app_root / relative
 		if not original.exists():
 			original = Path(value).resolve()
@@ -308,7 +531,12 @@ if hasattr(main, "main") and callable(main.main):
 			raise ValueError(f"Missing application data: {original}")
 		destination = app_src / relative
 		if original.is_dir():
-			shutil.copytree(original, destination, dirs_exist_ok=True)
+			data_ignore = shutil.ignore_patterns(
+				"__pycache__", "*.pyc", "desktop.ini",
+				"x64", "x86", "mac", "ios", "iosimulator", "armhf", "aarch64", "a86",
+				*DESKTOP_BIN_PATTERNS
+			)
+			shutil.copytree(original, destination, dirs_exist_ok=True, ignore=data_ignore)
 		else:
 			destination.parent.mkdir(parents=True, exist_ok=True)
 			shutil.copy2(original, destination)
@@ -319,13 +547,14 @@ if hasattr(main, "main") and callable(main.main):
 
 	_save_text("MIT License\n", workspace / "LICENSE")
 
-	default_reqs = ["pycryptodome", "cryptography"]
+	default_reqs = ["pycryptodome", "cryptography", "polib"]
 	for r in (extra_reqs or ()):
 		r_clean = str(r).strip()
 		if r_clean and not r_clean.startswith("-") and r_clean not in default_reqs:
 			default_reqs.append(r_clean)
 
 	req_formatted = ",\n    ".join(f'"{r}"' for r in default_reqs)
+	abis_formatted = ", ".join(f'"{a}"' for a in abis)
 	safe_name = str(name).replace('"', '\\"')
 	pyproject_content = f"""[build-system]
 requires = ["briefcase"]
@@ -350,10 +579,19 @@ requires = [
 
 [tool.briefcase.app.{slug}.android]
 requires = []
-permission.INTERNET = true
-permission.RECORD_AUDIO = true
-permission.MODIFY_AUDIO_SETTINGS = true
-permission.WAKE_LOCK = true
+android_abis = [{abis_formatted}]
+build_gradle_dependencies = [
+    "androidx.appcompat:appcompat:1.0.2",
+    "androidx.constraintlayout:constraintlayout:1.1.3",
+    "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0",
+]
+
+[tool.briefcase.app.{slug}.android.permission]
+"android.permission.INTERNET" = true
+"android.permission.ACCESS_NETWORK_STATE" = true
+"android.permission.RECORD_AUDIO" = true
+"android.permission.MODIFY_AUDIO_SETTINGS" = true
+"android.permission.WAKE_LOCK" = true
 """
 	_save_text(pyproject_content, workspace / "pyproject.toml")
 	return workspace, slug, abis, staging_native_dir, app_root
@@ -380,6 +618,10 @@ def build_android(project, name, data=(), arch=None, args=(), prepare_only=False
 		print("[BeeWare] Cleaning previous Android build cache...")
 		shutil.rmtree(workspace / "build" / slug / "android")
 
+	# Xóa các file APK cũ (đặc biệt là APK unsigned từ lần build trước) trong workspace/dist
+	if (workspace / "dist").exists():
+		shutil.rmtree(workspace / "dist")
+
 	if not gradle_project_dir.exists():
 		if (workspace / "build" / slug / "android").exists():
 			shutil.rmtree(workspace / "build" / slug / "android")
@@ -395,22 +637,24 @@ def build_android(project, name, data=(), arch=None, args=(), prepare_only=False
 	print("[BeeWare] Step 3/4: Building Android project via Gradle...")
 	_run_briefcase(["build", "android", "--no-input"], cwd=workspace, env=env)
 
-	print("[BeeWare] Step 4/4: Packaging standalone APK...")
+	print("[BeeWare] Step 4/4: Packaging signed standalone APK...")
 	_run_briefcase(
-		["package", "android", "--packaging-format", "apk", "--adhoc-sign", "--no-input"],
+		["package", "android", "--packaging-format", "debug-apk", "--no-input"],
 		cwd=workspace, env=env
 	)
 
 	found_apks = []
 	for search_root in (workspace / "dist", gradle_project_dir / "app" / "build" / "outputs" / "apk"):
 		if search_root.exists():
-			found_apks.extend(search_root.rglob("*.apk"))
+			for p in search_root.rglob("*.apk"):
+				if not p.name.lower().endswith("-unsigned.apk"):
+					found_apks.append(p)
 
 	if not found_apks:
-		raise RuntimeError("Briefcase finished but no .apk file was found in outputs!")
+		raise RuntimeError("Briefcase finished but no signed .apk file was found in outputs!")
 
-	found_apks.sort(key=lambda p: p.stat().st_mtime, reverse=True)
-	best_apk = found_apks[0]
+	found_apks.sort(key=lambda p: (_is_apk_signed(p), p.stat().st_mtime), reverse=True)
+	best_apk = _ensure_apk_signed(found_apks[0], env)
 
 	target_dist = Path(out_dir) if out_dir else (app_root / "dist" / str(name))
 	target_dist.mkdir(parents=True, exist_ok=True)
@@ -423,7 +667,7 @@ def build_android(project, name, data=(), arch=None, args=(), prepare_only=False
 	shutil.copy2(best_apk, final_apk_path)
 
 	print("=" * 60)
-	print(f"[BeeWare] Standalone APK successfully generated:")
+	print(f"[BeeWare] Standalone signed APK successfully generated:")
 	print(f" -> {final_apk_path.resolve()}")
 	print("=" * 60)
 	return True
@@ -795,7 +1039,7 @@ def build_command(tool, PROJECT, PROJECT_FULL_NAME, rename_file, args_compile, z
 		return f"cxfreeze {PROJECT}.py --target-dir {out_dir} --target-name {rename_file}{ext_bin} {' '.join(args)}"
 
 	elif tool in ("beeware", "briefcase"):
-		return f"{quote_arg(py_exe)} -I -m briefcase package android --packaging-format apk --adhoc-sign --no-input"
+		return f"{quote_arg(py_exe)} -I -m briefcase package android --packaging-format debug-apk --no-input"
 
 	else:
 		return f"{tool} {' '.join(args)} {PROJECT}.py"

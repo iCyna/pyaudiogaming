@@ -9,7 +9,7 @@ from . import pybass as bass, pybassmix as bassmix, pybass_fx as bass_fx
 # Fallback constants for BASS / BASSmix / BASS_FX
 BASS_CONFIG_UPDATEPERIOD = getattr(bass, 'BASS_CONFIG_UPDATEPERIOD', 1)
 BASS_CONFIG_BUFFER = getattr(bass, 'BASS_CONFIG_BUFFER', 0)
-BASS_CONFIG_FLOATDSP = getattr(bass, 'BASS_CONFIG_FLOATDSP', 11)
+BASS_CONFIG_FLOATDSP = getattr(bass, 'BASS_CONFIG_FLOATDSP', 9)
 BASS_CONFIG_UPDATETHREADS = getattr(bass, 'BASS_CONFIG_UPDATETHREADS', 24)
 BASS_CONFIG_ASYNCFILE_BUFFER = getattr(bass, 'BASS_CONFIG_ASYNCFILE_BUFFER', 45)
 BASS_CONFIG_DEV_DEFAULT = getattr(bass, 'BASS_CONFIG_DEV_DEFAULT', 36)
@@ -23,6 +23,7 @@ BASS_SAMPLE_MONO = getattr(bass, 'BASS_SAMPLE_MONO', 2)
 BASS_SAMPLE_LOOP = getattr(bass, 'BASS_SAMPLE_LOOP', 4)
 BASS_SAMPLE_3D = getattr(bass, 'BASS_SAMPLE_3D', 8)
 BASS_SAMPLE_OVER_POS = getattr(bass, 'BASS_SAMPLE_OVER_POS', 0x20000)
+BASS_SAMCHAN_STREAM = getattr(bass, 'BASS_SAMCHAN_STREAM', 2)
 BASS_STREAM_DECODE = getattr(bass, 'BASS_STREAM_DECODE', 0x200000)
 BASS_STREAM_AUTOFREE = getattr(bass, 'BASS_STREAM_AUTOFREE', 0x40000)
 BASS_STREAM_PRESCAN = getattr(bass, 'BASS_STREAM_PRESCAN', 0x20000)
@@ -323,9 +324,10 @@ def resolve_memory_source(src):
 			return entry["buffer"], entry["len"], entry.get("raw", entry["buffer"])
 	return None
 
-def get_cached_sample(filename, flags=0, max_chans=64):
+def get_cached_sample(filename, flags=0, max_chans=64, chan_flags=None):
 	# Fast HSAMPLE cache to avoid redundant disk I/O and memory allocation
 	fl, mem_src, identity = flags | BASS_SAMPLE_OVER_POS, resolve_memory_source(filename), None
+	ch_fl = BASS_SAMCHAN_STREAM if chan_flags is None else int(chan_flags)
 	if isinstance(filename, (str, bytes, os.PathLike)):
 		if mem_src is not None: identity = (filename, id(mem_src[2]))
 		else:
@@ -336,7 +338,7 @@ def get_cached_sample(filename, flags=0, max_chans=64):
 		if cache_key and cache_key in sample_cache:
 			entry = sample_cache[cache_key]
 			smp, ref = entry[:2]
-			ch = bass.BASS_SampleGetChannel(smp, False)
+			ch = bass.BASS_SampleGetChannel(smp, ch_fl) or bass.BASS_SampleGetChannel(smp, False)
 			if ch:
 				entry[2] += 1; entry[3] = time.monotonic()
 				return smp, ch, ref, True
@@ -346,7 +348,11 @@ def get_cached_sample(filename, flags=0, max_chans=64):
 		smp = bass.BASS_SampleLoad(True, ptr, 0, length, max_chans, fl)
 	elif not isinstance(filename, (str, bytes, os.PathLike)) and hasattr(filename, "handle"):
 		raw_h = int(getattr(filename.handle, "value", filename.handle))
-		return 0, bass.BASS_SampleGetChannel(raw_h, False), filename, True
+		ch = bass.BASS_SampleGetChannel(raw_h, ch_fl) or bass.BASS_SampleGetChannel(raw_h, False)
+		return 0, ch, filename, True
+	elif isinstance(filename, int) and filename > 0:
+		ch = bass.BASS_SampleGetChannel(filename, ch_fl) or bass.BASS_SampleGetChannel(filename, False)
+		return filename, ch, None, True
 	else:
 		pre = preload_encoded(filename, use_mmap=True)
 		if pre and pre.ptr and pre.size:
@@ -355,7 +361,7 @@ def get_cached_sample(filename, flags=0, max_chans=64):
 			c_path, u_fl = encode_path(filename)
 			keep_ref, smp = None, bass.BASS_SampleLoad(False, c_path, 0, 0, max_chans, fl | u_fl)
 	if not smp: return 0, 0, None, False
-	ch = bass.BASS_SampleGetChannel(smp, False)
+	ch = bass.BASS_SampleGetChannel(smp, ch_fl) or bass.BASS_SampleGetChannel(smp, False)
 	if not ch:
 		bass.BASS_SampleFree(smp); return 0, 0, None, False
 	if cache_key:
@@ -470,6 +476,7 @@ def init_sound(dev=-1, freq=44100, period=10, bbuffer=500, flags=0, clsid=None):
 	if sound_initialized: return True
 	# Configure direct hardware/OS mixing pipeline without intermediate master mixer latency
 	if _IS_WIN: bass.BASS_SetConfig(BASS_CONFIG_DEV_DEFAULT, 1)
+	bass.BASS_SetConfig(BASS_CONFIG_FLOATDSP, 1)
 	bass.BASS_SetConfig(BASS_CONFIG_ASYNCFILE_BUFFER, 262144)
 	bass.BASS_SetConfig(BASS_CONFIG_DEV_PERIOD, period)
 	bass.BASS_SetConfig(BASS_CONFIG_BUFFER, max(100, bbuffer))
