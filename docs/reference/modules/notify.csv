@@ -1,0 +1,7 @@
+﻿Module,Owner,Kind,Symbol,Parameters,Returns,Description
+notify,module,function,request_permission,,bool,Request runtime notification permission on Android 13+ (API 33+). No-op on other OSes.
+notify,module,function,open_fullscreen_intent_settings,,bool,Open Android 14+ 'Manage Full-Screen Intent' system settings page for this app.
+notify,module,function,wake_screen,,bool,Wake up a sleeping display on Windows or Android.
+notify,module,function,bring_window_to_front,"hwnd=None, topmost: bool=True",bool,Restore and bring the current application window to the foreground (Windows).
+notify,module,function,send,"title: str, message: str, urgency: str='normal', channel_id: str='pyag_default', app_name: str='PyAudioGaming', notification_id: int=1001",bool,"Send a native OS notification on Windows, Android, Linux, macOS, or iOS."
+notify,module,function,wake_and_show,"title: str, message: str, category: str='call', channel_id: str='pyag_fullscreen', app_name: str='PyAudioGaming', hwnd=None, vibrate: bool=True, notification_id: int=2001",bool,Wake a locked/sleeping screen and display a full-screen call/alarm alert.

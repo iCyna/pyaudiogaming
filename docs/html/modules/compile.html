@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>compile — Unified Cross-Platform Builder (Windows, Linux, macOS, Android, iOS, Web) — PyAudioGaming</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header role="banner">
+    <h1>compile — Unified Cross-Platform Builder (Windows, Linux, macOS, Android, iOS, Web) — PyAudioGaming</h1>
+    <nav aria-label="Documentation Navigation">
+    <a href="../index.html" class="">Home</a>
+    <a href="../01_getting_started.html" class="">01. Getting Started</a>
+    <a href="../02_window_input_menu.html" class="">02. Input &amp; Menu</a>
+    <a href="../03_audio_3d_fx.html" class="">03. 3D Audio</a>
+    <a href="../04_speech_vb_gui.html" class="">04. Speech, VB &amp; GUI</a>
+    <a href="../05_timer_worker_storage_haptics.html" class="">05. Advanced Systems</a>
+    <a href="../06_building_cross_platform.html" class="">06. Building</a>
+    <a href="../api_reference.html" class="">Module Reference</a>
+    </nav>
+  </header>
+  <main id="main-content" role="main">
+<p><a href="../api_reference.html">&larr; Back to All Modules</a></p>
+<div class="callout"><strong>Summary:</strong> Single-config build tool driving PyInstaller, Nuitka, Cython/GCC/MSVC, cx_Freeze, and BeeWare (Briefcase) for Desktop, Android APK, iOS Xcode/IPA, and Web.</div>
+<h2>Usage Guide &amp; Examples</h2>
+
+<h3>How to Use</h3>
+<pre><code># Generate template build.txt
+python -m pyaudiogaming.compile create build.txt
+
+# Launch interactive wizard
+python -m pyaudiogaming.compile make
+
+# Build from config file
+python -m pyaudiogaming.compile build.txt</code></pre>
+
+<h2>Parameter &amp; API Tables</h2>
+<label for="mod-search">Filter symbols in this module:</label>
+<input id="mod-search" type="search" placeholder="Type method or parameter name..." oninput="filterMod(this.value)">
+<h3>Module-Level Functions</h3>
+<table class="api-tbl" id="tbl_compile_funcs">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">function</span><code>prepare_android(project, name, data=(), arch=None, extra_reqs=())</code></td><td><code>project</code> (any, default: <code>required</code>)<br><code>name</code> (any, default: <code>required</code>)<br><code>data</code> (any, default: <code>()</code>)<br><code>arch</code> (any, default: <code>None</code>)<br><code>extra_reqs</code> (any, default: <code>()</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>build_android(project, name, data=(), arch=None, args=(), prepare_only=False, rename_file=None, out_dir=None)</code></td><td><code>project</code> (any, default: <code>required</code>)<br><code>name</code> (any, default: <code>required</code>)<br><code>data</code> (any, default: <code>()</code>)<br><code>arch</code> (any, default: <code>None</code>)<br><code>args</code> (any, default: <code>()</code>)<br><code>prepare_only</code> (any, default: <code>False</code>)<br><code>rename_file</code> (any, default: <code>None</code>)<br><code>out_dir</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>prepare_beeware(project, name, target_os, data=(), arch=None, extra_reqs=())</code></td><td><code>project</code> (any, default: <code>required</code>)<br><code>name</code> (any, default: <code>required</code>)<br><code>target_os</code> (any, default: <code>required</code>)<br><code>data</code> (any, default: <code>()</code>)<br><code>arch</code> (any, default: <code>None</code>)<br><code>extra_reqs</code> (any, default: <code>()</code>)</td><td><code>any</code></td><td>Chuẩn bị workspace Briefcase hoàn chỉnh cho iOS, macOS, Linux, Windows hoặc Web.</td></tr>
+    <tr><td><span class="badge">function</span><code>build_beeware(project, name, target_os, data=(), arch=None, args=(), prepare_only=False, rename_file=None, out_dir=None)</code></td><td><code>project</code> (any, default: <code>required</code>)<br><code>name</code> (any, default: <code>required</code>)<br><code>target_os</code> (any, default: <code>required</code>)<br><code>data</code> (any, default: <code>()</code>)<br><code>arch</code> (any, default: <code>None</code>)<br><code>args</code> (any, default: <code>()</code>)<br><code>prepare_only</code> (any, default: <code>False</code>)<br><code>rename_file</code> (any, default: <code>None</code>)<br><code>out_dir</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>Build ứng dụng qua BeeWare (Briefcase) cho iOS, macOS, Linux, Windows hoặc Web.</td></tr>
+    <tr><td><span class="badge">function</span><code>parse_val(val)</code></td><td><code>val</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>get_target_lib_info(os_name, arch_override=None)</code></td><td><code>os_name</code> (any, default: <code>required</code>)<br><code>arch_override</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>copy_platform_libs(src_root, dst_root, target_os, arch_override=None)</code></td><td><code>src_root</code> (any, default: <code>required</code>)<br><code>dst_root</code> (any, default: <code>required</code>)<br><code>target_os</code> (any, default: <code>required</code>)<br><code>arch_override</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>dopackage(PROJECT, PROJECT_FULL_NAME, target_os=&#x27;windows&#x27;)</code></td><td><code>PROJECT</code> (any, default: <code>required</code>)<br><code>PROJECT_FULL_NAME</code> (any, default: <code>required</code>)<br><code>target_os</code> (any, default: <code>&#x27;windows&#x27;</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>quote_arg(path_str)</code></td><td><code>path_str</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>find_local_gcc_or_clang(is_cpp=False)</code></td><td><code>is_cpp</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>find_vs_vcvars(arch=None)</code></td><td><code>arch</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>resolve_gcc_binary(host_os, target_os, arch=None, is_cpp=False)</code></td><td><code>host_os</code> (any, default: <code>required</code>)<br><code>target_os</code> (any, default: <code>required</code>)<br><code>arch</code> (any, default: <code>None</code>)<br><code>is_cpp</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>build_command(tool, PROJECT, PROJECT_FULL_NAME, rename_file, args_compile, zstandard, target_os, arch=None)</code></td><td><code>tool</code> (any, default: <code>required</code>)<br><code>PROJECT</code> (any, default: <code>required</code>)<br><code>PROJECT_FULL_NAME</code> (any, default: <code>required</code>)<br><code>rename_file</code> (any, default: <code>required</code>)<br><code>args_compile</code> (any, default: <code>required</code>)<br><code>zstandard</code> (any, default: <code>required</code>)<br><code>target_os</code> (any, default: <code>required</code>)<br><code>arch</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>run_build_step(cmd_or_list, project_name)</code></td><td><code>cmd_or_list</code> (any, default: <code>required</code>)<br><code>project_name</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>build(PROJECT=None, PROJECT_FULL_NAME=None, args_compile=[], data=[], rename_file=None, packet=False, zstandard=True, mode=&#x27;pyinstaller&#x27;, platforms=None, arch=None)</code></td><td><code>PROJECT</code> (any, default: <code>None</code>)<br><code>PROJECT_FULL_NAME</code> (any, default: <code>None</code>)<br><code>args_compile</code> (any, default: <code>[]</code>)<br><code>data</code> (any, default: <code>[]</code>)<br><code>rename_file</code> (any, default: <code>None</code>)<br><code>packet</code> (any, default: <code>False</code>)<br><code>zstandard</code> (any, default: <code>True</code>)<br><code>mode</code> (any, default: <code>&#x27;pyinstaller&#x27;</code>)<br><code>platforms</code> (any, default: <code>None</code>)<br><code>arch</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>create_template(filename=&#x27;build.txt&#x27;, legacy=False)</code></td><td><code>filename</code> (any, default: <code>&#x27;build.txt&#x27;</code>)<br><code>legacy</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>interactive_make()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>work(config_file)</code></td><td><code>config_file</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<script>
+function filterMod(q) {
+  q = (q || '').toLowerCase();
+  var rows = document.querySelectorAll('.api-tbl tbody tr');
+  for (var i = 0; i < rows.length; i++) {
+    rows[i].style.display = rows[i].innerText.toLowerCase().indexOf(q) !== -1 ? '' : 'none';
+  }
+}
+</script>
+  </main>
+  <footer role="contentinfo">
+    PyAudioGaming Official Documentation &mdash; Cross-Platform Audio Gaming for Windows, Linux, macOS, Android, iOS &amp; Web.
+  </footer>
+</body>
+</html>

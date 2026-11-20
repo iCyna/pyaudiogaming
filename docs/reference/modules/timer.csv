@@ -1,0 +1,87 @@
+﻿Module,Owner,Kind,Symbol,Parameters,Returns,Description
+timer,module,function,get_ticks,,int,"Return monotonic milliseconds since module import (high-resolution, never jumps backwards)."
+timer,module,function,get_ticks_us,,int,Return monotonic microseconds since module import.
+timer,module,function,get_ticks_sec,,float,Return monotonic seconds (float) since module import.
+timer,module,function,format_duration,"ms: float, style: str='clock'",str,Format milliseconds into a human-readable string.
+timer,Timer,constructor,Timer.__init__,"duration: float=0, paused: bool=False, scale: float=1.0, auto_start: bool=True",any,
+timer,Timer,property,Timer.elapsed,,int,Elapsed time in integer milliseconds (backwards-compatible).
+timer,Timer,property,Timer.elapsed_float,,float,Elapsed time in floating-point milliseconds.
+timer,Timer,property,Timer.elapsed_us,,int,Elapsed time in integer microseconds.
+timer,Timer,property,Timer.elapsed_seconds,,float,Elapsed time in seconds (float).
+timer,Timer,property,Timer.paused,,bool,
+timer,Timer,property,Timer.running,,bool,
+timer,Timer,property,Timer.scale,,float,"Time dilation factor (1.0 = normal, 0.5 = slow-mo, 2.0 = 2x speed)."
+timer,Timer,property,Timer.duration,,float,Configured countdown duration in milliseconds (0 if none).
+timer,Timer,property,Timer.remaining,,int,Remaining milliseconds until ``duration`` expires (clamped to >= 0).
+timer,Timer,property,Timer.remaining_float,,float,
+timer,Timer,property,Timer.remaining_seconds,,float,
+timer,Timer,property,Timer.progress,,float,Completion ratio from 0.0 to 1.0 when ``duration > 0``.
+timer,Timer,property,Timer.expired,,bool,True when ``duration > 0`` and elapsed >= duration.
+timer,Timer,method,Timer.restart,"duration: float=None, paused: bool=False",any,Reset elapsed time to 0 and start (unless ``paused=True``).
+timer,Timer,method,Timer.start,duration: float=None,any,Start or resume the timer. Optionally set a new duration and reset.
+timer,Timer,method,Timer.pause,,any,Freeze the timer at its current elapsed value.
+timer,Timer,method,Timer.resume,,any,Resume a paused timer from where it left off.
+timer,Timer,method,Timer.toggle_pause,,bool,Toggle paused state and return the new ``paused`` boolean.
+timer,Timer,method,Timer.stop,,any,Stop and reset elapsed time to 0.
+timer,Timer,method,Timer.force,ms: float,any,Force the timer's elapsed time to a specific millisecond value (like BGT ``timer.force``).
+timer,Timer,method,Timer.advance,delta_ms: float,any,Add ``delta_ms`` milliseconds to the current elapsed time.
+timer,Timer,method,Timer.rewind,"delta_ms: float, clamp_zero: bool=True",any,Subtract ``delta_ms`` milliseconds from the current elapsed time.
+timer,Timer,method,Timer.ready,"cooldown_ms: float=None, auto_restart: bool=False",bool,Check whether ``cooldown_ms`` (or ``self.duration``) has elapsed.
+timer,Timer,method,Timer.consume,interval_ms: float=None,bool,"Drift-free periodic trigger: if ``elapsed >= interval``, subtracts one interval (preserving sub-millisecond remainder) and returns ``True``."
+timer,Timer,method,Timer.consume_all,"interval_ms: float=None, max_ticks: int=None",int,Consume all completed intervals and return how many occurred (drift-free).
+timer,Timer,method,Timer.format,"style: str='clock', remaining: bool=False",str,Format either elapsed or remaining time using ``format_duration``.
+timer,Timer,method,Timer.to_dict,,dict,
+timer,Timer,method,Timer.from_dict,data,'Timer',
+timer,Stopwatch,constructor,Stopwatch.__init__,auto_start: bool=True,any,
+timer,Stopwatch,method,Stopwatch.restart,"duration: float=None, paused: bool=False",any,
+timer,Stopwatch,method,Stopwatch.lap,label: str='',dict,"Record a lap split and return ``{""index"", ""label"", ""split_ms"", ""total_ms""}``."
+timer,Stopwatch,property,Stopwatch.laps,,list,
+timer,Stopwatch,property,Stopwatch.last_lap,,any,
+timer,Stopwatch,method,Stopwatch.summary,,str,
+timer,CooldownManager,constructor,CooldownManager.__init__,scale: float=1.0,any,
+timer,CooldownManager,method,CooldownManager.start,"name: str, duration_ms: float",Timer,
+timer,CooldownManager,method,CooldownManager.is_ready,name: str,bool,
+timer,CooldownManager,method,CooldownManager.use,"name: str, duration_ms: float",bool,"If ``name`` is ready, start its cooldown and return ``True``; otherwise ``False``."
+timer,CooldownManager,method,CooldownManager.remaining,name: str,int,
+timer,CooldownManager,method,CooldownManager.remaining_seconds,name: str,float,
+timer,CooldownManager,method,CooldownManager.progress,name: str,float,
+timer,CooldownManager,method,CooldownManager.reduce,"name: str, delta_ms: float",any,
+timer,CooldownManager,method,CooldownManager.reduce_all,delta_ms: float,any,
+timer,CooldownManager,method,CooldownManager.reset,name: str,any,
+timer,CooldownManager,method,CooldownManager.clear,,any,
+timer,CooldownManager,method,CooldownManager.pause_all,,any,
+timer,CooldownManager,method,CooldownManager.resume_all,,any,
+timer,CooldownManager,method,CooldownManager.set_scale,scale: float,any,
+timer,CooldownManager,method,CooldownManager.active,,list,Return names of cooldowns that have not expired yet.
+timer,CooldownManager,method,CooldownManager.prune,,any,Remove expired cooldown entries to keep memory clean.
+timer,CooldownManager,method,CooldownManager.to_dict,,dict,
+timer,CooldownManager,method,CooldownManager.from_dict,data,'CooldownManager',
+timer,ScheduledTask,constructor,ScheduledTask.__init__,"task_id, callback, args, kwargs, delay_ms, interval_ms=0.0, count=1, due_ms=0.0, tag=None",any,
+timer,ScheduledTask,method,ScheduledTask.cancel,,any,
+timer,TimerScheduler,constructor,TimerScheduler.__init__,"scale: float=1.0, on_error=None",any,
+timer,TimerScheduler,property,TimerScheduler.now_ms,,float,
+timer,TimerScheduler,property,TimerScheduler.scale,,float,
+timer,TimerScheduler,property,TimerScheduler.paused,,bool,
+timer,TimerScheduler,method,TimerScheduler.pause_all,,any,
+timer,TimerScheduler,method,TimerScheduler.resume_all,,any,
+timer,TimerScheduler,method,TimerScheduler.after,"delay_ms: float, callback, *args, tag=None, **kwargs",int,"Schedule ``callback(*args, **kwargs)`` once after ``delay_ms`` milliseconds."
+timer,TimerScheduler,method,TimerScheduler.every,"interval_ms: float, callback, *args, count: int=None, start_immediately: bool=False, tag=None, **kwargs",int,Schedule ``callback`` repeatedly every ``interval_ms`` (optionally ``count`` times).
+timer,TimerScheduler,method,TimerScheduler.cancel,task_id: int,bool,
+timer,TimerScheduler,method,TimerScheduler.cancel_by_tag,tag,int,
+timer,TimerScheduler,method,TimerScheduler.pause_task,task_id: int,bool,
+timer,TimerScheduler,method,TimerScheduler.resume_task,task_id: int,bool,
+timer,TimerScheduler,method,TimerScheduler.clear,,any,
+timer,TimerScheduler,method,TimerScheduler.pending_count,,int,
+timer,TimerScheduler,method,TimerScheduler.next_due_ms,,any,"Milliseconds until next active task fires, or ``None`` if queue is empty."
+timer,TimerScheduler,method,TimerScheduler.update,max_callbacks: int=64,int,Run all due callbacks. Returns the number of callbacks executed.
+timer,FrameClock,constructor,FrameClock.__init__,"target_fps: float=0.0, max_dt_ms: float=100.0",any,
+timer,FrameClock,method,FrameClock.tick,target_fps: float=None,float,"Advance one frame, sleep if ``target_fps > 0``, and return delta time in **seconds**."
+timer,FrameClock,method,FrameClock.fixed_steps,"step_ms: float=16.6666667, max_steps: int=5",any,Yield fixed-timestep ``dt`` (seconds) to keep physics/movement deterministic.
+timer,FrameClock,property,FrameClock.dt,,float,Last frame delta time in seconds.
+timer,FrameClock,property,FrameClock.dt_ms,,float,Last frame delta time in milliseconds.
+timer,FrameClock,property,FrameClock.fps,,float,Exponentially smoothed FPS.
+timer,FrameClock,property,FrameClock.frame_count,,int,
+timer,RateLimiter,constructor,RateLimiter.__init__,"max_calls: int, per_ms: float",any,
+timer,RateLimiter,method,RateLimiter.allow,cost: float=1.0,bool,"Return ``True`` and consume ``cost`` tokens if allowed, else ``False``."
+timer,RateLimiter,method,RateLimiter.retry_after_ms,cost: float=1.0,float,Milliseconds until ``cost`` tokens will be available.
+timer,RateLimiter,method,RateLimiter.reset,,any,

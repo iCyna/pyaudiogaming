@@ -1,0 +1,438 @@
+{
+  "module": "worker",
+  "classes": [
+    {
+      "name": "SharedState",
+      "doc": "Simple dict-like shared state that works across ``process``, ``thread``, and ``inline`` modes.",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "mode: str='auto', initial=None",
+          "params": [
+            {
+              "name": "mode",
+              "type": "str",
+              "default": "'auto'"
+            },
+            {
+              "name": "initial",
+              "type": "dict",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "raw",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": "Underlying dict / DictProxy (pass this into worker functions in ``process`` mode)."
+        },
+        {
+          "name": "get",
+          "kind": "method",
+          "signature": "key, default=None",
+          "params": [
+            {
+              "name": "key",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "default",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set",
+          "kind": "method",
+          "signature": "key, value",
+          "params": [
+            {
+              "name": "key",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "update",
+          "kind": "method",
+          "signature": "mapping",
+          "params": [
+            {
+              "name": "mapping",
+              "type": "dict",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "pop",
+          "kind": "method",
+          "signature": "key, default=None",
+          "params": [
+            {
+              "name": "key",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "default",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "clear",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "snapshot",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "dict",
+          "doc": "Return a plain local ``dict`` copy of the current state."
+        },
+        {
+          "name": "close",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "TaskHandle",
+      "doc": "Handle returned by ``TaskPool.submit()`` to track status, result, or cancel.",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "task_id: int, future=None, on_done=None, on_error=None, tag=None",
+          "params": [
+            {
+              "name": "task_id",
+              "type": "int",
+              "default": "required"
+            },
+            {
+              "name": "future",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "on_done",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "on_error",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "tag",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "done",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "bool",
+          "doc": ""
+        },
+        {
+          "name": "cancelled",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "bool",
+          "doc": ""
+        },
+        {
+          "name": "running",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "bool",
+          "doc": ""
+        },
+        {
+          "name": "elapsed_ms",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "int",
+          "doc": ""
+        },
+        {
+          "name": "error",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "result",
+          "kind": "method",
+          "signature": "timeout=None",
+          "params": [
+            {
+              "name": "timeout",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "cancel",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "bool",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "TaskPool",
+      "doc": "Cross-platform background worker pool with main-thread callback polling.",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "mode: str='auto', max_workers: int=None",
+          "params": [
+            {
+              "name": "mode",
+              "type": "str",
+              "default": "'auto'"
+            },
+            {
+              "name": "max_workers",
+              "type": "int",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "submit",
+          "kind": "method",
+          "signature": "fn, *args, on_done=None, on_error=None, tag=None, prefer_thread: bool=False, **kwargs",
+          "params": [
+            {
+              "name": "fn",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "*args",
+              "type": "tuple",
+              "default": "optional"
+            },
+            {
+              "name": "on_done",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "on_error",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "tag",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "prefer_thread",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "**kwargs",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "TaskHandle",
+          "doc": "Submit a callable for execution and return a ``TaskHandle``."
+        },
+        {
+          "name": "map_async",
+          "kind": "method",
+          "signature": "fn, items, on_done=None, on_error=None, tag=None, prefer_thread: bool=False",
+          "params": [
+            {
+              "name": "fn",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "items",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "on_done",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "on_error",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "tag",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "prefer_thread",
+              "type": "bool",
+              "default": "False"
+            }
+          ],
+          "returns": "list",
+          "doc": "Submit ``fn(item)`` for each item in ``items`` and return the list of ``TaskHandle`` objects."
+        },
+        {
+          "name": "poll",
+          "kind": "method",
+          "signature": "max_callbacks: int=32",
+          "params": [
+            {
+              "name": "max_callbacks",
+              "type": "int",
+              "default": "32"
+            }
+          ],
+          "returns": "int",
+          "doc": "Dispatch completed task callbacks on the **main thread** (call inside ``frameUpdate()``)."
+        },
+        {
+          "name": "wait",
+          "kind": "method",
+          "signature": "handle: TaskHandle, timeout=None",
+          "params": [
+            {
+              "name": "handle",
+              "type": "TaskHandle",
+              "default": "required"
+            },
+            {
+              "name": "timeout",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": "Block until ``handle`` completes and return its result."
+        },
+        {
+          "name": "pending_count",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "int",
+          "doc": ""
+        },
+        {
+          "name": "cancel_by_tag",
+          "kind": "method",
+          "signature": "tag",
+          "params": [
+            {
+              "name": "tag",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "int",
+          "doc": ""
+        },
+        {
+          "name": "shutdown",
+          "kind": "method",
+          "signature": "wait: bool=False",
+          "params": [
+            {
+              "name": "wait",
+              "type": "bool",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "name": "enable_freeze_support",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "any",
+      "doc": "Safely call ``multiprocessing.freeze_support()`` once (prevents fork-bomb in PyInstaller/Nuitka)."
+    },
+    {
+      "name": "detect_best_mode",
+      "kind": "function",
+      "signature": "preferred: str='auto'",
+      "params": [
+        {
+          "name": "preferred",
+          "type": "str",
+          "default": "'auto'"
+        }
+      ],
+      "returns": "str",
+      "doc": "Resolve requested execution mode (``'auto'``, ``'process'``, ``'thread'``, ``'inline'``) to a mode guaranteed to work on the current OS."
+    }
+  ],
+  "title": "worker — Cross-Platform Background TaskPool & SharedState",
+  "summary": "Run heavy CPU/IO tasks without freezing your game loop. Automatically selects process on Desktop (with freeze_support and auto-thread fallback for lambdas), thread on Android/iOS, and inline on Web."
+}

@@ -1,0 +1,38 @@
+========================================================================
+MODULE: pyaudiogaming.haptics
+haptics — Cross-Platform Vibration & Gamepad Rumble
+========================================================================
+
+SUMMARY:
+Unified vibration & rumble controller for Android (Vibrator/VibrationEffect), iOS (UIImpactFeedbackGenerator), Windows XInput gamepads, and SDL2/pygame joysticks with 13 built-in presets and non-blocking patterns.
+
+[MODULE FUNCTIONS]
+----------------------------------------
+* vibrate(duration_ms: int=40, strength: float=0.6, low_freq=None, high_freq=None, device: int=0) -> bool
+* stop(device: int=0) -> any
+* pattern(steps, repeat: int=1, device: int=0) -> bool
+* preset(name: str, repeat: int=1, device: int=0) -> bool
+* update() -> any
+* set_enabled(enabled: bool) -> any
+* set_intensity(value: float) -> any
+* is_supported() -> bool
+
+[CLASS HapticEngine]
+----------------------------------------
+Unified cross-platform haptic feedback controller with pattern sequencer & presets.
+* HapticEngine.__init__(enabled: bool=True, intensity: float=1.0) -> any [constructor]
+* HapticEngine.enabled() -> bool [property]
+* HapticEngine.set_enabled(enabled: bool) -> any [method]
+* HapticEngine.intensity() -> float [property]
+* HapticEngine.set_intensity(value: float) -> any [method]
+* HapticEngine.is_supported() -> bool [method]
+* HapticEngine.vibrate(duration_ms: int=40, strength: float=0.6, low_freq=None, high_freq=None, device: int=0) -> bool [method]
+  Trigger a single vibration pulse. Returns True if a hardware backend accepted it.
+* HapticEngine.stop(device: int=0) -> any [method]
+  Immediately stop all active vibrations and cancel queued patterns.
+* HapticEngine.pattern(steps, repeat: int=1, device: int=0) -> any [method]
+  Play a sequence of ``(duration_ms, strength)`` tuples non-blockingly.
+* HapticEngine.preset(name: str, repeat: int=1, device: int=0) -> bool [method]
+  Play a named preset from ``PRESETS`` (e.g. ``'click'``, ``'hit_heavy'``, ``'error'``).
+* HapticEngine.update() -> any [method]
+  Advance active haptic patterns and auto-stop timed XInput motors. Call once per frame.

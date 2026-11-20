@@ -1,0 +1,509 @@
+{
+  "module": "compile",
+  "classes": [],
+  "functions": [
+    {
+      "name": "prepare_android",
+      "kind": "function",
+      "signature": "project, name, data=(), arch=None, extra_reqs=()",
+      "params": [
+        {
+          "name": "project",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "name",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "data",
+          "type": "any",
+          "default": "()"
+        },
+        {
+          "name": "arch",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "extra_reqs",
+          "type": "any",
+          "default": "()"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "build_android",
+      "kind": "function",
+      "signature": "project, name, data=(), arch=None, args=(), prepare_only=False, rename_file=None, out_dir=None",
+      "params": [
+        {
+          "name": "project",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "name",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "data",
+          "type": "any",
+          "default": "()"
+        },
+        {
+          "name": "arch",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "args",
+          "type": "any",
+          "default": "()"
+        },
+        {
+          "name": "prepare_only",
+          "type": "any",
+          "default": "False"
+        },
+        {
+          "name": "rename_file",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "out_dir",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "prepare_beeware",
+      "kind": "function",
+      "signature": "project, name, target_os, data=(), arch=None, extra_reqs=()",
+      "params": [
+        {
+          "name": "project",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "name",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "target_os",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "data",
+          "type": "any",
+          "default": "()"
+        },
+        {
+          "name": "arch",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "extra_reqs",
+          "type": "any",
+          "default": "()"
+        }
+      ],
+      "returns": "any",
+      "doc": "Chuẩn bị workspace Briefcase hoàn chỉnh cho iOS, macOS, Linux, Windows hoặc Web."
+    },
+    {
+      "name": "build_beeware",
+      "kind": "function",
+      "signature": "project, name, target_os, data=(), arch=None, args=(), prepare_only=False, rename_file=None, out_dir=None",
+      "params": [
+        {
+          "name": "project",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "name",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "target_os",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "data",
+          "type": "any",
+          "default": "()"
+        },
+        {
+          "name": "arch",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "args",
+          "type": "any",
+          "default": "()"
+        },
+        {
+          "name": "prepare_only",
+          "type": "any",
+          "default": "False"
+        },
+        {
+          "name": "rename_file",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "out_dir",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": "Build ứng dụng qua BeeWare (Briefcase) cho iOS, macOS, Linux, Windows hoặc Web."
+    },
+    {
+      "name": "parse_val",
+      "kind": "function",
+      "signature": "val",
+      "params": [
+        {
+          "name": "val",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "get_target_lib_info",
+      "kind": "function",
+      "signature": "os_name, arch_override=None",
+      "params": [
+        {
+          "name": "os_name",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "arch_override",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "copy_platform_libs",
+      "kind": "function",
+      "signature": "src_root, dst_root, target_os, arch_override=None",
+      "params": [
+        {
+          "name": "src_root",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "dst_root",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "target_os",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "arch_override",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "dopackage",
+      "kind": "function",
+      "signature": "PROJECT, PROJECT_FULL_NAME, target_os='windows'",
+      "params": [
+        {
+          "name": "PROJECT",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "PROJECT_FULL_NAME",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "target_os",
+          "type": "any",
+          "default": "'windows'"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "quote_arg",
+      "kind": "function",
+      "signature": "path_str",
+      "params": [
+        {
+          "name": "path_str",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "find_local_gcc_or_clang",
+      "kind": "function",
+      "signature": "is_cpp=False",
+      "params": [
+        {
+          "name": "is_cpp",
+          "type": "any",
+          "default": "False"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "find_vs_vcvars",
+      "kind": "function",
+      "signature": "arch=None",
+      "params": [
+        {
+          "name": "arch",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "resolve_gcc_binary",
+      "kind": "function",
+      "signature": "host_os, target_os, arch=None, is_cpp=False",
+      "params": [
+        {
+          "name": "host_os",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "target_os",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "arch",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "is_cpp",
+          "type": "any",
+          "default": "False"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "build_command",
+      "kind": "function",
+      "signature": "tool, PROJECT, PROJECT_FULL_NAME, rename_file, args_compile, zstandard, target_os, arch=None",
+      "params": [
+        {
+          "name": "tool",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "PROJECT",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "PROJECT_FULL_NAME",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "rename_file",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "args_compile",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "zstandard",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "target_os",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "arch",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "run_build_step",
+      "kind": "function",
+      "signature": "cmd_or_list, project_name",
+      "params": [
+        {
+          "name": "cmd_or_list",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "project_name",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "build",
+      "kind": "function",
+      "signature": "PROJECT=None, PROJECT_FULL_NAME=None, args_compile=[], data=[], rename_file=None, packet=False, zstandard=True, mode='pyinstaller', platforms=None, arch=None",
+      "params": [
+        {
+          "name": "PROJECT",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "PROJECT_FULL_NAME",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "args_compile",
+          "type": "any",
+          "default": "[]"
+        },
+        {
+          "name": "data",
+          "type": "any",
+          "default": "[]"
+        },
+        {
+          "name": "rename_file",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "packet",
+          "type": "any",
+          "default": "False"
+        },
+        {
+          "name": "zstandard",
+          "type": "any",
+          "default": "True"
+        },
+        {
+          "name": "mode",
+          "type": "any",
+          "default": "'pyinstaller'"
+        },
+        {
+          "name": "platforms",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "arch",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "create_template",
+      "kind": "function",
+      "signature": "filename='build.txt', legacy=False",
+      "params": [
+        {
+          "name": "filename",
+          "type": "any",
+          "default": "'build.txt'"
+        },
+        {
+          "name": "legacy",
+          "type": "any",
+          "default": "False"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "interactive_make",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "work",
+      "kind": "function",
+      "signature": "config_file",
+      "params": [
+        {
+          "name": "config_file",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    }
+  ],
+  "title": "compile — Unified Cross-Platform Builder (Windows, Linux, macOS, Android, iOS, Web)",
+  "summary": "Single-config build tool driving PyInstaller, Nuitka, Cython/GCC/MSVC, cx_Freeze, and BeeWare (Briefcase) for Desktop, Android APK, iOS Xcode/IPA, and Web."
+}

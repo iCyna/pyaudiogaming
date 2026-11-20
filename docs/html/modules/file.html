@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>file — Encrypted File I/O (Fernet + AES-CBC) — PyAudioGaming</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header role="banner">
+    <h1>file — Encrypted File I/O (Fernet + AES-CBC) — PyAudioGaming</h1>
+    <nav aria-label="Documentation Navigation">
+    <a href="../index.html" class="">Home</a>
+    <a href="../01_getting_started.html" class="">01. Getting Started</a>
+    <a href="../02_window_input_menu.html" class="">02. Input &amp; Menu</a>
+    <a href="../03_audio_3d_fx.html" class="">03. 3D Audio</a>
+    <a href="../04_speech_vb_gui.html" class="">04. Speech, VB &amp; GUI</a>
+    <a href="../05_timer_worker_storage_haptics.html" class="">05. Advanced Systems</a>
+    <a href="../06_building_cross_platform.html" class="">06. Building</a>
+    <a href="../api_reference.html" class="">Module Reference</a>
+    </nav>
+  </header>
+  <main id="main-content" role="main">
+<p><a href="../api_reference.html">&larr; Back to All Modules</a></p>
+<div class="callout"><strong>Summary:</strong> File helper supporting JSON, Pickle, and plain-text serialization with optional two-layer Fernet + AES-CBC encryption.</div>
+<h2>Usage Guide &amp; Examples</h2>
+
+<h3>How to Use</h3>
+<pre><code>from pyaudiogaming.file import File
+
+f = File(password="my_key", encode=True, aes=True)
+f.save({"user": "alice", "score": 500}, "save.dat", mode="wb+", type="json")
+data = f.load("save.dat", mode="rb+", type="json")</code></pre>
+
+<h2>Parameter &amp; API Tables</h2>
+<label for="mod-search">Filter symbols in this module:</label>
+<input id="mod-search" type="search" placeholder="Type method or parameter name..." oninput="filterMod(this.value)">
+<h3>Class <code>File</code></h3>
+<table class="api-tbl" id="tbl_file_File">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__(password: str, encode: bool=False, aes: bool=False)</code></td><td><code>password</code> (str, default: <code>required</code>)<br><code>encode</code> (bool, default: <code>False</code>)<br><code>aes</code> (bool, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>generate_key(password: str)</code></td><td><code>password</code> (str, default: <code>required</code>)</td><td><code>bytes</code></td><td>Tạo key từ mật khẩu bằng cách băm SHA-256.</td></tr>
+    <tr><td><span class="badge">method</span><code>dokey(key: bytes)</code></td><td><code>key</code> (bytes, default: <code>required</code>)</td><td><code>Fernet</code></td><td>Tạo đối tượng Fernet từ key.</td></tr>
+    <tr><td><span class="badge">method</span><code>aes_encrypt(data: bytes)</code></td><td><code>data</code> (bytes, default: <code>required</code>)</td><td><code>bytes</code></td><td>Mã hóa dữ liệu bằng AES.</td></tr>
+    <tr><td><span class="badge">method</span><code>aes_decrypt(data: bytes)</code></td><td><code>data</code> (bytes, default: <code>required</code>)</td><td><code>bytes</code></td><td>Giải mã dữ liệu bằng AES.</td></tr>
+    <tr><td><span class="badge">method</span><code>open(file_path, mode)</code></td><td><code>file_path</code> (any, default: <code>required</code>)<br><code>mode</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>close()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>save(data, file_path, mode=&#x27;w+&#x27;, type=&#x27;&#x27;)</code></td><td><code>data</code> (any, default: <code>required</code>)<br><code>file_path</code> (any, default: <code>required</code>)<br><code>mode</code> (any, default: <code>&#x27;w+&#x27;</code>)<br><code>type</code> (any, default: <code>&#x27;&#x27;</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>load(file_path: str, mode=&#x27;r+&#x27;, type: str=&#x27;&#x27;)</code></td><td><code>file_path</code> (str, default: <code>required</code>)<br><code>mode</code> (any, default: <code>&#x27;r+&#x27;</code>)<br><code>type</code> (str, default: <code>&#x27;&#x27;</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>remove(file_path: str)</code></td><td><code>file_path</code> (str, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>create(file_path: str)</code></td><td><code>file_path</code> (str, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>check(file_path: str)</code></td><td><code>file_path</code> (str, default: <code>required</code>)</td><td><code>bool</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>replace(old_file, new_file)</code></td><td><code>old_file</code> (any, default: <code>required</code>)<br><code>new_file</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>copy(src: str, dest: str)</code></td><td><code>src</code> (str, default: <code>required</code>)<br><code>dest</code> (str, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>move(src, dest)</code></td><td><code>src</code> (any, default: <code>required</code>)<br><code>dest</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<script>
+function filterMod(q) {
+  q = (q || '').toLowerCase();
+  var rows = document.querySelectorAll('.api-tbl tbody tr');
+  for (var i = 0; i < rows.length; i++) {
+    rows[i].style.display = rows[i].innerText.toLowerCase().indexOf(q) !== -1 ? '' : 'none';
+  }
+}
+</script>
+  </main>
+  <footer role="contentinfo">
+    PyAudioGaming Official Documentation &mdash; Cross-Platform Audio Gaming for Windows, Linux, macOS, Android, iOS &amp; Web.
+  </footer>
+</body>
+</html>

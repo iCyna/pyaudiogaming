@@ -1,0 +1,186 @@
+PYAUDIOGAMING — COMPLETE GUIDE (BEGINNER TO ADVANCED)
+====================================================================
+
+
+====================================================================
+PyAudioGaming — Official Documentation (Beginner to Advanced)
+====================================================================
+1. Overview
+PyAudioGaming is a complete Python framework for building audio games and accessible cross-platform applications targeting Windows, Linux, macOS, Android, iOS, and Web.
+
+  Documentation Structure:
+  
+    Step-by-Step Tutorials (01 → 06): Learn everything from your first window to 3D HRTF audio, forms, multi-backend GUI, storage, background workers, and shipping builds.
+    Dedicated Per-Module Guides & Parameter Tables: Every module has its own dedicated HTML page, TXT file, CSV spreadsheet, and JSON schema — never crammed into a single unreadable table.
+    Runnable Code Examples: Complete working Python scripts in docs/examples/.
+  
+
+2. Learning Path (Beginner → Advanced)
+
+  LevelTutorialTopics Covered
+  
+    Level 101. Getting StartedSetup, Window, game loop, Speech, first sound.
+    Level 202. Window, InputMap & MenuKeyboard, mobile touch, gamepad actions, non-blocking menus.
+    Level 303. 3D Audio, HRTF & SPAKBASS engine, binaural HRTF, Steam Audio occlusion, recording, SPAK.
+    Level 404. Speech, Virtual Box & GUI3D TTS, vb.input keyboard switcher, vb.form, boxes, 4-backend gui.Window.
+    Level 505. Timer, Worker, Storage & HapticsHigh-precision timers, cooldowns, mobile-safe saves, background tasks, vibration.
+    Level 606. Cross-Platform BuildingBuilding for Windows, Android APK, Linux, macOS, iOS, and Web.
+    ReferencePer-Module Reference HubBrowse dedicated parameter tables & full API docs for all 16 modules.
+
+
+====================================================================
+01. Getting Started (Beginner)
+====================================================================
+1. Installation
+pip install pygame pycryptodome cryptography polib
+pip install wxPython   # Optional: Windows native GUI (best NVDA/JAWS support)
+pip install PySide6    # Optional: Linux/macOS native GUI
+pip install pyinstaller nuitka briefcase   # Optional: packaging tools
+2. Complete First Program
+from pyaudiogaming.window import Window
+from pyaudiogaming.sound_pool import output, sound
+
+wnd = Window()
+wnd.init(800, 600, "My First Audio Game")
+audio = output()
+
+bgm = sound()
+if bgm.stream("res/sounds/intro.ogg"):
+    bgm.volume = 50
+    bgm.play_looped()
+
+wnd.say("Welcome! Press Space to say hello, Escape to exit.")
+while True:
+    wnd.frameUpdate()
+    if wnd.keyPressed("space"):
+        wnd.say("Hello from PyAudioGaming!")
+    if wnd.keyPressed("escape"):
+        bgm.fadeout(400)
+        wnd.wait(400)
+        break
+Next: 02. Window, InputMap & Menu | Full API: window module
+
+
+====================================================================
+02. Window, InputMap & Non-Blocking Menus
+====================================================================
+1. Unified Controls Across PC, Mobile & Gamepad
+from pyaudiogaming.input_map import InputMap
+
+imap = InputMap({
+    "jump":       ["space", "tap:1:2:left-play", "pad:a"],
+    "attack":     ["ctrl+space", "tap:2:1", "pad:x"],
+    "move_left":  ["left", "a", "swipe:left", "pad:lx-"],
+    "move_right": ["right", "d", "swipe:right", "pad:lx+"],
+})
+if imap.pressed("jump", wnd): player.jump()
+dx = imap.axis("move_left", "move_right", wnd)
+imap.save("keymap.json")
+2. Non-Blocking Accessible Menu
+from pyaudiogaming.menu import menu
+
+m = menu()
+m.init(wnd, ttl="Main Menu", items=["Start&S", "Settings&O", "Exit&E"], keyRead=True, readNP=True)
+m.open()
+while True:
+    wnd.frameUpdate()
+    choice = m.frameUpdate()
+    if choice == 0: play_game()
+    elif choice == 1: open_settings()
+    elif choice in (2, -1): break
+Module References: input_map | menu | window
+
+
+====================================================================
+03. 3D Audio, HRTF, Steam Audio & SPAK
+====================================================================
+1. 3D Binaural HRTF & Steam Audio Wall Occlusion
+from pyaudiogaming.sound_pool import output, sound, update_hrtf_listener, hrtf_add_box_preset, hrtf_set_auto_raycast
+
+out = output(device=-1, frequency=44100)
+hrtf_set_auto_raycast(True)
+hrtf_add_box_preset(1, min_x=4, max_x=5, min_y=-6, max_y=6, min_z=0, max_z=4)
+
+s = sound()
+s.stream("res/sounds/beacon.ogg", mono=True)
+s.attach_hrtf_dsp()
+s.play_looped()
+
+update_hrtf_listener(0, 0, 1.7, 0, 1, 0, 0, 0, 1)
+2. Encrypted SPAK Sound Archives
+from pyaudiogaming.utils import make_spak, load_spak
+
+make_spak("res/sounds", output_path="res/sounds.zb", password="pw", encrypt_bytes=256)
+load_spak("res/sounds.zb", password="pw", mode="lazy", target="both")
+Module References: sound_pool | sound_fx | utils
+
+
+====================================================================
+04. Speech, Virtual Box (vb) & 4-Backend GUI (gui)
+====================================================================
+1. Virtual Box Input & Neutral Keyboard Mode Switcher
+Press Ctrl + Shift + Alt + Backspace inside vb.input() to cycle neutral virtual keyboard modes (standard, numeric, symbols, emoji, or your own custom_keyboards).
+from pyaudiogaming import vb
+
+msg = vb.input("Message", placeholder="Press Ctrl+Shift+Alt+Backspace for symbols...", window=wnd)
+vb.info_box("Sent", f"You typed: {msg}")
+2. 4-Backend Cross-Platform GUI (wx / Qt / Tk / Audio)
+from pyaudiogaming import gui
+
+w = gui.Window("Settings", (520, 420), backend="auto")
+with w.page("General"):
+    with w.group("Profile"):
+        w.input("Username", value="player1")
+        w.spin("Level", 1, 99, 10)
+    with w.row():
+        w.button("Save", lambda _: w.alert("Saved", str(w.values())))
+        w.button("Close", lambda _: w.close())
+w.run()
+Module References: speech | vb | gui
+
+
+====================================================================
+05. Timer, Worker, Storage, Haptics & Utils
+====================================================================
+1. Timers, Cooldowns & Single-Threaded Scheduler
+from pyaudiogaming.timer import Timer, CooldownManager, TimerScheduler, FrameClock
+
+cd = CooldownManager()
+sched = TimerScheduler()
+if cd.use("dash", 2000):
+    sched.after(2000, lambda: wnd.say("Dash ready!"))
+sched.update()
+2. Mobile-Safe Storage, Background Workers & Haptics
+from pyaudiogaming.storage import ConfigStore
+from pyaudiogaming.worker import TaskPool
+from pyaudiogaming import haptics
+
+cfg = ConfigStore("my_game", defaults={"vol": 90.0}, portable=True)
+cfg.load(); cfg["vol"] = 80.0; cfg.save()
+
+pool = TaskPool(mode="auto")
+pool.submit(sum, range(500000), on_done=lambda total: print("Total:", total))
+pool.poll()
+
+haptics.preset("hit_heavy")
+haptics.update()
+Module References: timer | storage | worker | haptics | utils
+
+
+====================================================================
+06. Cross-Platform Building & Shipping (compile.py)
+====================================================================
+1. Sample build.txt
+project = main
+project_full_name = my_audio_game
+rename_file = game
+args_compile = [--noconsole]
+data = [res]
+mode = pyinstaller      # pyinstaller | nuitka | cython | gcc | cx_freeze | beeware
+platforms = windows     # windows | linux | macos | android | ios | web
+arch = null
+2. Build Commands
+python -m pyaudiogaming.compile create build.txt
+python -m pyaudiogaming.compile make
+python -m pyaudiogaming.compile build.txt
+Module Reference: compile | system

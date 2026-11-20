@@ -1,0 +1,914 @@
+{
+  "module": "vb",
+  "classes": [
+    {
+      "name": "form",
+      "doc": "NVDA & Android TalkBack accessible form with Rich Controls, Table, Tree, Dialog & Auto-Submit.",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "window=None, config=None",
+          "params": [
+            {
+              "name": "window",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "config",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "add",
+          "kind": "method",
+          "signature": "name, kind='button', value=None, choices=None, callback=None, config=None, **kwargs",
+          "params": [
+            {
+              "name": "name",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "kind",
+              "type": "any",
+              "default": "'button'"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "choices",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "callback",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "config",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "**kwargs",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "notify_live",
+          "kind": "method",
+          "signature": "name_or_text, new_value=None, interrupt=True",
+          "params": [
+            {
+              "name": "name_or_text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "new_value",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "interrupt",
+              "type": "any",
+              "default": "True"
+            }
+          ],
+          "returns": "any",
+          "doc": "Dynamic live region announcement (NVDA aria-live style)."
+        },
+        {
+          "name": "update_progress",
+          "kind": "method",
+          "signature": "name, value, announce_step=10",
+          "params": [
+            {
+              "name": "name",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "announce_step",
+              "type": "any",
+              "default": "10"
+            }
+          ],
+          "returns": "any",
+          "doc": "Update progress bar dynamically and announce milestone percentages."
+        },
+        {
+          "name": "begin_group",
+          "kind": "method",
+          "signature": "label",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": "Start a logical NVDA grouping container; subsequent ``add()`` calls inherit it until ``end_group()``."
+        },
+        {
+          "name": "end_group",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "validate",
+          "kind": "method",
+          "signature": "announce=True",
+          "params": [
+            {
+              "name": "announce",
+              "type": "any",
+              "default": "True"
+            }
+          ],
+          "returns": "any",
+          "doc": "Validate all visible controls with ``required=True`` or ``validator=fn``. Returns ``(ok, errors)``."
+        },
+        {
+          "name": "allowed",
+          "kind": "method",
+          "signature": "action, item=None",
+          "params": [
+            {
+              "name": "action",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "item",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "read",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "move",
+          "kind": "method",
+          "signature": "step",
+          "params": [
+            {
+              "name": "step",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "mainloop",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "open_context_menu",
+          "kind": "method",
+          "signature": "choices=None, item=None",
+          "params": [
+            {
+              "name": "choices",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "item",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "enter",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "frameUpdate",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "values",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "open",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": "Run modal form loop; return clicked button name or -1 on cancel."
+        },
+        {
+          "name": "get",
+          "kind": "method",
+          "signature": "name, fallback=None",
+          "params": [
+            {
+              "name": "name",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "fallback",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": "Get control value by name."
+        },
+        {
+          "name": "set",
+          "kind": "method",
+          "signature": "name, value, announce=False",
+          "params": [
+            {
+              "name": "name",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "announce",
+              "type": "any",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": "Set control value dynamically; auto-triggers live/progress logic if applicable."
+        },
+        {
+          "name": "set_style",
+          "kind": "method",
+          "signature": "name, **kwargs",
+          "params": [
+            {
+              "name": "name",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "**kwargs",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "any",
+          "doc": "Update visual style (color, bg_color, border_color, font, font_size, pos, size, border, margin, padding)."
+        },
+        {
+          "name": "quick_nav",
+          "kind": "method",
+          "signature": "kind_filter, reverse=False",
+          "params": [
+            {
+              "name": "kind_filter",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "reverse",
+              "type": "any",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": "NVDA-style single-key quick navigation (H=heading, B=button, E=input, C=combo, T=table, Q=quote, F=frame)."
+        },
+        {
+          "name": "set_cell",
+          "kind": "method",
+          "signature": "table_name, row, col, val, announce=False",
+          "params": [
+            {
+              "name": "table_name",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "row",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "col",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "val",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "announce",
+              "type": "any",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": "Update a specific cell in a table control."
+        },
+        {
+          "name": "add_row",
+          "kind": "method",
+          "signature": "table_name, row_data, announce=False",
+          "params": [
+            {
+              "name": "table_name",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "row_data",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "announce",
+              "type": "any",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": "Append a row to a table control dynamically."
+        },
+        {
+          "name": "save_values",
+          "kind": "method",
+          "signature": "filepath",
+          "params": [
+            {
+              "name": "filepath",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": "Save form values using pyaudiogaming.file if available."
+        },
+        {
+          "name": "load_values",
+          "kind": "method",
+          "signature": "filepath",
+          "params": [
+            {
+              "name": "filepath",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": "Load form values using pyaudiogaming.file if available."
+        }
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "name": "dialog",
+      "kind": "function",
+      "signature": "title='Dialog', text='', buttons=('OK', 'Cancel'), default=0, cancel=1, callback=None, window=None",
+      "params": [
+        {
+          "name": "title",
+          "type": "any",
+          "default": "'Dialog'"
+        },
+        {
+          "name": "text",
+          "type": "any",
+          "default": "''"
+        },
+        {
+          "name": "buttons",
+          "type": "any",
+          "default": "('OK', 'Cancel')"
+        },
+        {
+          "name": "default",
+          "type": "any",
+          "default": "0"
+        },
+        {
+          "name": "cancel",
+          "type": "any",
+          "default": "1"
+        },
+        {
+          "name": "callback",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "window",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": "Interactive modal dialog with multi-button navigation and touch support."
+    },
+    {
+      "name": "message",
+      "kind": "function",
+      "signature": "m, callback=None, open=None, move=None, close=None, window=None",
+      "params": [
+        {
+          "name": "m",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "callback",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "open",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "move",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "close",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "window",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "get_conput",
+      "kind": "function",
+      "signature": "name, key, fallback=None",
+      "params": [
+        {
+          "name": "name",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "key",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "fallback",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "set_conput",
+      "kind": "function",
+      "signature": "data, fallback={}",
+      "params": [
+        {
+          "name": "data",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "fallback",
+          "type": "any",
+          "default": "{}"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "input",
+      "kind": "function",
+      "signature": "title='', text='', callback=None, password=False, get_data=True, new_config=None, window=None",
+      "params": [
+        {
+          "name": "title",
+          "type": "any",
+          "default": "''"
+        },
+        {
+          "name": "text",
+          "type": "any",
+          "default": "''"
+        },
+        {
+          "name": "callback",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "password",
+          "type": "any",
+          "default": "False"
+        },
+        {
+          "name": "get_data",
+          "type": "any",
+          "default": "True"
+        },
+        {
+          "name": "new_config",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "window",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "get_form_config",
+      "kind": "function",
+      "signature": "key='', fallback=None",
+      "params": [
+        {
+          "name": "key",
+          "type": "any",
+          "default": "''"
+        },
+        {
+          "name": "fallback",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": "Get FORM_CONFIG key or copy of full config."
+    },
+    {
+      "name": "set_form_config",
+      "kind": "function",
+      "signature": "data, fallback=None",
+      "params": [
+        {
+          "name": "data",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "fallback",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": "Update global FORM_CONFIG dictionary in-place."
+    },
+    {
+      "name": "confirm",
+      "kind": "function",
+      "signature": "title='Confirm', text='Are you sure?', yes_text='Yes', no_text='No', window=None",
+      "params": [
+        {
+          "name": "title",
+          "type": "any",
+          "default": "'Confirm'"
+        },
+        {
+          "name": "text",
+          "type": "any",
+          "default": "'Are you sure?'"
+        },
+        {
+          "name": "yes_text",
+          "type": "any",
+          "default": "'Yes'"
+        },
+        {
+          "name": "no_text",
+          "type": "any",
+          "default": "'No'"
+        },
+        {
+          "name": "window",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": "Quick Yes/No modal dialog returning True if Yes is chosen."
+    },
+    {
+      "name": "prompt_chat",
+      "kind": "function",
+      "signature": "title='Message', placeholder='Type a message...', send_label='Send', suggestions=None, window=None",
+      "params": [
+        {
+          "name": "title",
+          "type": "any",
+          "default": "'Message'"
+        },
+        {
+          "name": "placeholder",
+          "type": "any",
+          "default": "'Type a message...'"
+        },
+        {
+          "name": "send_label",
+          "type": "any",
+          "default": "'Send'"
+        },
+        {
+          "name": "suggestions",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "window",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": "Android-style inline Input + adjacent Send button form; pressing Enter in input auto-clicks Send."
+    },
+    {
+      "name": "info_box",
+      "kind": "function",
+      "signature": "title='Information', text='', ok_text='OK', window=None",
+      "params": [
+        {
+          "name": "title",
+          "type": "any",
+          "default": "'Information'"
+        },
+        {
+          "name": "text",
+          "type": "any",
+          "default": "''"
+        },
+        {
+          "name": "ok_text",
+          "type": "any",
+          "default": "'OK'"
+        },
+        {
+          "name": "window",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": "Accessible information dialog with subtle haptic feedback."
+    },
+    {
+      "name": "warning_box",
+      "kind": "function",
+      "signature": "title='Warning', text='', ok_text='OK', window=None",
+      "params": [
+        {
+          "name": "title",
+          "type": "any",
+          "default": "'Warning'"
+        },
+        {
+          "name": "text",
+          "type": "any",
+          "default": "''"
+        },
+        {
+          "name": "ok_text",
+          "type": "any",
+          "default": "'OK'"
+        },
+        {
+          "name": "window",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": "Accessible warning dialog with warning haptic feedback."
+    },
+    {
+      "name": "success_box",
+      "kind": "function",
+      "signature": "title='Success', text='', ok_text='OK', window=None",
+      "params": [
+        {
+          "name": "title",
+          "type": "any",
+          "default": "'Success'"
+        },
+        {
+          "name": "text",
+          "type": "any",
+          "default": "''"
+        },
+        {
+          "name": "ok_text",
+          "type": "any",
+          "default": "'OK'"
+        },
+        {
+          "name": "window",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": "Accessible success dialog with success haptic feedback."
+    },
+    {
+      "name": "error_box",
+      "kind": "function",
+      "signature": "title='Error', text='', details=None, ok_text='OK', copy_text='Copy Details', window=None",
+      "params": [
+        {
+          "name": "title",
+          "type": "any",
+          "default": "'Error'"
+        },
+        {
+          "name": "text",
+          "type": "any",
+          "default": "''"
+        },
+        {
+          "name": "details",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "ok_text",
+          "type": "any",
+          "default": "'OK'"
+        },
+        {
+          "name": "copy_text",
+          "type": "any",
+          "default": "'Copy Details'"
+        },
+        {
+          "name": "window",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": "Accessible error dialog with optional Copy Details button for tracebacks/error logs."
+    },
+    {
+      "name": "choice_box",
+      "kind": "function",
+      "signature": "title='Select', text='', choices=(), ok_text='OK', cancel_text='Cancel', window=None",
+      "params": [
+        {
+          "name": "title",
+          "type": "any",
+          "default": "'Select'"
+        },
+        {
+          "name": "text",
+          "type": "any",
+          "default": "''"
+        },
+        {
+          "name": "choices",
+          "type": "any",
+          "default": "()"
+        },
+        {
+          "name": "ok_text",
+          "type": "any",
+          "default": "'OK'"
+        },
+        {
+          "name": "cancel_text",
+          "type": "any",
+          "default": "'Cancel'"
+        },
+        {
+          "name": "window",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": "Quick single-choice accessible selection box returning selected item string or None."
+    },
+    {
+      "name": "progress_box",
+      "kind": "function",
+      "signature": "title='Working', text='', step_fn=None, cancelable=True, announce_step=10, cancel_text='Cancel', window=None",
+      "params": [
+        {
+          "name": "title",
+          "type": "any",
+          "default": "'Working'"
+        },
+        {
+          "name": "text",
+          "type": "any",
+          "default": "''"
+        },
+        {
+          "name": "step_fn",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "cancelable",
+          "type": "any",
+          "default": "True"
+        },
+        {
+          "name": "announce_step",
+          "type": "any",
+          "default": "10"
+        },
+        {
+          "name": "cancel_text",
+          "type": "any",
+          "default": "'Cancel'"
+        },
+        {
+          "name": "window",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": "Accessible modal progress dialog."
+    }
+  ],
+  "title": "vb — Virtual Box (Accessible Input, Rich Forms & Modal Boxes)",
+  "summary": "NVDA & TalkBack accessible UI engine featuring advanced text input (with Ctrl+Shift+Alt+Backspace neutral keyboard mode switcher), 23-control forms (group, tab, link, switch, table, tree, slider), and ready-to-use modal boxes."
+}

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>app_link — File Associations, Android URI Resolver &amp; Single-Instance IPC — PyAudioGaming</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header role="banner">
+    <h1>app_link — File Associations, Android URI Resolver &amp; Single-Instance IPC — PyAudioGaming</h1>
+    <nav aria-label="Documentation Navigation">
+    <a href="../index.html" class="">Home</a>
+    <a href="../01_getting_started.html" class="">01. Getting Started</a>
+    <a href="../02_window_input_menu.html" class="">02. Input &amp; Menu</a>
+    <a href="../03_audio_3d_fx.html" class="">03. 3D Audio</a>
+    <a href="../04_speech_vb_gui.html" class="">04. Speech, VB &amp; GUI</a>
+    <a href="../05_timer_worker_storage_haptics.html" class="">05. Advanced Systems</a>
+    <a href="../06_building_cross_platform.html" class="">06. Building</a>
+    <a href="../api_reference.html" class="">Module Reference</a>
+    </nav>
+  </header>
+  <main id="main-content" role="main">
+<p><a href="../api_reference.html">&larr; Back to All Modules</a></p>
+<div class="callout"><strong>Summary:</strong> Register file extensions (.mp3, .ogg, .wav) without Admin on Windows (HKCU) or Linux (.desktop), read launched files / Android content:// URIs, and forward newly opened files to an already-running app instance.</div>
+<h2>Usage Guide &amp; Examples</h2>
+
+<h3>How to Use</h3>
+<pre><code>import sys
+from pyaudiogaming import app_link
+
+# Register .mp3 / .ogg (no Admin needed on Windows!)
+app_link.register_file_association([".mp3", ".ogg"], app_name="My Music Player")
+
+# Enforce Single Instance so pressing Enter on a 2nd song plays in the existing window
+inst = app_link.SingleInstance("my_music_player")
+if not inst.is_primary:
+    inst.send_args(app_link.get_launch_files())
+    sys.exit(0)
+
+first_song = app_link.get_launch_file()
+# Inside your main loop:
+for new_files in inst.poll():
+    if new_files:
+        play_song(app_link.resolve_uri_to_file(new_files[0]))</code></pre>
+
+<h2>Parameter &amp; API Tables</h2>
+<label for="mod-search">Filter symbols in this module:</label>
+<input id="mod-search" type="search" placeholder="Type method or parameter name..." oninput="filterMod(this.value)">
+<h3>Module-Level Functions</h3>
+<table class="api-tbl" id="tbl_app_link_funcs">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">function</span><code>get_launch_files(argv=None)</code></td><td><code>argv</code> (any, default: <code>None</code>)</td><td><code>list</code></td><td>Return a list of file paths or URIs passed to the application on launch.</td></tr>
+    <tr><td><span class="badge">function</span><code>get_launch_file(argv=None)</code></td><td><code>argv</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>Return the first file path / URI passed on launch, or ``None``.</td></tr>
+    <tr><td><span class="badge">function</span><code>resolve_uri_to_file(path_or_uri: str, suffix: str=&#x27;&#x27;)</code></td><td><code>path_or_uri</code> (str, default: <code>required</code>)<br><code>suffix</code> (str, default: <code>&#x27;&#x27;</code>)</td><td><code>str</code></td><td>Convert an Android ``content://`` URI into a readable local temp file path.</td></tr>
+    <tr><td><span class="badge">function</span><code>register_file_association(extensions, app_name: str, prog_id: str=None, exe_path: str=None, description: str=&#x27;&#x27;, icon_path: str=None, mime_types=None)</code></td><td><code>extensions</code> (any, default: <code>required</code>)<br><code>app_name</code> (str, default: <code>required</code>)<br><code>prog_id</code> (str, default: <code>None</code>)<br><code>exe_path</code> (str, default: <code>None</code>)<br><code>description</code> (str, default: <code>&#x27;&#x27;</code>)<br><code>icon_path</code> (str, default: <code>None</code>)<br><code>mime_types</code> (any, default: <code>None</code>)</td><td><code>dict</code></td><td>Register file extensions so pressing Enter / double-clicking opens your app.</td></tr>
+    <tr><td><span class="badge">function</span><code>unregister_file_association(extensions, prog_id: str)</code></td><td><code>extensions</code> (any, default: <code>required</code>)<br><code>prog_id</code> (str, default: <code>required</code>)</td><td><code>bool</code></td><td>Remove previously registered HKCU Windows or Linux .desktop file associations.</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>SingleInstance</code></h3>
+<p>Enforce a single running app instance and forward newly opened files to it.</p>
+<table class="api-tbl" id="tbl_app_link_SingleInstance">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__(app_id: str, port: int=None)</code></td><td><code>app_id</code> (str, default: <code>required</code>)<br><code>port</code> (int, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>send_args(args_list, timeout: float=1.5)</code></td><td><code>args_list</code> (any, default: <code>required</code>)<br><code>timeout</code> (float, default: <code>1.5</code>)</td><td><code>bool</code></td><td>Send a list of file paths / commands to the primary running instance.</td></tr>
+    <tr><td><span class="badge">method</span><code>poll()</code></td><td><em>None</em></td><td><code>list</code></td><td>Non-blocking check for messages forwarded by secondary instances. Call inside ``frameUpdate()``.</td></tr>
+    <tr><td><span class="badge">method</span><code>close()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<script>
+function filterMod(q) {
+  q = (q || '').toLowerCase();
+  var rows = document.querySelectorAll('.api-tbl tbody tr');
+  for (var i = 0; i < rows.length; i++) {
+    rows[i].style.display = rows[i].innerText.toLowerCase().indexOf(q) !== -1 ? '' : 'none';
+  }
+}
+</script>
+  </main>
+  <footer role="contentinfo">
+    PyAudioGaming Official Documentation &mdash; Cross-Platform Audio Gaming for Windows, Linux, macOS, Android, iOS &amp; Web.
+  </footer>
+</body>
+</html>

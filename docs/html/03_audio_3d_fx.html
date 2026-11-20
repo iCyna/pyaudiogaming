@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>03. 3D Audio, HRTF, Steam Audio &amp; SPAK</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header role="banner">
+    <h1>03. 3D Audio, HRTF, Steam Audio &amp; SPAK</h1>
+    <nav aria-label="Documentation Navigation">
+    <a href="index.html" class="">Home</a>
+    <a href="01_getting_started.html" class="">01. Getting Started</a>
+    <a href="02_window_input_menu.html" class="">02. Input &amp; Menu</a>
+    <a href="03_audio_3d_fx.html" class="active">03. 3D Audio</a>
+    <a href="04_speech_vb_gui.html" class="">04. Speech, VB &amp; GUI</a>
+    <a href="05_timer_worker_storage_haptics.html" class="">05. Advanced Systems</a>
+    <a href="06_building_cross_platform.html" class="">06. Building</a>
+    <a href="api_reference.html" class="">Module Reference</a>
+    </nav>
+  </header>
+  <main id="main-content" role="main">
+
+<h2>1. 3D Binaural HRTF &amp; Steam Audio Wall Occlusion</h2>
+<pre><code>from pyaudiogaming.sound_pool import output, sound, update_hrtf_listener, hrtf_add_box_preset, hrtf_set_auto_raycast
+
+out = output(device=-1, frequency=44100)
+hrtf_set_auto_raycast(True)
+hrtf_add_box_preset(1, min_x=4, max_x=5, min_y=-6, max_y=6, min_z=0, max_z=4)
+
+s = sound()
+s.stream("res/sounds/beacon.ogg", mono=True)
+s.attach_hrtf_dsp()
+s.play_looped()
+
+update_hrtf_listener(0, 0, 1.7, 0, 1, 0, 0, 0, 1)</code></pre>
+<h2>2. Encrypted SPAK Sound Archives</h2>
+<pre><code>from pyaudiogaming.utils import make_spak, load_spak
+
+make_spak("res/sounds", output_path="res/sounds.zb", password="pw", encrypt_bytes=256)
+load_spak("res/sounds.zb", password="pw", mode="lazy", target="both")</code></pre>
+<p>Module References: <a href="modules/sound_pool.html">sound_pool</a> | <a href="modules/sound_fx.html">sound_fx</a> | <a href="modules/utils.html">utils</a></p>
+
+  </main>
+  <footer role="contentinfo">
+    PyAudioGaming Official Documentation &mdash; Cross-Platform Audio Gaming for Windows, Linux, macOS, Android, iOS &amp; Web.
+  </footer>
+</body>
+</html>

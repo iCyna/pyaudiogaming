@@ -1,0 +1,38 @@
+﻿Module,Owner,Kind,Symbol,Parameters,Returns,Description
+window,WindowBase,constructor,WindowBase.__init__,platform=None,any,
+window,WindowBase,method,WindowBase.init,"x, y, ttl, vv=0, show_vv=False, author=''",any,
+window,WindowBase,method,WindowBase.touchPos,,any,Trả về tọa độ chuẩn hóa (0.0 -> 1.0) của ngón tay đang chạm hoặc chuột.
+window,WindowBase,method,WindowBase.in_zone,"zone, pos=None",any,Kiểm tra điểm chạm hiện tại (hoặc pos truyền vào) có nằm trong vùng zone không.
+window,WindowBase,method,WindowBase.frameUpdate,,any,
+window,WindowBase,method,WindowBase.clear_input,,any,Discard stale text/key/touch input while preserving quit and focus events.
+window,WindowBase,method,WindowBase.keyPressed,name,any,
+window,WindowBase,method,WindowBase.keyReleased,name,any,
+window,WindowBase,method,WindowBase.keyPressing,"name, t=0",any,
+window,WindowBase,method,WindowBase.mousePressed,button=1,any,
+window,WindowBase,method,WindowBase.mouseReleased,button=1,any,
+window,WindowBase,method,WindowBase.mousePressing,button=1,any,
+window,WindowBase,method,WindowBase.tap,"fingers=None, count=1, zone=None",any,"Kiểm tra cử chỉ chạm màn hình: - Mặc định tap() trả về số lần chạm (tương thích 100% với code cũ). - Có thể lọc theo số ngón (fingers=2), số lần chạm liên tiếp (count=2 cho double-tap), và vùng màn hình (zone=""right"")."
+window,WindowBase,method,WindowBase.double_tap,"fingers=1, zone=None",any,Kiểm tra chạm đúp (chuẩn TalkBack/VoiceOver để kích hoạt).
+window,WindowBase,method,WindowBase.long_press,"fingers=1, zone=None",any,Kiểm tra nhấn giữ tại chỗ trên màn hình (không trượt).
+window,WindowBase,method,WindowBase.keySlide,"direction, fingers=None, zone=None",any,"Kiểm tra vuốt nhấc tay theo hướng, số ngón tay (fingers) và khu vực (zone)."
+window,WindowBase,method,WindowBase.swipe,"direction, fingers=None, zone=None",any,
+window,WindowBase,method,WindowBase.keySliding,"direction, t=0, fingers=None, zone=None",any,"Kiểm tra vuốt giữ theo hướng, có hẹn giờ mỗi bước t (ms), lọc theo số ngón (fingers) và khu vực (zone)."
+window,WindowBase,method,WindowBase.swiping,"direction, t=0, fingers=None, zone=None",any,
+window,WindowBase,method,WindowBase.sym,"target, action='tap', fingers=1, count=1, pos=(0.5, 0.5), value=0.2",any,"Giả lập phím bấm, chạm nhiều lần (count), chạm/vuốt nhiều ngón (fingers), và chọn vị trí/khu vực trên màn hình (pos có thể là tuple (x, y) hoặc tên zone như ""left"", ""top-right"")."
+window,WindowBase,method,WindowBase.touchCount,,any,
+window,WindowBase,method,WindowBase.get_focused_window,,any,
+window,WindowBase,method,WindowBase.set_global_sound,value,any,
+window,WindowBase,method,WindowBase.get_global_sound,,any,
+window,WindowBase,method,WindowBase.wait,msec,any,
+window,WindowBase,method,WindowBase.say,"text, i=True, split=False",any,
+window,WindowBase,method,WindowBase.saync,text,any,
+window,WindowBase,method,WindowBase.say3d,"text, lx, ly, lz, sx, sy, sz, i=True, **kwargs",any,
+window,WindowBase,method,WindowBase.input,"title, message, password=False, dir=False, file=False",any,
+window,WindowBase,method,WindowBase.message,"m, callback=None, open=None, move=None, close=None",any,
+window,WindowBase,method,WindowBase.message_gui,"title, message, type=None",any,
+window,WindowBase,method,WindowBase.load_sound,"name, h='both'",any,
+window,WindowBase,method,WindowBase.sound_cast,"name, data, h='both'",any,
+window,WindowBase,method,WindowBase.make_spak,"source, output_path=None, password='', **kwargs",any,
+window,WindowBase,method,WindowBase.load_spak,"spak_path, password='', mode='lazy', target='both', **kwargs",any,
+window,WindowBase,method,WindowBase.beep,"frequency, duration",any,
+window,WindowBase,method,WindowBase.beep_progress_bar,"progress, duration=120",any,

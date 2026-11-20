@@ -1,0 +1,30 @@
+========================================================================
+MODULE: pyaudiogaming.app_link
+app_link — File Associations, Android URI Resolver & Single-Instance IPC
+========================================================================
+
+SUMMARY:
+Register file extensions (.mp3, .ogg, .wav) without Admin on Windows (HKCU) or Linux (.desktop), read launched files / Android content:// URIs, and forward newly opened files to an already-running app instance.
+
+[MODULE FUNCTIONS]
+----------------------------------------
+* get_launch_files(argv=None) -> list
+  Return a list of file paths or URIs passed to the application on launch.
+* get_launch_file(argv=None) -> any
+  Return the first file path / URI passed on launch, or ``None``.
+* resolve_uri_to_file(path_or_uri: str, suffix: str='') -> str
+  Convert an Android ``content://`` URI into a readable local temp file path.
+* register_file_association(extensions, app_name: str, prog_id: str=None, exe_path: str=None, description: str='', icon_path: str=None, mime_types=None) -> dict
+  Register file extensions so pressing Enter / double-clicking opens your app.
+* unregister_file_association(extensions, prog_id: str) -> bool
+  Remove previously registered HKCU Windows or Linux .desktop file associations.
+
+[CLASS SingleInstance]
+----------------------------------------
+Enforce a single running app instance and forward newly opened files to it.
+* SingleInstance.__init__(app_id: str, port: int=None) -> any [constructor]
+* SingleInstance.send_args(args_list, timeout: float=1.5) -> bool [method]
+  Send a list of file paths / commands to the primary running instance.
+* SingleInstance.poll() -> list [method]
+  Non-blocking check for messages forwarded by secondary instances. Call inside ``frameUpdate()``.
+* SingleInstance.close() -> any [method]

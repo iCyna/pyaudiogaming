@@ -1,6 +1,6 @@
 __pycache__/
 *.py[cod]
 desktop.ini
-include/*.zip
+include/*
 basses
 un4seen.py

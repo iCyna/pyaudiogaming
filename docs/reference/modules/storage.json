@@ -1,0 +1,619 @@
+{
+  "module": "storage",
+  "classes": [
+    {
+      "name": "Storage",
+      "doc": "Cross-platform user data storage manager (JSON, Pickle, text, binary, AES-encrypted).",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "app_name: str, portable: bool=False, portable_dir: str='res'",
+          "params": [
+            {
+              "name": "app_name",
+              "type": "str",
+              "default": "required"
+            },
+            {
+              "name": "portable",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "portable_dir",
+              "type": "str",
+              "default": "'res'"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "path",
+          "kind": "method",
+          "signature": "*parts, ensure_parent: bool=True, ensure_dir: bool=False",
+          "params": [
+            {
+              "name": "*parts",
+              "type": "tuple",
+              "default": "optional"
+            },
+            {
+              "name": "ensure_parent",
+              "type": "bool",
+              "default": "True"
+            },
+            {
+              "name": "ensure_dir",
+              "type": "bool",
+              "default": "False"
+            }
+          ],
+          "returns": "Path",
+          "doc": ""
+        },
+        {
+          "name": "exists",
+          "kind": "method",
+          "signature": "*parts",
+          "params": [
+            {
+              "name": "*parts",
+              "type": "tuple",
+              "default": "optional"
+            }
+          ],
+          "returns": "bool",
+          "doc": ""
+        },
+        {
+          "name": "delete",
+          "kind": "method",
+          "signature": "*parts",
+          "params": [
+            {
+              "name": "*parts",
+              "type": "tuple",
+              "default": "optional"
+            }
+          ],
+          "returns": "bool",
+          "doc": ""
+        },
+        {
+          "name": "list_files",
+          "kind": "method",
+          "signature": "*parts, suffix: str=None",
+          "params": [
+            {
+              "name": "*parts",
+              "type": "tuple",
+              "default": "optional"
+            },
+            {
+              "name": "suffix",
+              "type": "str",
+              "default": "None"
+            }
+          ],
+          "returns": "list",
+          "doc": ""
+        },
+        {
+          "name": "save_bytes",
+          "kind": "method",
+          "signature": "rel_path, data: bytes, backup: bool=True",
+          "params": [
+            {
+              "name": "rel_path",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "data",
+              "type": "bytes",
+              "default": "required"
+            },
+            {
+              "name": "backup",
+              "type": "bool",
+              "default": "True"
+            }
+          ],
+          "returns": "Path",
+          "doc": ""
+        },
+        {
+          "name": "load_bytes",
+          "kind": "method",
+          "signature": "rel_path, default=None",
+          "params": [
+            {
+              "name": "rel_path",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "default",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "save_text",
+          "kind": "method",
+          "signature": "rel_path, text: str, encoding: str='utf-8', backup: bool=True",
+          "params": [
+            {
+              "name": "rel_path",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "text",
+              "type": "str",
+              "default": "required"
+            },
+            {
+              "name": "encoding",
+              "type": "str",
+              "default": "'utf-8'"
+            },
+            {
+              "name": "backup",
+              "type": "bool",
+              "default": "True"
+            }
+          ],
+          "returns": "Path",
+          "doc": ""
+        },
+        {
+          "name": "load_text",
+          "kind": "method",
+          "signature": "rel_path, default='', encoding: str='utf-8'",
+          "params": [
+            {
+              "name": "rel_path",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "default",
+              "type": "any",
+              "default": "''"
+            },
+            {
+              "name": "encoding",
+              "type": "str",
+              "default": "'utf-8'"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "save_json",
+          "kind": "method",
+          "signature": "rel_path, obj, indent: int=2, backup: bool=True",
+          "params": [
+            {
+              "name": "rel_path",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "obj",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "indent",
+              "type": "int",
+              "default": "2"
+            },
+            {
+              "name": "backup",
+              "type": "bool",
+              "default": "True"
+            }
+          ],
+          "returns": "Path",
+          "doc": ""
+        },
+        {
+          "name": "load_json",
+          "kind": "method",
+          "signature": "rel_path, default=None",
+          "params": [
+            {
+              "name": "rel_path",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "default",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "save_pickle",
+          "kind": "method",
+          "signature": "rel_path, obj, backup: bool=True",
+          "params": [
+            {
+              "name": "rel_path",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "obj",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "backup",
+              "type": "bool",
+              "default": "True"
+            }
+          ],
+          "returns": "Path",
+          "doc": ""
+        },
+        {
+          "name": "load_pickle",
+          "kind": "method",
+          "signature": "rel_path, default=None",
+          "params": [
+            {
+              "name": "rel_path",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "default",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "save_encrypted",
+          "kind": "method",
+          "signature": "rel_path, obj, password: str, fmt: str='json', aes: bool=True, backup: bool=True",
+          "params": [
+            {
+              "name": "rel_path",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "obj",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "password",
+              "type": "str",
+              "default": "required"
+            },
+            {
+              "name": "fmt",
+              "type": "str",
+              "default": "'json'"
+            },
+            {
+              "name": "aes",
+              "type": "bool",
+              "default": "True"
+            },
+            {
+              "name": "backup",
+              "type": "bool",
+              "default": "True"
+            }
+          ],
+          "returns": "Path",
+          "doc": ""
+        },
+        {
+          "name": "load_encrypted",
+          "kind": "method",
+          "signature": "rel_path, password: str, fmt: str='json', aes: bool=True, default=None",
+          "params": [
+            {
+              "name": "rel_path",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "password",
+              "type": "str",
+              "default": "required"
+            },
+            {
+              "name": "fmt",
+              "type": "str",
+              "default": "'json'"
+            },
+            {
+              "name": "aes",
+              "type": "bool",
+              "default": "True"
+            },
+            {
+              "name": "default",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "ConfigStore",
+      "doc": "Dict-like persistent configuration store with defaults, auto-recovery & versioning.",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "app_name: str, filename: str='data/config.json', defaults=None, fmt: str='json', password: str=None, portable: bool=False, portable_dir: str='res', version: int=1, auto_save: bool=False",
+          "params": [
+            {
+              "name": "app_name",
+              "type": "str",
+              "default": "required"
+            },
+            {
+              "name": "filename",
+              "type": "str",
+              "default": "'data/config.json'"
+            },
+            {
+              "name": "defaults",
+              "type": "dict",
+              "default": "None"
+            },
+            {
+              "name": "fmt",
+              "type": "str",
+              "default": "'json'"
+            },
+            {
+              "name": "password",
+              "type": "str",
+              "default": "None"
+            },
+            {
+              "name": "portable",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "portable_dir",
+              "type": "str",
+              "default": "'res'"
+            },
+            {
+              "name": "version",
+              "type": "int",
+              "default": "1"
+            },
+            {
+              "name": "auto_save",
+              "type": "bool",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "load",
+          "kind": "method",
+          "signature": "migrate_fn=None",
+          "params": [
+            {
+              "name": "migrate_fn",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "dict",
+          "doc": ""
+        },
+        {
+          "name": "save",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "Path",
+          "doc": ""
+        },
+        {
+          "name": "save_if_dirty",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "reset_to_defaults",
+          "kind": "method",
+          "signature": "save_now: bool=False",
+          "params": [
+            {
+              "name": "save_now",
+              "type": "bool",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get",
+          "kind": "method",
+          "signature": "key, default=None",
+          "params": [
+            {
+              "name": "key",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "default",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set",
+          "kind": "method",
+          "signature": "key, value",
+          "params": [
+            {
+              "name": "key",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "update",
+          "kind": "method",
+          "signature": "mapping",
+          "params": [
+            {
+              "name": "mapping",
+              "type": "dict",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "to_dict",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "dict",
+          "doc": ""
+        },
+        {
+          "name": "dirty",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "bool",
+          "doc": ""
+        }
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "name": "get_platform_data_dir",
+      "kind": "function",
+      "signature": "app_name: str, portable: bool=False, portable_dir: str='res'",
+      "params": [
+        {
+          "name": "app_name",
+          "type": "str",
+          "default": "required"
+        },
+        {
+          "name": "portable",
+          "type": "bool",
+          "default": "False"
+        },
+        {
+          "name": "portable_dir",
+          "type": "str",
+          "default": "'res'"
+        }
+      ],
+      "returns": "Path",
+      "doc": "Return a guaranteed-writable persistent directory for ``app_name`` on any OS."
+    },
+    {
+      "name": "atomic_write_bytes",
+      "kind": "function",
+      "signature": "path, data: bytes, backup: bool=True",
+      "params": [
+        {
+          "name": "path",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "data",
+          "type": "bytes",
+          "default": "required"
+        },
+        {
+          "name": "backup",
+          "type": "bool",
+          "default": "True"
+        }
+      ],
+      "returns": "any",
+      "doc": "Write bytes atomically via ``.tmp`` + ``fsync`` + ``os.replace``."
+    },
+    {
+      "name": "atomic_write_text",
+      "kind": "function",
+      "signature": "path, text: str, encoding: str='utf-8', backup: bool=True",
+      "params": [
+        {
+          "name": "path",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "text",
+          "type": "str",
+          "default": "required"
+        },
+        {
+          "name": "encoding",
+          "type": "str",
+          "default": "'utf-8'"
+        },
+        {
+          "name": "backup",
+          "type": "bool",
+          "default": "True"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    }
+  ],
+  "title": "storage — Cross-Platform Persistent Storage & ConfigStore",
+  "summary": "Guaranteed-writable persistent storage solving mobile APK asset overwrites: uses filesDir ($HOME) on Android/iOS, AppData/XDG/portable on Desktop, with atomic writes (.tmp + fsync + os.replace) and automatic .bak recovery."
+}

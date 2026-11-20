@@ -1,0 +1,94 @@
+========================================================================
+MODULE: pyaudiogaming.utils
+utils — Math, Spatial, Formatting, Search, Clipboard & SPAK Archive Toolkit
+========================================================================
+
+SUMMARY:
+Zero-dependency game utilities: clamp/lerp/remap/clock_direction/db_to_linear, weighted random, fuzzy search, cross-platform clipboard (copy_text/paste_text), open_url, SHA-256 hashing, and SPAK binary audio archiving.
+
+[MODULE FUNCTIONS]
+----------------------------------------
+* convert_to_unicode(name) -> any
+* token(min=4, max=12, more='') -> any
+* run(cmd, sh=False) -> any
+* mkdir(fld) -> any
+* get_window() -> any
+* is_url(path_string) -> any
+* make_spak(source, output_path=None, password='', header_path=None, prefix=None, extensions=_SPAK_DEFAULT_EXTS, encrypt_bytes=256) -> any
+  Đóng gói một thư mục âm thanh (bao gồm toàn bộ thư mục con) hoặc danh sách/dict các file thành 1 gói .spak duy nhất (hoặc tách kèm file header.inf nếu truyền header_path).
+* load_spak(spak_path, password='', mode='lazy', target='both', prefix=None, header_path=None, preload_sample=False, callback=None) -> any
+  Đọc gói âm thanh .spak (hoặc gói .ogg + header.inf) và cast vào hệ thống âm thanh (hsample / hstream).
+* clamp(val, low, high) -> any
+  Clamp ``val`` to the inclusive range ``[low, high]``.
+* lerp(a, b, t) -> any
+  Linear interpolation between ``a`` and ``b`` by factor ``t``.
+* inv_lerp(a, b, value) -> any
+  Inverse linear interpolation: return ``t`` such that ``lerp(a, b, t) == value``.
+* remap(val, in_min, in_max, out_min, out_max, clamp_out=False) -> any
+  Remap ``val`` from range ``[in_min, in_max]`` to ``[out_min, out_max]``.
+* smoothstep(edge0, edge1, x) -> any
+  Smooth Hermite interpolation between 0 and 1.
+* distance_2d(x1, y1, x2, y2) -> any
+* distance_3d(x1, y1, z1, x2, y2, z2) -> any
+* angle_2d(x1, y1, x2, y2) -> any
+  Return clockwise bearing in degrees ``[0, 360)`` where North (+Y) = 0, East (+X) = 90.
+* clock_direction(dx, dy) -> any
+  Convert a 2D delta ``(dx, dy)`` (North = +Y, East = +X) to clock hour ``1..12``.
+* db_to_linear(db) -> any
+  Convert decibels (e.g. ``-6.0``) to linear amplitude (``0.0..1.0+``).
+* linear_to_db(amp, floor_db=-120.0) -> any
+  Convert linear amplitude to decibels.
+* percent(value, total, decimals=1) -> any
+  Return percentage ``0.0..100.0`` safely (returns ``0.0`` if ``total == 0``).
+* chance(prob_percent) -> any
+  Return ``True`` with probability ``prob_percent``% (0..100).
+* weighted_choice(items) -> any
+  Pick one item by weight. Accepts ``{item: weight}`` or ``[(item, weight), ...]``.
+* roll_dice(count=1, sides=6, bonus=0) -> any
+  Roll ``count`` dice with ``sides`` faces and add ``bonus``.
+* shuffle_copy(seq) -> any
+  Return a newly shuffled list without modifying the original sequence.
+* format_bytes(num_bytes, decimals=2) -> any
+  Format byte count into human-readable units (B, KB, MB, GB, TB).
+* format_number(num, sep=',') -> any
+  Format integer/float with thousands separators.
+* truncate(text, max_len, suffix='...') -> any
+  Truncate text cleanly to at most ``max_len`` characters.
+* strip_accents(text) -> any
+  Remove diacritical marks for accent-insensitive search/comparison.
+* slugify(text, sep='_') -> any
+  Convert arbitrary text into a clean ASCII filename/identifier slug.
+* natural_sort_key(text) -> any
+  Sort key so ``'item2'`` comes before ``'item10'``.
+* fuzzy_match(query, candidates, limit=10) -> any
+  Accent-insensitive ranked search returning up to ``limit`` matching candidates.
+* deep_merge(base, override) -> any
+  Recursively merge two dictionaries without mutating ``base`` or ``override``.
+* flatten(nested) -> any
+  Recursively flatten nested lists/tuples into a single list.
+* chunked(seq, size) -> any
+  Yield consecutive chunks of length ``size`` from ``seq``.
+* safe_int(val, default=0) -> any
+* safe_float(val, default=0.0) -> any
+* safe_bool(val, default=False) -> any
+* ensure_dir(path) -> any
+  Create directory (including parents) if missing and return the path.
+* file_hash(filepath, algo='sha256', chunk_size=65536) -> any
+  Compute hexadecimal hash digest of a file efficiently in chunks.
+* open_url(url) -> any
+  Open a URL in the default browser on Windows, macOS, Linux, and Android.
+* copy_text(text) -> any
+  Copy UTF-8 text to system clipboard (Windows, Android, macOS, Linux) with zero external dependencies.
+* paste_text() -> any
+  Read UTF-8 text from system clipboard (Windows, Android, macOS, Linux).
+* is_online(host='1.1.1.1', port=53, timeout=1.5) -> any
+  Quick check whether network connectivity is available.
+* retry(fn, retries=3, delay_ms=100, exceptions=(Exception,)) -> any
+  Call ``fn()`` up to ``retries`` times with ``delay_ms`` pause between failures.
+
+[CLASS SpakArchive]
+----------------------------------------
+Manages a loaded .spak package and provides thread-safe O(1) seek & slice reading.
+* SpakArchive.__init__(spak_path, data_offset, key32, header_info) -> any [constructor]
+* SpakArchive.read_entry(rel_offset, size, enc_len) -> any [method]
+* SpakArchive.close() -> any [method]

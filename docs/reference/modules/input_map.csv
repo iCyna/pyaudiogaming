@@ -1,0 +1,21 @@
+﻿Module,Owner,Kind,Symbol,Parameters,Returns,Description
+input_map,InputMap,constructor,InputMap.__init__,"bindings=None, deadzone: float=0.35",any,
+input_map,InputMap,method,InputMap.bind,"action: str, *bindings: str",any,Add one or more bindings to ``action``.
+input_map,InputMap,method,InputMap.unbind,"action: str, binding: str=None",any,"Remove a specific binding from ``action``, or all bindings if ``binding is None``."
+input_map,InputMap,method,InputMap.rebind,"action: str, old_binding: str, new_binding: str",bool,Replace ``old_binding`` with ``new_binding`` for ``action``.
+input_map,InputMap,method,InputMap.set_bindings,"action: str, bindings: list",any,
+input_map,InputMap,method,InputMap.get_bindings,action: str,list,
+input_map,InputMap,method,InputMap.actions,,list,
+input_map,InputMap,method,InputMap.clear,action: str=None,any,
+input_map,InputMap,method,InputMap.reset_defaults,,any,
+input_map,InputMap,method,InputMap.pressed,"action: str, wnd",bool,Return True on the frame any binding of ``action`` is newly triggered.
+input_map,InputMap,method,InputMap.pressing,"action: str, wnd, repeat_ms: int=0",bool,Return True while any binding of ``action`` is held (with optional ``repeat_ms`` throttle).
+input_map,InputMap,method,InputMap.released,"action: str, wnd",bool,Return True on the frame a binding of ``action`` is released.
+input_map,InputMap,method,InputMap.any_pressed,"actions, wnd",any,"Return the first action name in ``actions`` that was pressed this frame, else ``None``."
+input_map,InputMap,method,InputMap.axis,"neg_action: str, pos_action: str, wnd",float,"Return an axis value in ``[-1.0, 1.0]`` combining keyboard & gamepad sticks."
+input_map,InputMap,method,InputMap.capture_next_binding,"wnd, cancel_key: str='escape'",any,Poll once for a newly pressed key/combo or gamepad button; returns binding string or ``None``.
+input_map,InputMap,method,InputMap.describe,"action: str, separator: str=', '",str,Return a human-readable / TTS-friendly description of an action's bindings.
+input_map,InputMap,method,InputMap.to_dict,,dict,
+input_map,InputMap,method,InputMap.from_dict,"data, deadzone: float=0.35",'InputMap',
+input_map,InputMap,method,InputMap.save,filepath,Path,
+input_map,InputMap,method,InputMap.load,filepath,bool,

@@ -1,0 +1,51 @@
+========================================================================
+MODULE: pyaudiogaming.speech
+speech — Screen Reader, TTS & 3D Positional Speech
+========================================================================
+
+SUMMARY:
+Unified speech wrapper supporting NVDA, JAWS, SAPI5, VoiceOver, TalkBack, speech history, voice/rate/pitch/volume controls, and 3D positional TTS.
+
+[MODULE FUNCTIONS]
+----------------------------------------
+* say(text, i=True, split=False, log=True) -> any
+
+[CLASS Speech]
+----------------------------------------
+* Speech.__init__() -> any [constructor]
+* Speech.say(text, i=True, split=False) -> any [method]
+  tts speech
+* Speech.saync(string, i=True) -> any [method]
+  tts speech no log
+* Speech.say3d(text, lx, ly, lz, sx, sy, sz, i=True, **kwargs) -> any [method]
+* Speech.get_speech_volume() -> any [method]
+* Speech.set_speech_volume(value) -> any [method]
+* Speech.get_speech_pitch() -> any [method]
+* Speech.set_speech_pitch(value) -> any [method]
+* Speech.get_speech_rate() -> any [method]
+* Speech.set_speech_rate(value) -> any [method]
+* Speech.get_speech_voice() -> any [method]
+* Speech.set_speech_voice(type) -> any [method]
+* Speech.get_speech_pan() -> any [method]
+* Speech.set_speech_pan(value) -> any [method]
+* Speech.get_speech_sound_pitch() -> any [method]
+* Speech.set_speech_sound_pitch(value) -> any [method]
+* Speech.get_speech_output_device() -> any [method]
+* Speech.set_speech_output_device(device) -> any [method]
+* Speech.get_speech_sound() -> any [method]
+* Speech.get_speech_mono() -> any [method]
+* Speech.set_speech_mono(value) -> any [method]
+* Speech.get_speech_hrtf() -> any [method]
+* Speech.set_speech_hrtf(value) -> any [method]
+* Speech.get_speech_fx() -> any [method]
+* Speech.set_speech_fx(value) -> any [method]
+* Speech.set_speech_zone_fx_provider(provider) -> any [method]
+* Speech.list_speech_fx() -> any [method]
+* Speech.get_speech_auto_pause() -> any [method]
+* Speech.set_speech_auto_pause(enabled) -> any [method]
+* Speech.list_voices() -> any [method]
+* Speech.get_outputs(active_only=False) -> any [method]
+* Speech.get_output() -> any [method]
+* Speech.get_active_screen_reader() -> any [method]
+* Speech.set_output(name=None) -> any [method]
+* Speech.get_capabilities() -> any [method]

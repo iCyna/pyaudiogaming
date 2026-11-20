@@ -525,3 +525,445 @@ def load_spak(
 		"files": registered_keys,
 		"root": root_prefix,
 	}
+
+
+
+# ==============================================================================
+# GENERAL-PURPOSE GAME, AUDIO, MATH, TEXT, DATA & PLATFORM UTILITIES
+# ==============================================================================
+import ctypes
+import math
+import re
+import socket
+import time as _time
+import unicodedata
+import webbrowser
+
+
+# --- Math, Spatial & Audio Conversions ---
+
+def clamp(val, low, high):
+	"""Clamp ``val`` to the inclusive range ``[low, high]``."""
+	if low > high:
+		low, high = high, low
+	return low if val < low else (high if val > high else val)
+
+
+def lerp(a, b, t):
+	"""Linear interpolation between ``a`` and ``b`` by factor ``t``."""
+	return a + (b - a) * t
+
+
+def inv_lerp(a, b, value):
+	"""Inverse linear interpolation: return ``t`` such that ``lerp(a, b, t) == value``."""
+	if a == b:
+		return 0.0
+	return (value - a) / (b - a)
+
+
+def remap(val, in_min, in_max, out_min, out_max, clamp_out=False):
+	"""Remap ``val`` from range ``[in_min, in_max]`` to ``[out_min, out_max]``."""
+	t = inv_lerp(in_min, in_max, val)
+	if clamp_out:
+		t = clamp(t, 0.0, 1.0)
+	return lerp(out_min, out_max, t)
+
+
+def smoothstep(edge0, edge1, x):
+	"""Smooth Hermite interpolation between 0 and 1."""
+	t = clamp(inv_lerp(edge0, edge1, x), 0.0, 1.0)
+	return t * t * (3.0 - 2.0 * t)
+
+
+def distance_2d(x1, y1, x2, y2):
+	return math.hypot(x2 - x1, y2 - y1)
+
+
+def distance_3d(x1, y1, z1, x2, y2, z2):
+	return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2 + (z2 - z1) ** 2)
+
+
+def angle_2d(x1, y1, x2, y2):
+	"""Return clockwise bearing in degrees ``[0, 360)`` where North (+Y) = 0, East (+X) = 90."""
+	deg = math.degrees(math.atan2(x2 - x1, y2 - y1))
+	return deg % 360.0
+
+
+def clock_direction(dx, dy):
+	"""Convert a 2D delta ``(dx, dy)`` (North = +Y, East = +X) to clock hour ``1..12``."""
+	if dx == 0 and dy == 0:
+		return 12
+	deg = math.degrees(math.atan2(dx, dy)) % 360.0
+	hour = int(((deg + 15.0) % 360.0) // 30.0)
+	return 12 if hour == 0 else hour
+
+
+def db_to_linear(db):
+	"""Convert decibels (e.g. ``-6.0``) to linear amplitude (``0.0..1.0+``)."""
+	if db <= -120.0:
+		return 0.0
+	return 10.0 ** (float(db) / 20.0)
+
+
+def linear_to_db(amp, floor_db=-120.0):
+	"""Convert linear amplitude to decibels."""
+	amp = float(amp)
+	if amp <= 0.0:
+		return float(floor_db)
+	return max(float(floor_db), 20.0 * math.log10(amp))
+
+
+def percent(value, total, decimals=1):
+	"""Return percentage ``0.0..100.0`` safely (returns ``0.0`` if ``total == 0``)."""
+	if not total:
+		return 0.0
+	return round((float(value) / float(total)) * 100.0, decimals)
+
+
+# --- Random & Probability ---
+
+def chance(prob_percent):
+	"""Return ``True`` with probability ``prob_percent``% (0..100)."""
+	p = float(prob_percent)
+	if p <= 0.0:
+		return False
+	if p >= 100.0:
+		return True
+	return random.random() * 100.0 < p
+
+
+def weighted_choice(items):
+	"""Pick one item by weight. Accepts ``{item: weight}`` or ``[(item, weight), ...]``."""
+	pairs = list(items.items()) if isinstance(items, dict) else list(items)
+	if not pairs:
+		raise ValueError("weighted_choice requires a non-empty mapping or sequence")
+	vals = [p[0] for p in pairs]
+	weights = [max(0.0, float(p[1])) for p in pairs]
+	if sum(weights) <= 0.0:
+		return random.choice(vals)
+	return random.choices(vals, weights=weights, k=1)[0]
+
+
+def roll_dice(count=1, sides=6, bonus=0):
+	"""Roll ``count`` dice with ``sides`` faces and add ``bonus``."""
+	return sum(random.randint(1, max(1, int(sides))) for _ in range(max(0, int(count)))) + int(bonus)
+
+
+def shuffle_copy(seq):
+	"""Return a newly shuffled list without modifying the original sequence."""
+	out = list(seq)
+	random.shuffle(out)
+	return out
+
+
+# --- String, Formatting & Search ---
+
+def format_bytes(num_bytes, decimals=2):
+	"""Format byte count into human-readable units (B, KB, MB, GB, TB)."""
+	val = float(num_bytes)
+	sign = "-" if val < 0 else ""
+	val = abs(val)
+	for unit in ("B", "KB", "MB", "GB", "TB", "PB"):
+		if val < 1024.0 or unit == "PB":
+			if unit == "B":
+				return f"{sign}{int(val)} B"
+			return f"{sign}{val:.{decimals}f} {unit}"
+		val /= 1024.0
+	return f"{sign}{val:.{decimals}f} PB"
+
+
+def format_number(num, sep=","):
+	"""Format integer/float with thousands separators."""
+	if isinstance(num, int):
+		return f"{num:,}".replace(",", sep)
+	return f"{float(num):,.2f}".replace(",", sep)
+
+
+def truncate(text, max_len, suffix="..."):
+	"""Truncate text cleanly to at most ``max_len`` characters."""
+	s = str(text)
+	if max_len <= 0 or len(s) <= max_len:
+		return s
+	if len(suffix) >= max_len:
+		return s[:max_len]
+	return s[: max_len - len(suffix)] + suffix
+
+
+def strip_accents(text):
+	"""Remove diacritical marks for accent-insensitive search/comparison."""
+	s = str(text or "")
+	decomposed = unicodedata.normalize("NFKD", s)
+	out = "".join(ch for ch in decomposed if not unicodedata.combining(ch))
+	return out.replace("đ", "d").replace("Đ", "D")
+
+
+def slugify(text, sep="_"):
+	"""Convert arbitrary text into a clean ASCII filename/identifier slug."""
+	base = strip_accents(str(text or "")).lower()
+	cleaned = re.sub(r"[^a-z0-9]+", sep, base).strip(sep)
+	return cleaned or "item"
+
+
+def natural_sort_key(text):
+	"""Sort key so ``'item2'`` comes before ``'item10'``."""
+	return [int(tok) if tok.isdigit() else tok.lower() for tok in re.split(r"(\d+)", str(text))]
+
+
+def fuzzy_match(query, candidates, limit=10):
+	"""Accent-insensitive ranked search returning up to ``limit`` matching candidates."""
+	q = strip_accents(str(query or "")).strip().lower()
+	if not q:
+		return list(candidates)[:limit]
+	scored = []
+	for item in candidates:
+		raw = str(item)
+		norm = strip_accents(raw).lower()
+		if norm == q:
+			scored.append((0, len(raw), item))
+		elif norm.startswith(q):
+			scored.append((1, len(raw), item))
+		elif q in norm:
+			scored.append((2, norm.index(q), item))
+		else:
+			# Subsequence check
+			qi = 0
+			for ch in norm:
+				if ch == q[qi]:
+					qi += 1
+					if qi == len(q):
+						scored.append((3, len(raw), item))
+						break
+	scored.sort(key=lambda x: (x[0], x[1]))
+	return [x[2] for x in scored[:limit]]
+
+
+# --- Data, Type Conversion & Collections ---
+
+def deep_merge(base, override):
+	"""Recursively merge two dictionaries without mutating ``base`` or ``override``."""
+	out = dict(base or {})
+	for k, v in (override or {}).items():
+		if k in out and isinstance(out[k], dict) and isinstance(v, dict):
+			out[k] = deep_merge(out[k], v)
+		else:
+			out[k] = v
+	return out
+
+
+def flatten(nested):
+	"""Recursively flatten nested lists/tuples into a single list."""
+	out = []
+	for item in nested:
+		if isinstance(item, (list, tuple)):
+			out.extend(flatten(item))
+		else:
+			out.append(item)
+	return out
+
+
+def chunked(seq, size):
+	"""Yield consecutive chunks of length ``size`` from ``seq``."""
+	size = max(1, int(size))
+	seq = list(seq)
+	for i in range(0, len(seq), size):
+		yield seq[i : i + size]
+
+
+def safe_int(val, default=0):
+	try:
+		return int(float(val))
+	except (TypeError, ValueError):
+		return default
+
+
+def safe_float(val, default=0.0):
+	try:
+		return float(val)
+	except (TypeError, ValueError):
+		return default
+
+
+def safe_bool(val, default=False):
+	if isinstance(val, bool):
+		return val
+	if isinstance(val, (int, float)):
+		return val != 0
+	s = str(val or "").strip().lower()
+	if s in ("1", "true", "yes", "on", "y"):
+		return True
+	if s in ("0", "false", "no", "off", "n", ""):
+		return False
+	return default
+
+
+# --- Files, Hashing, Network, Clipboard & Retry ---
+
+def ensure_dir(path):
+	"""Create directory (including parents) if missing and return the path."""
+	os.makedirs(path, exist_ok=True)
+	return path
+
+
+def file_hash(filepath, algo="sha256", chunk_size=65536):
+	"""Compute hexadecimal hash digest of a file efficiently in chunks."""
+	h = hashlib.new(algo)
+	with open(filepath, "rb") as f:
+		while True:
+			chunk = f.read(chunk_size)
+			if not chunk:
+				break
+			h.update(chunk)
+	return h.hexdigest()
+
+
+def open_url(url):
+	"""Open a URL in the default browser on Windows, macOS, Linux, and Android."""
+	url = str(url or "").strip()
+	if not url:
+		return False
+	try:
+		if system.get_platform()["os"] == "android":
+			act, bridge = system.get_android_activity()
+			if act is not None:
+				jcls = (lambda n: __import__("java").jclass(n)) if bridge == "chaquopy" else (lambda n: __import__("jnius").autoclass(n))
+				Intent = jcls("android.content.Intent")
+				Uri = jcls("android.net.Uri")
+				intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+				act.startActivity(intent)
+				return True
+	except Exception:
+		pass
+	try:
+		return bool(webbrowser.open(url))
+	except Exception:
+		return False
+
+
+def copy_text(text):
+	"""Copy UTF-8 text to system clipboard (Windows, Android, macOS, Linux) with zero external dependencies."""
+	s = str(text)
+	if system.get_platform()["os"] == "android":
+		try:
+			from .pygame_shim import _android_bridge
+			if _android_bridge.is_android_java_available():
+				_android_bridge.set_clipboard(s)
+				return True
+		except Exception:
+			pass
+	if os.name == "nt":
+		try:
+			CF_UNICODETEXT = 13
+			GMEM_MOVEABLE = 0x0002
+			u32 = ctypes.windll.user32
+			k32 = ctypes.windll.kernel32
+			k32.GlobalAlloc.argtypes = [ctypes.c_uint, ctypes.c_size_t]
+			k32.GlobalAlloc.restype = ctypes.c_void_p
+			k32.GlobalLock.argtypes = [ctypes.c_void_p]
+			k32.GlobalLock.restype = ctypes.c_void_p
+			k32.GlobalUnlock.argtypes = [ctypes.c_void_p]
+			u32.SetClipboardData.argtypes = [ctypes.c_uint, ctypes.c_void_p]
+			u32.SetClipboardData.restype = ctypes.c_void_p
+			data = (s + "\x00").encode("utf-16-le")
+			if not u32.OpenClipboard(0):
+				return False
+			try:
+				u32.EmptyClipboard()
+				hmem = k32.GlobalAlloc(GMEM_MOVEABLE, len(data))
+				if not hmem:
+					return False
+				ptr = k32.GlobalLock(hmem)
+				ctypes.memmove(ptr, data, len(data))
+				k32.GlobalUnlock(hmem)
+				u32.SetClipboardData(CF_UNICODETEXT, hmem)
+				return True
+			finally:
+				u32.CloseClipboard()
+		except Exception:
+			return False
+	if sys.platform == "darwin":
+		try:
+			subprocess.run(["pbcopy"], input=s.encode("utf-8"), check=True)
+			return True
+		except Exception:
+			return False
+	for cmd in (["wl-copy"], ["xclip", "-selection", "clipboard"], ["xsel", "--clipboard", "--input"]):
+		if shutil.which(cmd[0]):
+			try:
+				subprocess.run(cmd, input=s.encode("utf-8"), check=True)
+				return True
+			except Exception:
+				continue
+	return False
+
+
+def paste_text():
+	"""Read UTF-8 text from system clipboard (Windows, Android, macOS, Linux)."""
+	if system.get_platform()["os"] == "android":
+		try:
+			from .pygame_shim import _android_bridge
+			if _android_bridge.is_android_java_available():
+				return _android_bridge.get_clipboard() or ""
+		except Exception:
+			pass
+	if os.name == "nt":
+		try:
+			CF_UNICODETEXT = 13
+			u32 = ctypes.windll.user32
+			k32 = ctypes.windll.kernel32
+			u32.GetClipboardData.argtypes = [ctypes.c_uint]
+			u32.GetClipboardData.restype = ctypes.c_void_p
+			k32.GlobalLock.argtypes = [ctypes.c_void_p]
+			k32.GlobalLock.restype = ctypes.c_void_p
+			k32.GlobalUnlock.argtypes = [ctypes.c_void_p]
+			if not u32.OpenClipboard(0):
+				return ""
+			try:
+				hmem = u32.GetClipboardData(CF_UNICODETEXT)
+				if not hmem:
+					return ""
+				ptr = k32.GlobalLock(hmem)
+				if not ptr:
+					return ""
+				try:
+					return ctypes.wstring_at(ptr)
+				finally:
+					k32.GlobalUnlock(hmem)
+			finally:
+				u32.CloseClipboard()
+		except Exception:
+			return ""
+	if sys.platform == "darwin":
+		try:
+			return subprocess.check_output(["pbpaste"]).decode("utf-8", errors="replace")
+		except Exception:
+			return ""
+	for cmd in (["wl-paste", "--no-newline"], ["xclip", "-selection", "clipboard", "-o"], ["xsel", "--clipboard", "--output"]):
+		if shutil.which(cmd[0]):
+			try:
+				return subprocess.check_output(cmd).decode("utf-8", errors="replace")
+			except Exception:
+				continue
+	return ""
+
+
+def is_online(host="1.1.1.1", port=53, timeout=1.5):
+	"""Quick check whether network connectivity is available."""
+	try:
+		with socket.create_connection((host, int(port)), timeout=float(timeout)):
+			return True
+	except OSError:
+		return False
+
+
+def retry(fn, retries=3, delay_ms=100, exceptions=(Exception,)):
+	"""Call ``fn()`` up to ``retries`` times with ``delay_ms`` pause between failures."""
+	last_err = None
+	for attempt in range(max(1, int(retries))):
+		try:
+			return fn()
+		except exceptions as exc:
+			last_err = exc
+			if attempt + 1 < retries and delay_ms > 0:
+				_time.sleep(delay_ms / 1000.0)
+	raise last_err

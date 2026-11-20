@@ -1,0 +1,57 @@
+========================================================================
+MODULE: pyaudiogaming.worker
+worker — Cross-Platform Background TaskPool & SharedState
+========================================================================
+
+SUMMARY:
+Run heavy CPU/IO tasks without freezing your game loop. Automatically selects process on Desktop (with freeze_support and auto-thread fallback for lambdas), thread on Android/iOS, and inline on Web.
+
+[MODULE FUNCTIONS]
+----------------------------------------
+* enable_freeze_support() -> any
+  Safely call ``multiprocessing.freeze_support()`` once (prevents fork-bomb in PyInstaller/Nuitka).
+* detect_best_mode(preferred: str='auto') -> str
+  Resolve requested execution mode (``'auto'``, ``'process'``, ``'thread'``, ``'inline'``) to a mode guaranteed to work on the current OS.
+
+[CLASS SharedState]
+----------------------------------------
+Simple dict-like shared state that works across ``process``, ``thread``, and ``inline`` modes.
+* SharedState.__init__(mode: str='auto', initial=None) -> any [constructor]
+* SharedState.raw() -> any [property]
+  Underlying dict / DictProxy (pass this into worker functions in ``process`` mode).
+* SharedState.get(key, default=None) -> any [method]
+* SharedState.set(key, value) -> any [method]
+* SharedState.update(mapping) -> any [method]
+* SharedState.pop(key, default=None) -> any [method]
+* SharedState.clear() -> any [method]
+* SharedState.snapshot() -> dict [method]
+  Return a plain local ``dict`` copy of the current state.
+* SharedState.close() -> any [method]
+
+[CLASS TaskHandle]
+----------------------------------------
+Handle returned by ``TaskPool.submit()`` to track status, result, or cancel.
+* TaskHandle.__init__(task_id: int, future=None, on_done=None, on_error=None, tag=None) -> any [constructor]
+* TaskHandle.done() -> bool [property]
+* TaskHandle.cancelled() -> bool [property]
+* TaskHandle.running() -> bool [property]
+* TaskHandle.elapsed_ms() -> int [property]
+* TaskHandle.error() -> any [property]
+* TaskHandle.result(timeout=None) -> any [method]
+* TaskHandle.cancel() -> bool [method]
+
+[CLASS TaskPool]
+----------------------------------------
+Cross-platform background worker pool with main-thread callback polling.
+* TaskPool.__init__(mode: str='auto', max_workers: int=None) -> any [constructor]
+* TaskPool.submit(fn, *args, on_done=None, on_error=None, tag=None, prefer_thread: bool=False, **kwargs) -> TaskHandle [method]
+  Submit a callable for execution and return a ``TaskHandle``.
+* TaskPool.map_async(fn, items, on_done=None, on_error=None, tag=None, prefer_thread: bool=False) -> list [method]
+  Submit ``fn(item)`` for each item in ``items`` and return the list of ``TaskHandle`` objects.
+* TaskPool.poll(max_callbacks: int=32) -> int [method]
+  Dispatch completed task callbacks on the **main thread** (call inside ``frameUpdate()``).
+* TaskPool.wait(handle: TaskHandle, timeout=None) -> any [method]
+  Block until ``handle`` completes and return its result.
+* TaskPool.pending_count() -> int [method]
+* TaskPool.cancel_by_tag(tag) -> int [method]
+* TaskPool.shutdown(wait: bool=False) -> any [method]

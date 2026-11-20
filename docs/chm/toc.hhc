@@ -1,0 +1,36 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML><BODY>
+<UL>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Tutorials (Beginner to Advanced)"></OBJECT>
+  <UL>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="Home"><param name="Local" value="..\html\index.html"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="01. Getting Started"><param name="Local" value="..\html\01_getting_started.html"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="02. Input &amp; Menu"><param name="Local" value="..\html\02_window_input_menu.html"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="03. 3D Audio"><param name="Local" value="..\html\03_audio_3d_fx.html"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="04. Speech, VB &amp; GUI"><param name="Local" value="..\html\04_speech_vb_gui.html"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="05. Advanced Systems"><param name="Local" value="..\html\05_timer_worker_storage_haptics.html"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="06. Building"><param name="Local" value="..\html\06_building_cross_platform.html"></OBJECT>
+  </UL>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Per-Module Reference &amp; Parameter Tables"><param name="Local" value="..\html\api_reference.html"></OBJECT>
+  <UL>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.window"><param name="Local" value="..\html\modules\window.html"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.speech"><param name="Local" value="..\html\modules\speech.html"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.sound_pool"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.sound_fx"><param name="Local" value="..\html\modules\sound_fx.html"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.menu"><param name="Local" value="..\html\modules\menu.html"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.vb"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.gui"><param name="Local" value="..\html\modules\gui.html"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.timer"><param name="Local" value="..\html\modules\timer.html"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.haptics"><param name="Local" value="..\html\modules\haptics.html"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.notify"><param name="Local" value="..\html\modules\notify.html"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.app_link"><param name="Local" value="..\html\modules\app_link.html"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.storage"><param name="Local" value="..\html\modules\storage.html"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.worker"><param name="Local" value="..\html\modules\worker.html"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.input_map"><param name="Local" value="..\html\modules\input_map.html"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.file"><param name="Local" value="..\html\modules\file.html"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.utils"><param name="Local" value="..\html\modules\utils.html"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.system"><param name="Local" value="..\html\modules\system.html"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.compile"><param name="Local" value="..\html\modules\compile.html"></OBJECT>
+  </UL>
+</UL>
+</BODY></HTML>

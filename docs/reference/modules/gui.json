@@ -1,0 +1,3491 @@
+{
+  "module": "gui",
+  "classes": [
+    {
+      "name": "WxWindow",
+      "doc": "",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "title='PyAudioGaming App', size=(500, 400)",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "'PyAudioGaming App'"
+            },
+            {
+              "name": "size",
+              "type": "any",
+              "default": "(500, 400)"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "row",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "group",
+          "kind": "method",
+          "signature": "label",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "page",
+          "kind": "method",
+          "signature": "title",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "button",
+          "kind": "method",
+          "signature": "label, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "print",
+          "kind": "method",
+          "signature": "text, font=None, color=None",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "input",
+          "kind": "method",
+          "signature": "label, value='', font=None, password=False, multiline=False, placeholder='', color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "''"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "password",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "multiline",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "placeholder",
+              "type": "any",
+              "default": "''"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "checkbox",
+          "kind": "method",
+          "signature": "label, value=False, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "slider",
+          "kind": "method",
+          "signature": "label, min_val=0, max_val=100, value=50, step=1, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "min_val",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "max_val",
+              "type": "any",
+              "default": "100"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "50"
+            },
+            {
+              "name": "step",
+              "type": "any",
+              "default": "1"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "spin",
+          "kind": "method",
+          "signature": "label, min_val=0, max_val=100, value=0, step=1, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "min_val",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "max_val",
+              "type": "any",
+              "default": "100"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "step",
+              "type": "any",
+              "default": "1"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "combo",
+          "kind": "method",
+          "signature": "label, choices=(), value=0, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "choices",
+              "type": "any",
+              "default": "()"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "listbox",
+          "kind": "method",
+          "signature": "label, choices=(), value=0, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "choices",
+              "type": "any",
+              "default": "()"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "radio",
+          "kind": "method",
+          "signature": "label, choices=(), value=0, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "choices",
+              "type": "any",
+              "default": "()"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "progress",
+          "kind": "method",
+          "signature": "label, value=0, max_val=100, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "max_val",
+              "type": "any",
+              "default": "100"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "table",
+          "kind": "method",
+          "signature": "label, headers=(), rows=(), handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "headers",
+              "type": "any",
+              "default": "()"
+            },
+            {
+              "name": "rows",
+              "type": "any",
+              "default": "()"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "link",
+          "kind": "method",
+          "signature": "label, url, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "url",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "separator",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get",
+          "kind": "method",
+          "signature": "label, default=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "default",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set",
+          "kind": "method",
+          "signature": "label, value",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "enable",
+          "kind": "method",
+          "signature": "label, enabled=True",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "enabled",
+              "type": "any",
+              "default": "True"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "show",
+          "kind": "method",
+          "signature": "label, visible=True",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "visible",
+              "type": "any",
+              "default": "True"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "focus",
+          "kind": "method",
+          "signature": "label",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_title",
+          "kind": "method",
+          "signature": "title",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "on_close",
+          "kind": "method",
+          "signature": "handler",
+          "params": [
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "after",
+          "kind": "method",
+          "signature": "ms, callback",
+          "params": [
+            {
+              "name": "ms",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "callback",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "shortcut",
+          "kind": "method",
+          "signature": "combo, handler",
+          "params": [
+            {
+              "name": "combo",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "remove",
+          "kind": "method",
+          "signature": "label",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "edit",
+          "kind": "method",
+          "signature": "label, font=None, color=None, text=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "text",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "alert",
+          "kind": "method",
+          "signature": "title, text, level='info'",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "level",
+              "type": "any",
+              "default": "'info'"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "confirm",
+          "kind": "method",
+          "signature": "title, text",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "bool",
+          "doc": ""
+        },
+        {
+          "name": "prompt",
+          "kind": "method",
+          "signature": "title, text='', default=''",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "text",
+              "type": "any",
+              "default": "''"
+            },
+            {
+              "name": "default",
+              "type": "any",
+              "default": "''"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "open_file",
+          "kind": "method",
+          "signature": "title='Open File', wildcard='All files (*.*)|*.*'",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "'Open File'"
+            },
+            {
+              "name": "wildcard",
+              "type": "any",
+              "default": "'All files (*.*)|*.*'"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "save_file",
+          "kind": "method",
+          "signature": "title='Save File', wildcard='All files (*.*)|*.*'",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "'Save File'"
+            },
+            {
+              "name": "wildcard",
+              "type": "any",
+              "default": "'All files (*.*)|*.*'"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "open_folder",
+          "kind": "method",
+          "signature": "title='Select Folder'",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "'Select Folder'"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "close",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "frameUpdate",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "QtWindow",
+      "doc": "",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "title='PyAudioGaming App', size=(500, 400)",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "'PyAudioGaming App'"
+            },
+            {
+              "name": "size",
+              "type": "any",
+              "default": "(500, 400)"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "row",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "group",
+          "kind": "method",
+          "signature": "label",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "page",
+          "kind": "method",
+          "signature": "title",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "button",
+          "kind": "method",
+          "signature": "label, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "print",
+          "kind": "method",
+          "signature": "text, font=None, color=None",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "input",
+          "kind": "method",
+          "signature": "label, value='', font=None, password=False, multiline=False, placeholder='', color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "''"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "password",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "multiline",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "placeholder",
+              "type": "any",
+              "default": "''"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "checkbox",
+          "kind": "method",
+          "signature": "label, value=False, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "slider",
+          "kind": "method",
+          "signature": "label, min_val=0, max_val=100, value=50, step=1, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "min_val",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "max_val",
+              "type": "any",
+              "default": "100"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "50"
+            },
+            {
+              "name": "step",
+              "type": "any",
+              "default": "1"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "spin",
+          "kind": "method",
+          "signature": "label, min_val=0, max_val=100, value=0, step=1, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "min_val",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "max_val",
+              "type": "any",
+              "default": "100"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "step",
+              "type": "any",
+              "default": "1"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "combo",
+          "kind": "method",
+          "signature": "label, choices=(), value=0, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "choices",
+              "type": "any",
+              "default": "()"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "listbox",
+          "kind": "method",
+          "signature": "label, choices=(), value=0, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "choices",
+              "type": "any",
+              "default": "()"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "radio",
+          "kind": "method",
+          "signature": "label, choices=(), value=0, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "choices",
+              "type": "any",
+              "default": "()"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "progress",
+          "kind": "method",
+          "signature": "label, value=0, max_val=100, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "max_val",
+              "type": "any",
+              "default": "100"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "table",
+          "kind": "method",
+          "signature": "label, headers=(), rows=(), handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "headers",
+              "type": "any",
+              "default": "()"
+            },
+            {
+              "name": "rows",
+              "type": "any",
+              "default": "()"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "link",
+          "kind": "method",
+          "signature": "label, url, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "url",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "separator",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get",
+          "kind": "method",
+          "signature": "label, default=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "default",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set",
+          "kind": "method",
+          "signature": "label, value",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "enable",
+          "kind": "method",
+          "signature": "label, enabled=True",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "enabled",
+              "type": "any",
+              "default": "True"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "show",
+          "kind": "method",
+          "signature": "label, visible=True",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "visible",
+              "type": "any",
+              "default": "True"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "focus",
+          "kind": "method",
+          "signature": "label",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_title",
+          "kind": "method",
+          "signature": "title",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "on_close",
+          "kind": "method",
+          "signature": "handler",
+          "params": [
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "after",
+          "kind": "method",
+          "signature": "ms, callback",
+          "params": [
+            {
+              "name": "ms",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "callback",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "shortcut",
+          "kind": "method",
+          "signature": "combo, handler",
+          "params": [
+            {
+              "name": "combo",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "remove",
+          "kind": "method",
+          "signature": "label",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "edit",
+          "kind": "method",
+          "signature": "label, font=None, color=None, text=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "text",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "alert",
+          "kind": "method",
+          "signature": "title, text, level='info'",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "level",
+              "type": "any",
+              "default": "'info'"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "confirm",
+          "kind": "method",
+          "signature": "title, text",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "bool",
+          "doc": ""
+        },
+        {
+          "name": "prompt",
+          "kind": "method",
+          "signature": "title, text='', default=''",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "text",
+              "type": "any",
+              "default": "''"
+            },
+            {
+              "name": "default",
+              "type": "any",
+              "default": "''"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "open_file",
+          "kind": "method",
+          "signature": "title='Open File', wildcard='All Files (*.*)'",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "'Open File'"
+            },
+            {
+              "name": "wildcard",
+              "type": "any",
+              "default": "'All Files (*.*)'"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "save_file",
+          "kind": "method",
+          "signature": "title='Save File', wildcard='All Files (*.*)'",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "'Save File'"
+            },
+            {
+              "name": "wildcard",
+              "type": "any",
+              "default": "'All Files (*.*)'"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "open_folder",
+          "kind": "method",
+          "signature": "title='Select Folder'",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "'Select Folder'"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "close",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "frameUpdate",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "TkWindow",
+      "doc": "",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "title='PyAudioGaming App', size=(500, 400)",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "'PyAudioGaming App'"
+            },
+            {
+              "name": "size",
+              "type": "any",
+              "default": "(500, 400)"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "row",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "group",
+          "kind": "method",
+          "signature": "label",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "page",
+          "kind": "method",
+          "signature": "title",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "button",
+          "kind": "method",
+          "signature": "label, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "print",
+          "kind": "method",
+          "signature": "text, font=None, color=None",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "input",
+          "kind": "method",
+          "signature": "label, value='', font=None, password=False, multiline=False, placeholder='', color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "''"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "password",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "multiline",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "placeholder",
+              "type": "any",
+              "default": "''"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "checkbox",
+          "kind": "method",
+          "signature": "label, value=False, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "slider",
+          "kind": "method",
+          "signature": "label, min_val=0, max_val=100, value=50, step=1, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "min_val",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "max_val",
+              "type": "any",
+              "default": "100"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "50"
+            },
+            {
+              "name": "step",
+              "type": "any",
+              "default": "1"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "spin",
+          "kind": "method",
+          "signature": "label, min_val=0, max_val=100, value=0, step=1, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "min_val",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "max_val",
+              "type": "any",
+              "default": "100"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "step",
+              "type": "any",
+              "default": "1"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "combo",
+          "kind": "method",
+          "signature": "label, choices=(), value=0, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "choices",
+              "type": "any",
+              "default": "()"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "listbox",
+          "kind": "method",
+          "signature": "label, choices=(), value=0, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "choices",
+              "type": "any",
+              "default": "()"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "radio",
+          "kind": "method",
+          "signature": "label, choices=(), value=0, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "choices",
+              "type": "any",
+              "default": "()"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "progress",
+          "kind": "method",
+          "signature": "label, value=0, max_val=100, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "max_val",
+              "type": "any",
+              "default": "100"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "table",
+          "kind": "method",
+          "signature": "label, headers=(), rows=(), handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "headers",
+              "type": "any",
+              "default": "()"
+            },
+            {
+              "name": "rows",
+              "type": "any",
+              "default": "()"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "link",
+          "kind": "method",
+          "signature": "label, url, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "url",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "separator",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get",
+          "kind": "method",
+          "signature": "label, default=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "default",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set",
+          "kind": "method",
+          "signature": "label, value",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "enable",
+          "kind": "method",
+          "signature": "label, enabled=True",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "enabled",
+              "type": "any",
+              "default": "True"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "show",
+          "kind": "method",
+          "signature": "label, visible=True",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "visible",
+              "type": "any",
+              "default": "True"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "focus",
+          "kind": "method",
+          "signature": "label",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_title",
+          "kind": "method",
+          "signature": "title",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "on_close",
+          "kind": "method",
+          "signature": "handler",
+          "params": [
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "after",
+          "kind": "method",
+          "signature": "ms, callback",
+          "params": [
+            {
+              "name": "ms",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "callback",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "shortcut",
+          "kind": "method",
+          "signature": "combo, handler",
+          "params": [
+            {
+              "name": "combo",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "remove",
+          "kind": "method",
+          "signature": "label",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "edit",
+          "kind": "method",
+          "signature": "label, font=None, color=None, text=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "text",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "alert",
+          "kind": "method",
+          "signature": "title, text, level='info'",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "level",
+              "type": "any",
+              "default": "'info'"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "confirm",
+          "kind": "method",
+          "signature": "title, text",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "bool",
+          "doc": ""
+        },
+        {
+          "name": "prompt",
+          "kind": "method",
+          "signature": "title, text='', default=''",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "text",
+              "type": "any",
+              "default": "''"
+            },
+            {
+              "name": "default",
+              "type": "any",
+              "default": "''"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "open_file",
+          "kind": "method",
+          "signature": "title='Open File', wildcard=None",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "'Open File'"
+            },
+            {
+              "name": "wildcard",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "save_file",
+          "kind": "method",
+          "signature": "title='Save File', wildcard=None",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "'Save File'"
+            },
+            {
+              "name": "wildcard",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "open_folder",
+          "kind": "method",
+          "signature": "title='Select Folder'",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "'Select Folder'"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "close",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "frameUpdate",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "AudioWindow",
+      "doc": "Accessible virtual GUI powered by ``vb.form`` — runs everywhere (Android, iOS, Web, PC).",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "title='PyAudioGaming App', size=(500, 400), window=None",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "'PyAudioGaming App'"
+            },
+            {
+              "name": "size",
+              "type": "any",
+              "default": "(500, 400)"
+            },
+            {
+              "name": "window",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "row",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "group",
+          "kind": "method",
+          "signature": "label",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "page",
+          "kind": "method",
+          "signature": "title",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "button",
+          "kind": "method",
+          "signature": "label, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "print",
+          "kind": "method",
+          "signature": "text, font=None, color=None",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "input",
+          "kind": "method",
+          "signature": "label, value='', font=None, password=False, multiline=False, placeholder='', color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "''"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "password",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "multiline",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "placeholder",
+              "type": "any",
+              "default": "''"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "checkbox",
+          "kind": "method",
+          "signature": "label, value=False, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "switch",
+          "kind": "method",
+          "signature": "label, value=False, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "slider",
+          "kind": "method",
+          "signature": "label, min_val=0, max_val=100, value=50, step=1, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "min_val",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "max_val",
+              "type": "any",
+              "default": "100"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "50"
+            },
+            {
+              "name": "step",
+              "type": "any",
+              "default": "1"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "spin",
+          "kind": "method",
+          "signature": "label, min_val=0, max_val=100, value=0, step=1, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "min_val",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "max_val",
+              "type": "any",
+              "default": "100"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "step",
+              "type": "any",
+              "default": "1"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "combo",
+          "kind": "method",
+          "signature": "label, choices=(), value=0, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "choices",
+              "type": "any",
+              "default": "()"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "listbox",
+          "kind": "method",
+          "signature": "label, choices=(), value=0, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "choices",
+              "type": "any",
+              "default": "()"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "radio",
+          "kind": "method",
+          "signature": "label, choices=(), value=0, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "choices",
+              "type": "any",
+              "default": "()"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "progress",
+          "kind": "method",
+          "signature": "label, value=0, max_val=100, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "max_val",
+              "type": "any",
+              "default": "100"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "table",
+          "kind": "method",
+          "signature": "label, headers=(), rows=(), handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "headers",
+              "type": "any",
+              "default": "()"
+            },
+            {
+              "name": "rows",
+              "type": "any",
+              "default": "()"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "link",
+          "kind": "method",
+          "signature": "label, url, handler=None, font=None, color=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "url",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "separator",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get",
+          "kind": "method",
+          "signature": "label, default=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "default",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set",
+          "kind": "method",
+          "signature": "label, value",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "enable",
+          "kind": "method",
+          "signature": "label, enabled=True",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "enabled",
+              "type": "any",
+              "default": "True"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "show",
+          "kind": "method",
+          "signature": "label, visible=True",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "visible",
+              "type": "any",
+              "default": "True"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "focus",
+          "kind": "method",
+          "signature": "label",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_title",
+          "kind": "method",
+          "signature": "title",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "on_close",
+          "kind": "method",
+          "signature": "handler",
+          "params": [
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "after",
+          "kind": "method",
+          "signature": "ms, callback",
+          "params": [
+            {
+              "name": "ms",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "callback",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "shortcut",
+          "kind": "method",
+          "signature": "combo, handler",
+          "params": [
+            {
+              "name": "combo",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "handler",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "remove",
+          "kind": "method",
+          "signature": "label",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "edit",
+          "kind": "method",
+          "signature": "label, font=None, color=None, text=None",
+          "params": [
+            {
+              "name": "label",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "font",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "color",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "text",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "alert",
+          "kind": "method",
+          "signature": "title, text, level='info'",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "level",
+              "type": "any",
+              "default": "'info'"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "confirm",
+          "kind": "method",
+          "signature": "title, text",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "bool",
+          "doc": ""
+        },
+        {
+          "name": "prompt",
+          "kind": "method",
+          "signature": "title, text='', default=''",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "text",
+              "type": "any",
+              "default": "''"
+            },
+            {
+              "name": "default",
+              "type": "any",
+              "default": "''"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "open_file",
+          "kind": "method",
+          "signature": "title='Open File', wildcard=None",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "'Open File'"
+            },
+            {
+              "name": "wildcard",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "save_file",
+          "kind": "method",
+          "signature": "title='Save File', wildcard=None",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "'Save File'"
+            },
+            {
+              "name": "wildcard",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "open_folder",
+          "kind": "method",
+          "signature": "title='Select Folder'",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "'Select Folder'"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "close",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "frameUpdate",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "Window",
+      "doc": "Cross-platform accessible GUI Window factory.",
+      "methods": []
+    }
+  ],
+  "functions": [
+    {
+      "name": "detect_gui_backend",
+      "kind": "function",
+      "signature": "preferred: str='auto'",
+      "params": [
+        {
+          "name": "preferred",
+          "type": "str",
+          "default": "'auto'"
+        }
+      ],
+      "returns": "str",
+      "doc": "Return the best available GUI backend name: ``'wx'``, ``'qt'``, ``'tk'``, or ``'audio'``."
+    }
+  ],
+  "title": "gui — Unified 4-Backend Cross-Platform GUI (wx / Qt / Tk / Audio)",
+  "summary": "Write GUI code once and run natively on wxPython (Windows), PySide6/PyQt6 (Linux/macOS), Tkinter (stdlib fallback), or AudioWindow/vb.form (Android/iOS/Web)."
+}

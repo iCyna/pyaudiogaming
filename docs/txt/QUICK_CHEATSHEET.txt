@@ -1,0 +1,19 @@
+PYAUDIOGAMING — QUICK CHEATSHEET
+================================
+
+[1. Keyboard Shortcuts in vb.input]
+- Ctrl + Shift + Alt + Backspace : Cycle keyboard modes (standard / numeric / symbols / emoji / custom)
+- Ctrl + Shift + P               : Toggle password visibility
+- Ctrl + Shift + F               : Announce text formatting & active keyboard mode
+- Ctrl + Z / Ctrl + Y            : Undo / Redo
+- Ctrl + A / C / X / V           : Select All / Copy / Cut / Paste
+
+[2. Keyboard Shortcuts in vb.form]
+- Tab / Shift + Tab              : Next / Previous control
+- Application / Menu / Shift+F10 : Open Context Menu
+- Ctrl + Tab / Ctrl + PageUp/Dn  : Switch Tab / Page
+
+[3. Cross-Platform Build CLI (compile.py)]
+- python -m pyaudiogaming.compile create build.txt
+- python -m pyaudiogaming.compile make
+- python -m pyaudiogaming.compile build.txt

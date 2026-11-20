@@ -1,0 +1,22 @@
+========================================================================
+MODULE: pyaudiogaming.notify
+notify — System Notifications & Lock-Screen Full-Screen Call/Alarm Wake
+========================================================================
+
+SUMMARY:
+Send native OS notifications (Windows Toast, Android NotificationManager, macOS, Linux) and wake locked/sleeping screens with Full-Screen Intent (Android) or Win32 display wake & foreground bring-to-front (Windows).
+
+[MODULE FUNCTIONS]
+----------------------------------------
+* request_permission() -> bool
+  Request runtime notification permission on Android 13+ (API 33+). No-op on other OSes.
+* open_fullscreen_intent_settings() -> bool
+  Open Android 14+ 'Manage Full-Screen Intent' system settings page for this app.
+* wake_screen() -> bool
+  Wake up a sleeping display on Windows or Android.
+* bring_window_to_front(hwnd=None, topmost: bool=True) -> bool
+  Restore and bring the current application window to the foreground (Windows).
+* send(title: str, message: str, urgency: str='normal', channel_id: str='pyag_default', app_name: str='PyAudioGaming', notification_id: int=1001) -> bool
+  Send a native OS notification on Windows, Android, Linux, macOS, or iOS.
+* wake_and_show(title: str, message: str, category: str='call', channel_id: str='pyag_fullscreen', app_name: str='PyAudioGaming', hwnd=None, vibrate: bool=True, notification_id: int=2001) -> bool
+  Wake a locked/sleeping screen and display a full-screen call/alarm alert.

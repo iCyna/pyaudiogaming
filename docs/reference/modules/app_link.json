@@ -1,0 +1,179 @@
+{
+  "module": "app_link",
+  "classes": [
+    {
+      "name": "SingleInstance",
+      "doc": "Enforce a single running app instance and forward newly opened files to it.",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "app_id: str, port: int=None",
+          "params": [
+            {
+              "name": "app_id",
+              "type": "str",
+              "default": "required"
+            },
+            {
+              "name": "port",
+              "type": "int",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "send_args",
+          "kind": "method",
+          "signature": "args_list, timeout: float=1.5",
+          "params": [
+            {
+              "name": "args_list",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "timeout",
+              "type": "float",
+              "default": "1.5"
+            }
+          ],
+          "returns": "bool",
+          "doc": "Send a list of file paths / commands to the primary running instance."
+        },
+        {
+          "name": "poll",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "list",
+          "doc": "Non-blocking check for messages forwarded by secondary instances. Call inside ``frameUpdate()``."
+        },
+        {
+          "name": "close",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "name": "get_launch_files",
+      "kind": "function",
+      "signature": "argv=None",
+      "params": [
+        {
+          "name": "argv",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "list",
+      "doc": "Return a list of file paths or URIs passed to the application on launch."
+    },
+    {
+      "name": "get_launch_file",
+      "kind": "function",
+      "signature": "argv=None",
+      "params": [
+        {
+          "name": "argv",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": "Return the first file path / URI passed on launch, or ``None``."
+    },
+    {
+      "name": "resolve_uri_to_file",
+      "kind": "function",
+      "signature": "path_or_uri: str, suffix: str=''",
+      "params": [
+        {
+          "name": "path_or_uri",
+          "type": "str",
+          "default": "required"
+        },
+        {
+          "name": "suffix",
+          "type": "str",
+          "default": "''"
+        }
+      ],
+      "returns": "str",
+      "doc": "Convert an Android ``content://`` URI into a readable local temp file path."
+    },
+    {
+      "name": "register_file_association",
+      "kind": "function",
+      "signature": "extensions, app_name: str, prog_id: str=None, exe_path: str=None, description: str='', icon_path: str=None, mime_types=None",
+      "params": [
+        {
+          "name": "extensions",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "app_name",
+          "type": "str",
+          "default": "required"
+        },
+        {
+          "name": "prog_id",
+          "type": "str",
+          "default": "None"
+        },
+        {
+          "name": "exe_path",
+          "type": "str",
+          "default": "None"
+        },
+        {
+          "name": "description",
+          "type": "str",
+          "default": "''"
+        },
+        {
+          "name": "icon_path",
+          "type": "str",
+          "default": "None"
+        },
+        {
+          "name": "mime_types",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "dict",
+      "doc": "Register file extensions so pressing Enter / double-clicking opens your app."
+    },
+    {
+      "name": "unregister_file_association",
+      "kind": "function",
+      "signature": "extensions, prog_id: str",
+      "params": [
+        {
+          "name": "extensions",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "prog_id",
+          "type": "str",
+          "default": "required"
+        }
+      ],
+      "returns": "bool",
+      "doc": "Remove previously registered HKCU Windows or Linux .desktop file associations."
+    }
+  ],
+  "title": "app_link — File Associations, Android URI Resolver & Single-Instance IPC",
+  "summary": "Register file extensions (.mp3, .ogg, .wav) without Admin on Windows (HKCU) or Linux (.desktop), read launched files / Android content:// URIs, and forward newly opened files to an already-running app instance."
+}

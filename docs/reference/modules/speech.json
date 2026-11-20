@@ -1,0 +1,481 @@
+{
+  "module": "speech",
+  "classes": [
+    {
+      "name": "Speech",
+      "doc": "",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "say",
+          "kind": "method",
+          "signature": "text, i=True, split=False",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "i",
+              "type": "any",
+              "default": "True"
+            },
+            {
+              "name": "split",
+              "type": "any",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": "tts speech"
+        },
+        {
+          "name": "saync",
+          "kind": "method",
+          "signature": "string, i=True",
+          "params": [
+            {
+              "name": "string",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "i",
+              "type": "any",
+              "default": "True"
+            }
+          ],
+          "returns": "any",
+          "doc": "tts speech no log"
+        },
+        {
+          "name": "say3d",
+          "kind": "method",
+          "signature": "text, lx, ly, lz, sx, sy, sz, i=True, **kwargs",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "lx",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "ly",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "lz",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "sx",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "sy",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "sz",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "i",
+              "type": "any",
+              "default": "True"
+            },
+            {
+              "name": "**kwargs",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_speech_volume",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_speech_volume",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_speech_pitch",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_speech_pitch",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_speech_rate",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_speech_rate",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_speech_voice",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_speech_voice",
+          "kind": "method",
+          "signature": "type",
+          "params": [
+            {
+              "name": "type",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_speech_pan",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_speech_pan",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_speech_sound_pitch",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_speech_sound_pitch",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_speech_output_device",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_speech_output_device",
+          "kind": "method",
+          "signature": "device",
+          "params": [
+            {
+              "name": "device",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_speech_sound",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_speech_mono",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_speech_mono",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_speech_hrtf",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_speech_hrtf",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_speech_fx",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_speech_fx",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_speech_zone_fx_provider",
+          "kind": "method",
+          "signature": "provider",
+          "params": [
+            {
+              "name": "provider",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "list_speech_fx",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_speech_auto_pause",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_speech_auto_pause",
+          "kind": "method",
+          "signature": "enabled",
+          "params": [
+            {
+              "name": "enabled",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "list_voices",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_outputs",
+          "kind": "method",
+          "signature": "active_only=False",
+          "params": [
+            {
+              "name": "active_only",
+              "type": "any",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_output",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_active_screen_reader",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_output",
+          "kind": "method",
+          "signature": "name=None",
+          "params": [
+            {
+              "name": "name",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_capabilities",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "name": "say",
+      "kind": "function",
+      "signature": "text, i=True, split=False, log=True",
+      "params": [
+        {
+          "name": "text",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "i",
+          "type": "any",
+          "default": "True"
+        },
+        {
+          "name": "split",
+          "type": "any",
+          "default": "False"
+        },
+        {
+          "name": "log",
+          "type": "any",
+          "default": "True"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    }
+  ],
+  "title": "speech — Screen Reader, TTS & 3D Positional Speech",
+  "summary": "Unified speech wrapper supporting NVDA, JAWS, SAPI5, VoiceOver, TalkBack, speech history, voice/rate/pitch/volume controls, and 3D positional TTS."
+}

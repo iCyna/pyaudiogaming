@@ -1,0 +1,39 @@
+[OPTIONS]
+Compatibility=1.1 or later
+Compiled file=pyaudiogaming.chm
+Contents file=toc.hhc
+Default topic=..\html\index.html
+Display compile progress=Yes
+Full-text search=Yes
+Index file=index.hhk
+Language=0x409 English (United States)
+Title=PyAudioGaming Official Documentation
+
+[FILES]
+..\html\index.html
+..\html\01_getting_started.html
+..\html\02_window_input_menu.html
+..\html\03_audio_3d_fx.html
+..\html\04_speech_vb_gui.html
+..\html\05_timer_worker_storage_haptics.html
+..\html\06_building_cross_platform.html
+..\html\api_reference.html
+..\html\style.css
+..\html\modules\window.html
+..\html\modules\speech.html
+..\html\modules\sound_pool.html
+..\html\modules\sound_fx.html
+..\html\modules\menu.html
+..\html\modules\vb.html
+..\html\modules\gui.html
+..\html\modules\timer.html
+..\html\modules\haptics.html
+..\html\modules\notify.html
+..\html\modules\app_link.html
+..\html\modules\storage.html
+..\html\modules\worker.html
+..\html\modules\input_map.html
+..\html\modules\file.html
+..\html\modules\utils.html
+..\html\modules\system.html
+..\html\modules\compile.html

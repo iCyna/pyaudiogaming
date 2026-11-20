@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>speech — Screen Reader, TTS &amp; 3D Positional Speech — PyAudioGaming</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header role="banner">
+    <h1>speech — Screen Reader, TTS &amp; 3D Positional Speech — PyAudioGaming</h1>
+    <nav aria-label="Documentation Navigation">
+    <a href="../index.html" class="">Home</a>
+    <a href="../01_getting_started.html" class="">01. Getting Started</a>
+    <a href="../02_window_input_menu.html" class="">02. Input &amp; Menu</a>
+    <a href="../03_audio_3d_fx.html" class="">03. 3D Audio</a>
+    <a href="../04_speech_vb_gui.html" class="">04. Speech, VB &amp; GUI</a>
+    <a href="../05_timer_worker_storage_haptics.html" class="">05. Advanced Systems</a>
+    <a href="../06_building_cross_platform.html" class="">06. Building</a>
+    <a href="../api_reference.html" class="">Module Reference</a>
+    </nav>
+  </header>
+  <main id="main-content" role="main">
+<p><a href="../api_reference.html">&larr; Back to All Modules</a></p>
+<div class="callout"><strong>Summary:</strong> Unified speech wrapper supporting NVDA, JAWS, SAPI5, VoiceOver, TalkBack, speech history, voice/rate/pitch/volume controls, and 3D positional TTS.</div>
+<h2>Usage Guide &amp; Examples</h2>
+
+<h3>How to Use</h3>
+<ul>
+  <li>Use <code>say(text, i=True)</code> to interrupt current speech, or <code>i=False</code> to queue after the current utterance.</li>
+  <li>Pass a list with <code>split=True</code> to speak multiple items sequentially without cutting each other off.</li>
+  <li>Use <code>saync(text)</code> for transient UI hints that should not pollute <code>speech_history</code>.</li>
+  <li>Use <code>say3d(text, lx, ly, lz, sx, sy, sz)</code> to speak from a 3D world coordinate.</li>
+</ul>
+<pre><code>from pyaudiogaming.speech import Speech
+
+sp = Speech()
+sp.say("Welcome!", i=True)
+sp.say(["Health: 100", "Mana: 50"], split=True)
+sp.say3d("Enemy spotted!", 0, 0, 0, 10, 4, 0)
+sp.set_speech_rate(55)</code></pre>
+
+<h2>Parameter &amp; API Tables</h2>
+<label for="mod-search">Filter symbols in this module:</label>
+<input id="mod-search" type="search" placeholder="Type method or parameter name..." oninput="filterMod(this.value)">
+<h3>Module-Level Functions</h3>
+<table class="api-tbl" id="tbl_speech_funcs">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">function</span><code>say(text, i=True, split=False, log=True)</code></td><td><code>text</code> (any, default: <code>required</code>)<br><code>i</code> (any, default: <code>True</code>)<br><code>split</code> (any, default: <code>False</code>)<br><code>log</code> (any, default: <code>True</code>)</td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>Speech</code></h3>
+<table class="api-tbl" id="tbl_speech_Speech">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>say(text, i=True, split=False)</code></td><td><code>text</code> (any, default: <code>required</code>)<br><code>i</code> (any, default: <code>True</code>)<br><code>split</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>tts speech</td></tr>
+    <tr><td><span class="badge">method</span><code>saync(string, i=True)</code></td><td><code>string</code> (any, default: <code>required</code>)<br><code>i</code> (any, default: <code>True</code>)</td><td><code>any</code></td><td>tts speech no log</td></tr>
+    <tr><td><span class="badge">method</span><code>say3d(text, lx, ly, lz, sx, sy, sz, i=True, **kwargs)</code></td><td><code>text</code> (any, default: <code>required</code>)<br><code>lx</code> (any, default: <code>required</code>)<br><code>ly</code> (any, default: <code>required</code>)<br><code>lz</code> (any, default: <code>required</code>)<br><code>sx</code> (any, default: <code>required</code>)<br><code>sy</code> (any, default: <code>required</code>)<br><code>sz</code> (any, default: <code>required</code>)<br><code>i</code> (any, default: <code>True</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_speech_volume()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_speech_volume(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_speech_pitch()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_speech_pitch(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_speech_rate()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_speech_rate(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_speech_voice()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_speech_voice(type)</code></td><td><code>type</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_speech_pan()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_speech_pan(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_speech_sound_pitch()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_speech_sound_pitch(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_speech_output_device()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_speech_output_device(device)</code></td><td><code>device</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_speech_sound()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_speech_mono()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_speech_mono(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_speech_hrtf()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_speech_hrtf(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_speech_fx()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_speech_fx(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_speech_zone_fx_provider(provider)</code></td><td><code>provider</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>list_speech_fx()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_speech_auto_pause()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_speech_auto_pause(enabled)</code></td><td><code>enabled</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>list_voices()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_outputs(active_only=False)</code></td><td><code>active_only</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_output()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_active_screen_reader()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_output(name=None)</code></td><td><code>name</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_capabilities()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<script>
+function filterMod(q) {
+  q = (q || '').toLowerCase();
+  var rows = document.querySelectorAll('.api-tbl tbody tr');
+  for (var i = 0; i < rows.length; i++) {
+    rows[i].style.display = rows[i].innerText.toLowerCase().indexOf(q) !== -1 ? '' : 'none';
+  }
+}
+</script>
+  </main>
+  <footer role="contentinfo">
+    PyAudioGaming Official Documentation &mdash; Cross-Platform Audio Gaming for Windows, Linux, macOS, Android, iOS &amp; Web.
+  </footer>
+</body>
+</html>

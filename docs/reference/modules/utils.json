@@ -1,0 +1,1005 @@
+{
+  "module": "utils",
+  "classes": [
+    {
+      "name": "SpakArchive",
+      "doc": "Manages a loaded .spak package and provides thread-safe O(1) seek & slice reading.",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "spak_path, data_offset, key32, header_info",
+          "params": [
+            {
+              "name": "spak_path",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "data_offset",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "key32",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "header_info",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "read_entry",
+          "kind": "method",
+          "signature": "rel_offset, size, enc_len",
+          "params": [
+            {
+              "name": "rel_offset",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "size",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "enc_len",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "close",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "name": "convert_to_unicode",
+      "kind": "function",
+      "signature": "name",
+      "params": [
+        {
+          "name": "name",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "token",
+      "kind": "function",
+      "signature": "min=4, max=12, more=''",
+      "params": [
+        {
+          "name": "min",
+          "type": "any",
+          "default": "4"
+        },
+        {
+          "name": "max",
+          "type": "any",
+          "default": "12"
+        },
+        {
+          "name": "more",
+          "type": "any",
+          "default": "''"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "run",
+      "kind": "function",
+      "signature": "cmd, sh=False",
+      "params": [
+        {
+          "name": "cmd",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "sh",
+          "type": "any",
+          "default": "False"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "mkdir",
+      "kind": "function",
+      "signature": "fld",
+      "params": [
+        {
+          "name": "fld",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "get_window",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "is_url",
+      "kind": "function",
+      "signature": "path_string",
+      "params": [
+        {
+          "name": "path_string",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "make_spak",
+      "kind": "function",
+      "signature": "source, output_path=None, password='', header_path=None, prefix=None, extensions=_SPAK_DEFAULT_EXTS, encrypt_bytes=256",
+      "params": [
+        {
+          "name": "source",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "output_path",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "password",
+          "type": "any",
+          "default": "''"
+        },
+        {
+          "name": "header_path",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "prefix",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "extensions",
+          "type": "any",
+          "default": "_SPAK_DEFAULT_EXTS"
+        },
+        {
+          "name": "encrypt_bytes",
+          "type": "any",
+          "default": "256"
+        }
+      ],
+      "returns": "any",
+      "doc": "Đóng gói một thư mục âm thanh (bao gồm toàn bộ thư mục con) hoặc danh sách/dict các file thành 1 gói .spak duy nhất (hoặc tách kèm file header.inf nếu truyền header_path)."
+    },
+    {
+      "name": "load_spak",
+      "kind": "function",
+      "signature": "spak_path, password='', mode='lazy', target='both', prefix=None, header_path=None, preload_sample=False, callback=None",
+      "params": [
+        {
+          "name": "spak_path",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "password",
+          "type": "any",
+          "default": "''"
+        },
+        {
+          "name": "mode",
+          "type": "any",
+          "default": "'lazy'"
+        },
+        {
+          "name": "target",
+          "type": "any",
+          "default": "'both'"
+        },
+        {
+          "name": "prefix",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "header_path",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "preload_sample",
+          "type": "any",
+          "default": "False"
+        },
+        {
+          "name": "callback",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": "Đọc gói âm thanh .spak (hoặc gói .ogg + header.inf) và cast vào hệ thống âm thanh (hsample / hstream)."
+    },
+    {
+      "name": "clamp",
+      "kind": "function",
+      "signature": "val, low, high",
+      "params": [
+        {
+          "name": "val",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "low",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "high",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": "Clamp ``val`` to the inclusive range ``[low, high]``."
+    },
+    {
+      "name": "lerp",
+      "kind": "function",
+      "signature": "a, b, t",
+      "params": [
+        {
+          "name": "a",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "b",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "t",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": "Linear interpolation between ``a`` and ``b`` by factor ``t``."
+    },
+    {
+      "name": "inv_lerp",
+      "kind": "function",
+      "signature": "a, b, value",
+      "params": [
+        {
+          "name": "a",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "b",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "value",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": "Inverse linear interpolation: return ``t`` such that ``lerp(a, b, t) == value``."
+    },
+    {
+      "name": "remap",
+      "kind": "function",
+      "signature": "val, in_min, in_max, out_min, out_max, clamp_out=False",
+      "params": [
+        {
+          "name": "val",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "in_min",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "in_max",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "out_min",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "out_max",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "clamp_out",
+          "type": "any",
+          "default": "False"
+        }
+      ],
+      "returns": "any",
+      "doc": "Remap ``val`` from range ``[in_min, in_max]`` to ``[out_min, out_max]``."
+    },
+    {
+      "name": "smoothstep",
+      "kind": "function",
+      "signature": "edge0, edge1, x",
+      "params": [
+        {
+          "name": "edge0",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "edge1",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "x",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": "Smooth Hermite interpolation between 0 and 1."
+    },
+    {
+      "name": "distance_2d",
+      "kind": "function",
+      "signature": "x1, y1, x2, y2",
+      "params": [
+        {
+          "name": "x1",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "y1",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "x2",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "y2",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "distance_3d",
+      "kind": "function",
+      "signature": "x1, y1, z1, x2, y2, z2",
+      "params": [
+        {
+          "name": "x1",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "y1",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "z1",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "x2",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "y2",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "z2",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "angle_2d",
+      "kind": "function",
+      "signature": "x1, y1, x2, y2",
+      "params": [
+        {
+          "name": "x1",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "y1",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "x2",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "y2",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": "Return clockwise bearing in degrees ``[0, 360)`` where North (+Y) = 0, East (+X) = 90."
+    },
+    {
+      "name": "clock_direction",
+      "kind": "function",
+      "signature": "dx, dy",
+      "params": [
+        {
+          "name": "dx",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "dy",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": "Convert a 2D delta ``(dx, dy)`` (North = +Y, East = +X) to clock hour ``1..12``."
+    },
+    {
+      "name": "db_to_linear",
+      "kind": "function",
+      "signature": "db",
+      "params": [
+        {
+          "name": "db",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": "Convert decibels (e.g. ``-6.0``) to linear amplitude (``0.0..1.0+``)."
+    },
+    {
+      "name": "linear_to_db",
+      "kind": "function",
+      "signature": "amp, floor_db=-120.0",
+      "params": [
+        {
+          "name": "amp",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "floor_db",
+          "type": "any",
+          "default": "-120.0"
+        }
+      ],
+      "returns": "any",
+      "doc": "Convert linear amplitude to decibels."
+    },
+    {
+      "name": "percent",
+      "kind": "function",
+      "signature": "value, total, decimals=1",
+      "params": [
+        {
+          "name": "value",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "total",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "decimals",
+          "type": "any",
+          "default": "1"
+        }
+      ],
+      "returns": "any",
+      "doc": "Return percentage ``0.0..100.0`` safely (returns ``0.0`` if ``total == 0``)."
+    },
+    {
+      "name": "chance",
+      "kind": "function",
+      "signature": "prob_percent",
+      "params": [
+        {
+          "name": "prob_percent",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": "Return ``True`` with probability ``prob_percent``% (0..100)."
+    },
+    {
+      "name": "weighted_choice",
+      "kind": "function",
+      "signature": "items",
+      "params": [
+        {
+          "name": "items",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": "Pick one item by weight. Accepts ``{item: weight}`` or ``[(item, weight), ...]``."
+    },
+    {
+      "name": "roll_dice",
+      "kind": "function",
+      "signature": "count=1, sides=6, bonus=0",
+      "params": [
+        {
+          "name": "count",
+          "type": "any",
+          "default": "1"
+        },
+        {
+          "name": "sides",
+          "type": "any",
+          "default": "6"
+        },
+        {
+          "name": "bonus",
+          "type": "any",
+          "default": "0"
+        }
+      ],
+      "returns": "any",
+      "doc": "Roll ``count`` dice with ``sides`` faces and add ``bonus``."
+    },
+    {
+      "name": "shuffle_copy",
+      "kind": "function",
+      "signature": "seq",
+      "params": [
+        {
+          "name": "seq",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": "Return a newly shuffled list without modifying the original sequence."
+    },
+    {
+      "name": "format_bytes",
+      "kind": "function",
+      "signature": "num_bytes, decimals=2",
+      "params": [
+        {
+          "name": "num_bytes",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "decimals",
+          "type": "any",
+          "default": "2"
+        }
+      ],
+      "returns": "any",
+      "doc": "Format byte count into human-readable units (B, KB, MB, GB, TB)."
+    },
+    {
+      "name": "format_number",
+      "kind": "function",
+      "signature": "num, sep=','",
+      "params": [
+        {
+          "name": "num",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "sep",
+          "type": "any",
+          "default": "','"
+        }
+      ],
+      "returns": "any",
+      "doc": "Format integer/float with thousands separators."
+    },
+    {
+      "name": "truncate",
+      "kind": "function",
+      "signature": "text, max_len, suffix='...'",
+      "params": [
+        {
+          "name": "text",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "max_len",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "suffix",
+          "type": "any",
+          "default": "'...'"
+        }
+      ],
+      "returns": "any",
+      "doc": "Truncate text cleanly to at most ``max_len`` characters."
+    },
+    {
+      "name": "strip_accents",
+      "kind": "function",
+      "signature": "text",
+      "params": [
+        {
+          "name": "text",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": "Remove diacritical marks for accent-insensitive search/comparison."
+    },
+    {
+      "name": "slugify",
+      "kind": "function",
+      "signature": "text, sep='_'",
+      "params": [
+        {
+          "name": "text",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "sep",
+          "type": "any",
+          "default": "'_'"
+        }
+      ],
+      "returns": "any",
+      "doc": "Convert arbitrary text into a clean ASCII filename/identifier slug."
+    },
+    {
+      "name": "natural_sort_key",
+      "kind": "function",
+      "signature": "text",
+      "params": [
+        {
+          "name": "text",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": "Sort key so ``'item2'`` comes before ``'item10'``."
+    },
+    {
+      "name": "fuzzy_match",
+      "kind": "function",
+      "signature": "query, candidates, limit=10",
+      "params": [
+        {
+          "name": "query",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "candidates",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "limit",
+          "type": "any",
+          "default": "10"
+        }
+      ],
+      "returns": "any",
+      "doc": "Accent-insensitive ranked search returning up to ``limit`` matching candidates."
+    },
+    {
+      "name": "deep_merge",
+      "kind": "function",
+      "signature": "base, override",
+      "params": [
+        {
+          "name": "base",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "override",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": "Recursively merge two dictionaries without mutating ``base`` or ``override``."
+    },
+    {
+      "name": "flatten",
+      "kind": "function",
+      "signature": "nested",
+      "params": [
+        {
+          "name": "nested",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": "Recursively flatten nested lists/tuples into a single list."
+    },
+    {
+      "name": "chunked",
+      "kind": "function",
+      "signature": "seq, size",
+      "params": [
+        {
+          "name": "seq",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "size",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": "Yield consecutive chunks of length ``size`` from ``seq``."
+    },
+    {
+      "name": "safe_int",
+      "kind": "function",
+      "signature": "val, default=0",
+      "params": [
+        {
+          "name": "val",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "default",
+          "type": "any",
+          "default": "0"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "safe_float",
+      "kind": "function",
+      "signature": "val, default=0.0",
+      "params": [
+        {
+          "name": "val",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "default",
+          "type": "any",
+          "default": "0.0"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "safe_bool",
+      "kind": "function",
+      "signature": "val, default=False",
+      "params": [
+        {
+          "name": "val",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "default",
+          "type": "any",
+          "default": "False"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "ensure_dir",
+      "kind": "function",
+      "signature": "path",
+      "params": [
+        {
+          "name": "path",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": "Create directory (including parents) if missing and return the path."
+    },
+    {
+      "name": "file_hash",
+      "kind": "function",
+      "signature": "filepath, algo='sha256', chunk_size=65536",
+      "params": [
+        {
+          "name": "filepath",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "algo",
+          "type": "any",
+          "default": "'sha256'"
+        },
+        {
+          "name": "chunk_size",
+          "type": "any",
+          "default": "65536"
+        }
+      ],
+      "returns": "any",
+      "doc": "Compute hexadecimal hash digest of a file efficiently in chunks."
+    },
+    {
+      "name": "open_url",
+      "kind": "function",
+      "signature": "url",
+      "params": [
+        {
+          "name": "url",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": "Open a URL in the default browser on Windows, macOS, Linux, and Android."
+    },
+    {
+      "name": "copy_text",
+      "kind": "function",
+      "signature": "text",
+      "params": [
+        {
+          "name": "text",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": "Copy UTF-8 text to system clipboard (Windows, Android, macOS, Linux) with zero external dependencies."
+    },
+    {
+      "name": "paste_text",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "any",
+      "doc": "Read UTF-8 text from system clipboard (Windows, Android, macOS, Linux)."
+    },
+    {
+      "name": "is_online",
+      "kind": "function",
+      "signature": "host='1.1.1.1', port=53, timeout=1.5",
+      "params": [
+        {
+          "name": "host",
+          "type": "any",
+          "default": "'1.1.1.1'"
+        },
+        {
+          "name": "port",
+          "type": "any",
+          "default": "53"
+        },
+        {
+          "name": "timeout",
+          "type": "any",
+          "default": "1.5"
+        }
+      ],
+      "returns": "any",
+      "doc": "Quick check whether network connectivity is available."
+    },
+    {
+      "name": "retry",
+      "kind": "function",
+      "signature": "fn, retries=3, delay_ms=100, exceptions=(Exception,)",
+      "params": [
+        {
+          "name": "fn",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "retries",
+          "type": "any",
+          "default": "3"
+        },
+        {
+          "name": "delay_ms",
+          "type": "any",
+          "default": "100"
+        },
+        {
+          "name": "exceptions",
+          "type": "any",
+          "default": "(Exception,)"
+        }
+      ],
+      "returns": "any",
+      "doc": "Call ``fn()`` up to ``retries`` times with ``delay_ms`` pause between failures."
+    }
+  ],
+  "title": "utils — Math, Spatial, Formatting, Search, Clipboard & SPAK Archive Toolkit",
+  "summary": "Zero-dependency game utilities: clamp/lerp/remap/clock_direction/db_to_linear, weighted random, fuzzy search, cross-platform clipboard (copy_text/paste_text), open_url, SHA-256 hashing, and SPAK binary audio archiving."
+}

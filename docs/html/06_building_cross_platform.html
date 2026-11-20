@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>06. Cross-Platform Building &amp; Shipping (compile.py)</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header role="banner">
+    <h1>06. Cross-Platform Building &amp; Shipping (compile.py)</h1>
+    <nav aria-label="Documentation Navigation">
+    <a href="index.html" class="">Home</a>
+    <a href="01_getting_started.html" class="">01. Getting Started</a>
+    <a href="02_window_input_menu.html" class="">02. Input &amp; Menu</a>
+    <a href="03_audio_3d_fx.html" class="">03. 3D Audio</a>
+    <a href="04_speech_vb_gui.html" class="">04. Speech, VB &amp; GUI</a>
+    <a href="05_timer_worker_storage_haptics.html" class="">05. Advanced Systems</a>
+    <a href="06_building_cross_platform.html" class="active">06. Building</a>
+    <a href="api_reference.html" class="">Module Reference</a>
+    </nav>
+  </header>
+  <main id="main-content" role="main">
+
+<h2>1. Sample <code>build.txt</code></h2>
+<pre><code>project = main
+project_full_name = my_audio_game
+rename_file = game
+args_compile = [--noconsole]
+data = [res]
+mode = pyinstaller      # pyinstaller | nuitka | cython | gcc | cx_freeze | beeware
+platforms = windows     # windows | linux | macos | android | ios | web
+arch = null</code></pre>
+<h2>2. Build Commands</h2>
+<pre><code>python -m pyaudiogaming.compile create build.txt
+python -m pyaudiogaming.compile make
+python -m pyaudiogaming.compile build.txt</code></pre>
+<p>Module Reference: <a href="modules/compile.html">compile</a> | <a href="modules/system.html">system</a></p>
+
+  </main>
+  <footer role="contentinfo">
+    PyAudioGaming Official Documentation &mdash; Cross-Platform Audio Gaming for Windows, Linux, macOS, Android, iOS &amp; Web.
+  </footer>
+</body>
+</html>

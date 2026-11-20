@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>haptics — Cross-Platform Vibration &amp; Gamepad Rumble — PyAudioGaming</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header role="banner">
+    <h1>haptics — Cross-Platform Vibration &amp; Gamepad Rumble — PyAudioGaming</h1>
+    <nav aria-label="Documentation Navigation">
+    <a href="../index.html" class="">Home</a>
+    <a href="../01_getting_started.html" class="">01. Getting Started</a>
+    <a href="../02_window_input_menu.html" class="">02. Input &amp; Menu</a>
+    <a href="../03_audio_3d_fx.html" class="">03. 3D Audio</a>
+    <a href="../04_speech_vb_gui.html" class="">04. Speech, VB &amp; GUI</a>
+    <a href="../05_timer_worker_storage_haptics.html" class="">05. Advanced Systems</a>
+    <a href="../06_building_cross_platform.html" class="">06. Building</a>
+    <a href="../api_reference.html" class="">Module Reference</a>
+    </nav>
+  </header>
+  <main id="main-content" role="main">
+<p><a href="../api_reference.html">&larr; Back to All Modules</a></p>
+<div class="callout"><strong>Summary:</strong> Unified vibration &amp; rumble controller for Android (Vibrator/VibrationEffect), iOS (UIImpactFeedbackGenerator), Windows XInput gamepads, and SDL2/pygame joysticks with 13 built-in presets and non-blocking patterns.</div>
+<h2>Usage Guide &amp; Examples</h2>
+
+<h3>How to Use</h3>
+<ol>
+  <li>Trigger instant feedback with <code>haptics.preset("click")</code>, <code>haptics.preset("hit_heavy")</code>, or <code>haptics.vibrate(duration_ms=60, strength=0.8)</code>.</li>
+  <li>Play multi-step rhythms with <code>haptics.pattern([(40, 0.8), (60, 0.0), (100, 1.0)])</code>.</li>
+  <li>Call <code>haptics.update()</code> once per frame in your game loop.</li>
+</ol>
+<pre><code>from pyaudiogaming import haptics
+
+haptics.set_intensity(0.85)
+haptics.preset("explosion")
+# Inside game loop:
+haptics.update()</code></pre>
+
+<h2>Parameter &amp; API Tables</h2>
+<label for="mod-search">Filter symbols in this module:</label>
+<input id="mod-search" type="search" placeholder="Type method or parameter name..." oninput="filterMod(this.value)">
+<h3>Module-Level Functions</h3>
+<table class="api-tbl" id="tbl_haptics_funcs">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">function</span><code>vibrate(duration_ms: int=40, strength: float=0.6, low_freq=None, high_freq=None, device: int=0)</code></td><td><code>duration_ms</code> (int, default: <code>40</code>)<br><code>strength</code> (float, default: <code>0.6</code>)<br><code>low_freq</code> (any, default: <code>None</code>)<br><code>high_freq</code> (any, default: <code>None</code>)<br><code>device</code> (int, default: <code>0</code>)</td><td><code>bool</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>stop(device: int=0)</code></td><td><code>device</code> (int, default: <code>0</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>pattern(steps, repeat: int=1, device: int=0)</code></td><td><code>steps</code> (any, default: <code>required</code>)<br><code>repeat</code> (int, default: <code>1</code>)<br><code>device</code> (int, default: <code>0</code>)</td><td><code>bool</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>preset(name: str, repeat: int=1, device: int=0)</code></td><td><code>name</code> (str, default: <code>required</code>)<br><code>repeat</code> (int, default: <code>1</code>)<br><code>device</code> (int, default: <code>0</code>)</td><td><code>bool</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>update()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>set_enabled(enabled: bool)</code></td><td><code>enabled</code> (bool, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>set_intensity(value: float)</code></td><td><code>value</code> (float, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>is_supported()</code></td><td><em>None</em></td><td><code>bool</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>HapticEngine</code></h3>
+<p>Unified cross-platform haptic feedback controller with pattern sequencer &amp; presets.</p>
+<table class="api-tbl" id="tbl_haptics_HapticEngine">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__(enabled: bool=True, intensity: float=1.0)</code></td><td><code>enabled</code> (bool, default: <code>True</code>)<br><code>intensity</code> (float, default: <code>1.0</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">property</span><code>enabled()</code></td><td><em>None</em></td><td><code>bool</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_enabled(enabled: bool)</code></td><td><code>enabled</code> (bool, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">property</span><code>intensity()</code></td><td><em>None</em></td><td><code>float</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_intensity(value: float)</code></td><td><code>value</code> (float, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>is_supported()</code></td><td><em>None</em></td><td><code>bool</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>vibrate(duration_ms: int=40, strength: float=0.6, low_freq=None, high_freq=None, device: int=0)</code></td><td><code>duration_ms</code> (int, default: <code>40</code>)<br><code>strength</code> (float, default: <code>0.6</code>)<br><code>low_freq</code> (any, default: <code>None</code>)<br><code>high_freq</code> (any, default: <code>None</code>)<br><code>device</code> (int, default: <code>0</code>)</td><td><code>bool</code></td><td>Trigger a single vibration pulse. Returns True if a hardware backend accepted it.</td></tr>
+    <tr><td><span class="badge">method</span><code>stop(device: int=0)</code></td><td><code>device</code> (int, default: <code>0</code>)</td><td><code>any</code></td><td>Immediately stop all active vibrations and cancel queued patterns.</td></tr>
+    <tr><td><span class="badge">method</span><code>pattern(steps, repeat: int=1, device: int=0)</code></td><td><code>steps</code> (any, default: <code>required</code>)<br><code>repeat</code> (int, default: <code>1</code>)<br><code>device</code> (int, default: <code>0</code>)</td><td><code>any</code></td><td>Play a sequence of ``(duration_ms, strength)`` tuples non-blockingly.</td></tr>
+    <tr><td><span class="badge">method</span><code>preset(name: str, repeat: int=1, device: int=0)</code></td><td><code>name</code> (str, default: <code>required</code>)<br><code>repeat</code> (int, default: <code>1</code>)<br><code>device</code> (int, default: <code>0</code>)</td><td><code>bool</code></td><td>Play a named preset from ``PRESETS`` (e.g. ``&#x27;click&#x27;``, ``&#x27;hit_heavy&#x27;``, ``&#x27;error&#x27;``).</td></tr>
+    <tr><td><span class="badge">method</span><code>update()</code></td><td><em>None</em></td><td><code>any</code></td><td>Advance active haptic patterns and auto-stop timed XInput motors. Call once per frame.</td></tr>
+  </tbody>
+</table>
+<script>
+function filterMod(q) {
+  q = (q || '').toLowerCase();
+  var rows = document.querySelectorAll('.api-tbl tbody tr');
+  for (var i = 0; i < rows.length; i++) {
+    rows[i].style.display = rows[i].innerText.toLowerCase().indexOf(q) !== -1 ? '' : 'none';
+  }
+}
+</script>
+  </main>
+  <footer role="contentinfo">
+    PyAudioGaming Official Documentation &mdash; Cross-Platform Audio Gaming for Windows, Linux, macOS, Android, iOS &amp; Web.
+  </footer>
+</body>
+</html>

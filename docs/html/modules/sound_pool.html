@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>sound_pool — BASS Audio Engine, 3D HRTF, Steam Audio &amp; Recording — PyAudioGaming</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header role="banner">
+    <h1>sound_pool — BASS Audio Engine, 3D HRTF, Steam Audio &amp; Recording — PyAudioGaming</h1>
+    <nav aria-label="Documentation Navigation">
+    <a href="../index.html" class="">Home</a>
+    <a href="../01_getting_started.html" class="">01. Getting Started</a>
+    <a href="../02_window_input_menu.html" class="">02. Input &amp; Menu</a>
+    <a href="../03_audio_3d_fx.html" class="">03. 3D Audio</a>
+    <a href="../04_speech_vb_gui.html" class="">04. Speech, VB &amp; GUI</a>
+    <a href="../05_timer_worker_storage_haptics.html" class="">05. Advanced Systems</a>
+    <a href="../06_building_cross_platform.html" class="">06. Building</a>
+    <a href="../api_reference.html" class="">Module Reference</a>
+    </nav>
+  </header>
+  <main id="main-content" role="main">
+<p><a href="../api_reference.html">&larr; Back to All Modules</a></p>
+<div class="callout"><strong>Summary:</strong> Full-featured BASS audio engine: output/input device management, streaming &amp; cached samples, fading, binaural HRTF, Steam Audio wall occlusion, push streams, and microphone recording.</div>
+<h2>Usage Guide &amp; Examples</h2>
+
+<h3>How to Use</h3>
+<ol>
+  <li>Initialize audio output once with <code>out = output(device=-1)</code>.</li>
+  <li>Create a <code>sound()</code> object, call <code>stream(path)</code>, configure <code>volume</code>/<code>pan</code>/<code>pitch</code>, and call <code>play()</code> or <code>play_looped()</code>.</li>
+  <li>For 3D binaural audio, pass <code>mono=True</code>, call <code>attach_hrtf_dsp()</code>, and call <code>update_hrtf_listener(...)</code> each frame.</li>
+  <li>For real-time voice chat or procedural audio, use <code>record(mono=True, draw=True)</code> and <code>sound.stream("", mono=True, draw=True)</code> + <code>push(pcm_bytes)</code>.</li>
+</ol>
+<pre><code>from pyaudiogaming.sound_pool import output, sound, update_hrtf_listener
+
+out = output(device=-1, frequency=44100)
+s = sound()
+s.stream("res/sounds/beacon.ogg", mono=True)
+s.attach_hrtf_dsp()
+s.volume = 80
+s.play_looped()
+
+update_hrtf_listener(0, 0, 1.7, 0, 1, 0, 0, 0, 1)</code></pre>
+
+<h2>Parameter &amp; API Tables</h2>
+<label for="mod-search">Filter symbols in this module:</label>
+<input id="mod-search" type="search" placeholder="Type method or parameter name..." oninput="filterMod(this.value)">
+<h3>Module-Level Functions</h3>
+<table class="api-tbl" id="tbl_sound_pool_funcs">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">function</span><code>set_hrtf_frame_size(frame_size=512)</code></td><td><code>frame_size</code> (any, default: <code>512</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>get_hrtf_frame_size()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>set_hrtf_distance_model(min_dist=1.0, max_dist=50.0, rolloff=0.12, blend_step=0.25)</code></td><td><code>min_dist</code> (any, default: <code>1.0</code>)<br><code>max_dist</code> (any, default: <code>50.0</code>)<br><code>rolloff</code> (any, default: <code>0.12</code>)<br><code>blend_step</code> (any, default: <code>0.25</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>update_hrtf_listener(listener_x, listener_y, listener_z, yaw=0.0, pitch=0.0, roll=0.0)</code></td><td><code>listener_x</code> (any, default: <code>required</code>)<br><code>listener_y</code> (any, default: <code>required</code>)<br><code>listener_z</code> (any, default: <code>required</code>)<br><code>yaw</code> (any, default: <code>0.0</code>)<br><code>pitch</code> (any, default: <code>0.0</code>)<br><code>roll</code> (any, default: <code>0.0</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>add_hrtf_env_box(material_preset, min_x, max_x, min_y, max_y, min_z, max_z)</code></td><td><code>material_preset</code> (any, default: <code>required</code>)<br><code>min_x</code> (any, default: <code>required</code>)<br><code>max_x</code> (any, default: <code>required</code>)<br><code>min_y</code> (any, default: <code>required</code>)<br><code>max_y</code> (any, default: <code>required</code>)<br><code>min_z</code> (any, default: <code>required</code>)<br><code>max_z</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>clear_hrtf_env_boxes()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>set_hrtf_auto_raycast(enabled=True)</code></td><td><code>enabled</code> (any, default: <code>True</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>get_global_sound()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>set_global_sound(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>set_focus(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>output(period=10, bbuffer=500, ThreeD=False, sample_rate=44100, dev=-1, frame_size=None, **kwargs)</code></td><td><code>period</code> (any, default: <code>10</code>)<br><code>bbuffer</code> (any, default: <code>500</code>)<br><code>ThreeD</code> (any, default: <code>False</code>)<br><code>sample_rate</code> (any, default: <code>44100</code>)<br><code>dev</code> (any, default: <code>-1</code>)<br><code>frame_size</code> (any, default: <code>None</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>input(device=-1)</code></td><td><code>device</code> (any, default: <code>-1</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>set_output_device(device)</code></td><td><code>device</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>get_output_device()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>set_input_device(device)</code></td><td><code>device</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>get_input_device()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>clean_oneshots(force=False)</code></td><td><code>force</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>playsingle(filename, volume=100, pitch=100, pan=0, mono=False, ThreeD=False, **kwargs)</code></td><td><code>filename</code> (any, default: <code>required</code>)<br><code>volume</code> (any, default: <code>100</code>)<br><code>pitch</code> (any, default: <code>100</code>)<br><code>pan</code> (any, default: <code>0</code>)<br><code>mono</code> (any, default: <code>False</code>)<br><code>ThreeD</code> (any, default: <code>False</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>OutputManager</code></h3>
+<table class="api-tbl" id="tbl_sound_pool_OutputManager">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__(device=-1, frequency=44100, period=10, bbuffer=500, flags=0, clsid=None)</code></td><td><code>device</code> (any, default: <code>-1</code>)<br><code>frequency</code> (any, default: <code>44100</code>)<br><code>period</code> (any, default: <code>10</code>)<br><code>bbuffer</code> (any, default: <code>500</code>)<br><code>flags</code> (any, default: <code>0</code>)<br><code>clsid</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>start()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>pause()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>stop()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>free()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_device()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_device(device)</code></td><td><code>device</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_volume()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_volume(volume)</code></td><td><code>volume</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>find_user_provided_device(name)</code></td><td><code>name</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>InputManager</code></h3>
+<table class="api-tbl" id="tbl_sound_pool_InputManager">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__(device=-1)</code></td><td><code>device</code> (any, default: <code>-1</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>free()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_device()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_device(device)</code></td><td><code>device</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>find_user_provided_device(name)</code></td><td><code>name</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>SoundBase</code></h3>
+<table class="api-tbl" id="tbl_sound_pool_SoundBase">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">property</span><code>channel()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_frame_size(frame_size)</code></td><td><code>frame_size</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_frame_size()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>is_fading(attr_type=None)</code></td><td><code>attr_type</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_faded_value(attr_type=&#x27;volume&#x27;, default_val=100.0)</code></td><td><code>attr_type</code> (any, default: <code>&#x27;volume&#x27;</code>)<br><code>default_val</code> (any, default: <code>100.0</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_mixer(target_mixer=None)</code></td><td><code>target_mixer</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>attach_hrtf_dsp(priority=0)</code></td><td><code>priority</code> (any, default: <code>0</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>detach_hrtf_dsp()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_hrtf_enabled(enabled=True)</code></td><td><code>enabled</code> (any, default: <code>True</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>setPaused(p)</code></td><td><code>p</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>fade(fadetime, value=0, type=&#x27;volume&#x27;)</code></td><td><code>fadetime</code> (any, default: <code>required</code>)<br><code>value</code> (any, default: <code>0</code>)<br><code>type</code> (any, default: <code>&#x27;volume&#x27;</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>fadeout(fadetime, value=0, type=&#x27;volume&#x27;)</code></td><td><code>fadetime</code> (any, default: <code>required</code>)<br><code>value</code> (any, default: <code>0</code>)<br><code>type</code> (any, default: <code>&#x27;volume&#x27;</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>fadein(fadetime, value=100, type=&#x27;volume&#x27;)</code></td><td><code>fadetime</code> (any, default: <code>required</code>)<br><code>value</code> (any, default: <code>100</code>)<br><code>type</code> (any, default: <code>&#x27;volume&#x27;</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>setfx(fx_key, priority=0, **overrides)</code></td><td><code>fx_key</code> (any, default: <code>required</code>)<br><code>priority</code> (any, default: <code>0</code>)<br><code>**overrides</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>Add or enable an audio effect preset (BASS_FX, DX8, Filter, or Steam Audio FX).</td></tr>
+    <tr><td><span class="badge">method</span><code>set_fx_param(fx_key=None, **params)</code></td><td><code>fx_key</code> (any, default: <code>None</code>)<br><code>**params</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>Update parameters of an active BASS_FX or Steam Audio FX without recreating the effect.</td></tr>
+    <tr><td><span class="badge">method</span><code>set_param(param_name=None, value=None, fx_key=None, **kwargs)</code></td><td><code>param_name</code> (any, default: <code>None</code>)<br><code>value</code> (any, default: <code>None</code>)<br><code>fx_key</code> (any, default: <code>None</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>Direct parameter setter for Steam Audio HRTF or an active FX (distinct from setfx).</td></tr>
+    <tr><td><span class="badge">method</span><code>get_param(param_name, fx_key=None)</code></td><td><code>param_name</code> (any, default: <code>required</code>)<br><code>fx_key</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>Query a parameter value from Steam Audio HRTF or an active BASS_FX.</td></tr>
+    <tr><td><span class="badge">method</span><code>remove_fx(fx_key)</code></td><td><code>fx_key</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>Remove a single active BASS_FX or Steam Audio FX.</td></tr>
+    <tr><td><span class="badge">method</span><code>remove_all_fx()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_steam_reverb(preset=&#x27;steam_medium_room&#x27;, wet=-1.0, **overrides)</code></td><td><code>preset</code> (any, default: <code>&#x27;steam_medium_room&#x27;</code>)<br><code>wet</code> (any, default: <code>-1.0</code>)<br><code>**overrides</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_steam_reflection_params(reverb_low=1.2, reverb_mid=1.0, reverb_high=0.7, eq_low=1.0, eq_mid=0.9, eq_high=0.7, delay_ms=20.0, wet_mix=0.25)</code></td><td><code>reverb_low</code> (any, default: <code>1.2</code>)<br><code>reverb_mid</code> (any, default: <code>1.0</code>)<br><code>reverb_high</code> (any, default: <code>0.7</code>)<br><code>eq_low</code> (any, default: <code>1.0</code>)<br><code>eq_mid</code> (any, default: <code>0.9</code>)<br><code>eq_high</code> (any, default: <code>0.7</code>)<br><code>delay_ms</code> (any, default: <code>20.0</code>)<br><code>wet_mix</code> (any, default: <code>0.25</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_steam_path_params(eq_low=0.9, eq_mid=0.7, eq_high=0.45, sh0=1.0, sh1=0.5, sh2=0.5, sh3=0.5, wet_mix=0.25)</code></td><td><code>eq_low</code> (any, default: <code>0.9</code>)<br><code>eq_mid</code> (any, default: <code>0.7</code>)<br><code>eq_high</code> (any, default: <code>0.45</code>)<br><code>sh0</code> (any, default: <code>1.0</code>)<br><code>sh1</code> (any, default: <code>0.5</code>)<br><code>sh2</code> (any, default: <code>0.5</code>)<br><code>sh3</code> (any, default: <code>0.5</code>)<br><code>wet_mix</code> (any, default: <code>0.25</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_steam_material(material_preset, enable_direct=True)</code></td><td><code>material_preset</code> (any, default: <code>required</code>)<br><code>enable_direct</code> (any, default: <code>True</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_steam_physical_params(x=0.0, y=0.0, z=0.0, occlusion=0.0, air_absorption=1.0, trans_low=None, trans_mid=None, trans_high=None)</code></td><td><code>x</code> (any, default: <code>0.0</code>)<br><code>y</code> (any, default: <code>0.0</code>)<br><code>z</code> (any, default: <code>0.0</code>)<br><code>occlusion</code> (any, default: <code>0.0</code>)<br><code>air_absorption</code> (any, default: <code>1.0</code>)<br><code>trans_low</code> (any, default: <code>None</code>)<br><code>trans_mid</code> (any, default: <code>None</code>)<br><code>trans_high</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_steam_directivity(directivity=1.0, dipole_weight=None, dipole_power=1.0, ahead=(0.0, 1.0, 0.0))</code></td><td><code>directivity</code> (any, default: <code>1.0</code>)<br><code>dipole_weight</code> (any, default: <code>None</code>)<br><code>dipole_power</code> (any, default: <code>1.0</code>)<br><code>ahead</code> (any, default: <code>(0.0, 1.0, 0.0)</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_steam_mode(mode=0, ambi_order=1, surround_layout=1)</code></td><td><code>mode</code> (any, default: <code>0</code>)<br><code>ambi_order</code> (any, default: <code>1</code>)<br><code>surround_layout</code> (any, default: <code>1</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_data(frame_size=None, data_type=&#x27;raw&#x27;)</code></td><td><code>frame_size</code> (any, default: <code>None</code>)<br><code>data_type</code> (any, default: <code>&#x27;raw&#x27;</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_length()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">property</span><code>volume()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">property</span><code>pitch()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">property</span><code>pan()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">property</span><code>playing()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">property</span><code>is_playing()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">property</span><code>stopped()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">property</span><code>stalled()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">property</span><code>position()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>seek(ms_value)</code></td><td><code>ms_value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set3d(listener_x, listener_y, listener_z, source_x, source_y, source_z, rotation=0, head=180, pan_step=2.5, volume_step=2.5, behind_pitch_decrease=0, behind_volume_decrease=0, pitch_step=1, pitch_range=92, pan_range=70, start_pan=0, start_volume=100, start_pitch=100, soft=False, mix_pan_with_hrtf=False, bilinear=True)</code></td><td><code>listener_x</code> (any, default: <code>required</code>)<br><code>listener_y</code> (any, default: <code>required</code>)<br><code>listener_z</code> (any, default: <code>required</code>)<br><code>source_x</code> (any, default: <code>required</code>)<br><code>source_y</code> (any, default: <code>required</code>)<br><code>source_z</code> (any, default: <code>required</code>)<br><code>rotation</code> (any, default: <code>0</code>)<br><code>head</code> (any, default: <code>180</code>)<br><code>pan_step</code> (any, default: <code>2.5</code>)<br><code>volume_step</code> (any, default: <code>2.5</code>)<br><code>behind_pitch_decrease</code> (any, default: <code>0</code>)<br><code>behind_volume_decrease</code> (any, default: <code>0</code>)<br><code>pitch_step</code> (any, default: <code>1</code>)<br><code>pitch_range</code> (any, default: <code>92</code>)<br><code>pan_range</code> (any, default: <code>70</code>)<br><code>start_pan</code> (any, default: <code>0</code>)<br><code>start_volume</code> (any, default: <code>100</code>)<br><code>start_pitch</code> (any, default: <code>100</code>)<br><code>soft</code> (any, default: <code>False</code>)<br><code>mix_pan_with_hrtf</code> (any, default: <code>False</code>)<br><code>bilinear</code> (any, default: <code>True</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set3dsoft(listener_x, listener_y, listener_z, source_x, source_y, source_z, rotation=0, start_volume=100, volume_step=2.5, start_pitch=100, start_pan=0, pan_step=0.0, behind_pitch_decrease=0, behind_volume_decrease=0, pitch_step=0, pitch_range=92, pan_range=70, bilinear=True)</code></td><td><code>listener_x</code> (any, default: <code>required</code>)<br><code>listener_y</code> (any, default: <code>required</code>)<br><code>listener_z</code> (any, default: <code>required</code>)<br><code>source_x</code> (any, default: <code>required</code>)<br><code>source_y</code> (any, default: <code>required</code>)<br><code>source_z</code> (any, default: <code>required</code>)<br><code>rotation</code> (any, default: <code>0</code>)<br><code>start_volume</code> (any, default: <code>100</code>)<br><code>volume_step</code> (any, default: <code>2.5</code>)<br><code>start_pitch</code> (any, default: <code>100</code>)<br><code>start_pan</code> (any, default: <code>0</code>)<br><code>pan_step</code> (any, default: <code>0.0</code>)<br><code>behind_pitch_decrease</code> (any, default: <code>0</code>)<br><code>behind_volume_decrease</code> (any, default: <code>0</code>)<br><code>pitch_step</code> (any, default: <code>0</code>)<br><code>pitch_range</code> (any, default: <code>92</code>)<br><code>pan_range</code> (any, default: <code>70</code>)<br><code>bilinear</code> (any, default: <code>True</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>math3d(listener_x, listener_y, listener_z, source_x, source_y, source_z, pan_step, volume_step, behind_pitch_decrease, behind_volume_decrease, pitch_step, pitch_range, pan_range, start_pan, start_volume, start_pitch, soft=False, rotation=0.0)</code></td><td><code>listener_x</code> (any, default: <code>required</code>)<br><code>listener_y</code> (any, default: <code>required</code>)<br><code>listener_z</code> (any, default: <code>required</code>)<br><code>source_x</code> (any, default: <code>required</code>)<br><code>source_y</code> (any, default: <code>required</code>)<br><code>source_z</code> (any, default: <code>required</code>)<br><code>pan_step</code> (any, default: <code>required</code>)<br><code>volume_step</code> (any, default: <code>required</code>)<br><code>behind_pitch_decrease</code> (any, default: <code>required</code>)<br><code>behind_volume_decrease</code> (any, default: <code>required</code>)<br><code>pitch_step</code> (any, default: <code>required</code>)<br><code>pitch_range</code> (any, default: <code>required</code>)<br><code>pan_range</code> (any, default: <code>required</code>)<br><code>start_pan</code> (any, default: <code>required</code>)<br><code>start_volume</code> (any, default: <code>required</code>)<br><code>start_pitch</code> (any, default: <code>required</code>)<br><code>soft</code> (any, default: <code>False</code>)<br><code>rotation</code> (any, default: <code>0.0</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">property</span><code>is_sliding3d()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>slide3d(*args, **kwargs)</code></td><td><code>*args</code> (tuple, default: <code>optional</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>update_slide3d(listener_x, listener_y, listener_z, rotation=0)</code></td><td><code>listener_x</code> (any, default: <code>required</code>)<br><code>listener_y</code> (any, default: <code>required</code>)<br><code>listener_z</code> (any, default: <code>required</code>)<br><code>rotation</code> (any, default: <code>0</code>)</td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>vst</code></h3>
+<table class="api-tbl" id="tbl_sound_pool_vst">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>create_instrument(dll_path, frequency=44100, channels=2, flags=0, ThreeD=False, decode=False, **kwargs)</code></td><td><code>dll_path</code> (any, default: <code>required</code>)<br><code>frequency</code> (any, default: <code>44100</code>)<br><code>channels</code> (any, default: <code>2</code>)<br><code>flags</code> (any, default: <code>0</code>)<br><code>ThreeD</code> (any, default: <code>False</code>)<br><code>decode</code> (any, default: <code>False</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>play()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>stop()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>close()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>mixer</code></h3>
+<table class="api-tbl" id="tbl_sound_pool_mixer">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__(parent=None)</code></td><td><code>parent</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>create(frequency=44100, channels=2, flags=control.BASS_MIXER_NONSTOP | control.BASS_MIXER_RESUME, ThreeD=False, parent=None, **kwargs)</code></td><td><code>frequency</code> (any, default: <code>44100</code>)<br><code>channels</code> (any, default: <code>2</code>)<br><code>flags</code> (any, default: <code>control.BASS_MIXER_NONSTOP | control.BASS_MIXER_RESUME</code>)<br><code>ThreeD</code> (any, default: <code>False</code>)<br><code>parent</code> (any, default: <code>None</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_parent_mixer(parent_mixer=None)</code></td><td><code>parent_mixer</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>add(source, flags=control.BASS_MIXER_CHAN_NORAMPIN, start=None, length=None, **kwargs)</code></td><td><code>source</code> (any, default: <code>required</code>)<br><code>flags</code> (any, default: <code>control.BASS_MIXER_CHAN_NORAMPIN</code>)<br><code>start</code> (any, default: <code>None</code>)<br><code>length</code> (any, default: <code>None</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>remove(source)</code></td><td><code>source</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>play()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>stop()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>close()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>record</code></h3>
+<table class="api-tbl" id="tbl_sound_pool_record">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>stream(filename, draw=False, mono=False, ThreeD=False, decode=False, autofree=False, use_dsp_hrtf=True, preload=True, frame_size=None, **kwargs)</code></td><td><code>filename</code> (any, default: <code>required</code>)<br><code>draw</code> (any, default: <code>False</code>)<br><code>mono</code> (any, default: <code>False</code>)<br><code>ThreeD</code> (any, default: <code>False</code>)<br><code>decode</code> (any, default: <code>False</code>)<br><code>autofree</code> (any, default: <code>False</code>)<br><code>use_dsp_hrtf</code> (any, default: <code>True</code>)<br><code>preload</code> (any, default: <code>True</code>)<br><code>frame_size</code> (any, default: <code>None</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>push(data)</code></td><td><code>data</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_sample()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>clear_sample()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>stop()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>close()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>musical</code></h3>
+<table class="api-tbl" id="tbl_sound_pool_musical">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>load_font(font_path, flags=0, **kwargs)</code></td><td><code>font_path</code> (any, default: <code>required</code>)<br><code>flags</code> (any, default: <code>0</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>stream(filename, mono=False, ThreeD=False, decode=False, use_dsp_hrtf=True, **kwargs)</code></td><td><code>filename</code> (any, default: <code>required</code>)<br><code>mono</code> (any, default: <code>False</code>)<br><code>ThreeD</code> (any, default: <code>False</code>)<br><code>decode</code> (any, default: <code>False</code>)<br><code>use_dsp_hrtf</code> (any, default: <code>True</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>play()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>stop()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>close()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>sound</code></h3>
+<table class="api-tbl" id="tbl_sound_pool_sound">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>stream(filename=&#x27;&#x27;, draw=False, mono=False, ThreeD=False, decode=False, autofree=False, use_dsp_hrtf=False, preload=False, frame_size=None, **kwargs)</code></td><td><code>filename</code> (any, default: <code>&#x27;&#x27;</code>)<br><code>draw</code> (any, default: <code>False</code>)<br><code>mono</code> (any, default: <code>False</code>)<br><code>ThreeD</code> (any, default: <code>False</code>)<br><code>decode</code> (any, default: <code>False</code>)<br><code>autofree</code> (any, default: <code>False</code>)<br><code>use_dsp_hrtf</code> (any, default: <code>False</code>)<br><code>preload</code> (any, default: <code>False</code>)<br><code>frame_size</code> (any, default: <code>None</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>music(filename, mono=False, ThreeD=False, decode=False, autofree=False, use_dsp_hrtf=True, prescan=True, ramp=True, frame_size=None, **kwargs)</code></td><td><code>filename</code> (any, default: <code>required</code>)<br><code>mono</code> (any, default: <code>False</code>)<br><code>ThreeD</code> (any, default: <code>False</code>)<br><code>decode</code> (any, default: <code>False</code>)<br><code>autofree</code> (any, default: <code>False</code>)<br><code>use_dsp_hrtf</code> (any, default: <code>True</code>)<br><code>prescan</code> (any, default: <code>True</code>)<br><code>ramp</code> (any, default: <code>True</code>)<br><code>frame_size</code> (any, default: <code>None</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>Load MOD/XM/IT/S3M/MO3 tracker music (HMUSIC) with full HRTF DSP &amp; Decode Stream compatibility.</td></tr>
+    <tr><td><span class="badge">method</span><code>load(filename=&#x27;&#x27;, mono=False, ThreeD=False, decode=False, use_dsp_hrtf=True, frame_size=None, **kwargs)</code></td><td><code>filename</code> (any, default: <code>&#x27;&#x27;</code>)<br><code>mono</code> (any, default: <code>False</code>)<br><code>ThreeD</code> (any, default: <code>False</code>)<br><code>decode</code> (any, default: <code>False</code>)<br><code>use_dsp_hrtf</code> (any, default: <code>True</code>)<br><code>frame_size</code> (any, default: <code>None</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>play(reset_loop=True)</code></td><td><code>reset_loop</code> (any, default: <code>True</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>play_looped()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>stop()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>close()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>push(data)</code></td><td><code>data</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>music</code></h3>
+<p>Dedicated HMUSIC wrapper class for tracker music (.mod, .xm, .it, .s3m, .mo3) with HRTF &amp; FX.</p>
+<table class="api-tbl" id="tbl_sound_pool_music">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">method</span><code>load(filename=&#x27;&#x27;, mono=False, ThreeD=False, decode=False, use_dsp_hrtf=True, **kwargs)</code></td><td><code>filename</code> (any, default: <code>&#x27;&#x27;</code>)<br><code>mono</code> (any, default: <code>False</code>)<br><code>ThreeD</code> (any, default: <code>False</code>)<br><code>decode</code> (any, default: <code>False</code>)<br><code>use_dsp_hrtf</code> (any, default: <code>True</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>stream(filename=&#x27;&#x27;, mono=False, ThreeD=False, decode=False, use_dsp_hrtf=True, **kwargs)</code></td><td><code>filename</code> (any, default: <code>&#x27;&#x27;</code>)<br><code>mono</code> (any, default: <code>False</code>)<br><code>ThreeD</code> (any, default: <code>False</code>)<br><code>decode</code> (any, default: <code>False</code>)<br><code>use_dsp_hrtf</code> (any, default: <code>True</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<script>
+function filterMod(q) {
+  q = (q || '').toLowerCase();
+  var rows = document.querySelectorAll('.api-tbl tbody tr');
+  for (var i = 0; i < rows.length; i++) {
+    rows[i].style.display = rows[i].innerText.toLowerCase().indexOf(q) !== -1 ? '' : 'none';
+  }
+}
+</script>
+  </main>
+  <footer role="contentinfo">
+    PyAudioGaming Official Documentation &mdash; Cross-Platform Audio Gaming for Windows, Linux, macOS, Android, iOS &amp; Web.
+  </footer>
+</body>
+</html>

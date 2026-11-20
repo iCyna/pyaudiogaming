@@ -1,0 +1,40 @@
+﻿Module,Owner,Kind,Symbol,Parameters,Returns,Description
+vb,module,function,dialog,"title='Dialog', text='', buttons=('OK', 'Cancel'), default=0, cancel=1, callback=None, window=None",any,Interactive modal dialog with multi-button navigation and touch support.
+vb,module,function,message,"m, callback=None, open=None, move=None, close=None, window=None",any,
+vb,module,function,get_conput,"name, key, fallback=None",any,
+vb,module,function,set_conput,"data, fallback={}",any,
+vb,module,function,input,"title='', text='', callback=None, password=False, get_data=True, new_config=None, window=None",any,
+vb,module,function,get_form_config,"key='', fallback=None",any,Get FORM_CONFIG key or copy of full config.
+vb,module,function,set_form_config,"data, fallback=None",any,Update global FORM_CONFIG dictionary in-place.
+vb,module,function,confirm,"title='Confirm', text='Are you sure?', yes_text='Yes', no_text='No', window=None",any,Quick Yes/No modal dialog returning True if Yes is chosen.
+vb,module,function,prompt_chat,"title='Message', placeholder='Type a message...', send_label='Send', suggestions=None, window=None",any,Android-style inline Input + adjacent Send button form; pressing Enter in input auto-clicks Send.
+vb,module,function,info_box,"title='Information', text='', ok_text='OK', window=None",any,Accessible information dialog with subtle haptic feedback.
+vb,module,function,warning_box,"title='Warning', text='', ok_text='OK', window=None",any,Accessible warning dialog with warning haptic feedback.
+vb,module,function,success_box,"title='Success', text='', ok_text='OK', window=None",any,Accessible success dialog with success haptic feedback.
+vb,module,function,error_box,"title='Error', text='', details=None, ok_text='OK', copy_text='Copy Details', window=None",any,Accessible error dialog with optional Copy Details button for tracebacks/error logs.
+vb,module,function,choice_box,"title='Select', text='', choices=(), ok_text='OK', cancel_text='Cancel', window=None",any,Quick single-choice accessible selection box returning selected item string or None.
+vb,module,function,progress_box,"title='Working', text='', step_fn=None, cancelable=True, announce_step=10, cancel_text='Cancel', window=None",any,Accessible modal progress dialog.
+vb,form,constructor,form.__init__,"window=None, config=None",any,
+vb,form,method,form.add,"name, kind='button', value=None, choices=None, callback=None, config=None, **kwargs",any,
+vb,form,method,form.notify_live,"name_or_text, new_value=None, interrupt=True",any,Dynamic live region announcement (NVDA aria-live style).
+vb,form,method,form.update_progress,"name, value, announce_step=10",any,Update progress bar dynamically and announce milestone percentages.
+vb,form,method,form.begin_group,label,any,Start a logical NVDA grouping container; subsequent ``add()`` calls inherit it until ``end_group()``.
+vb,form,method,form.end_group,,any,
+vb,form,method,form.validate,announce=True,any,"Validate all visible controls with ``required=True`` or ``validator=fn``. Returns ``(ok, errors)``."
+vb,form,method,form.allowed,"action, item=None",any,
+vb,form,method,form.read,,any,
+vb,form,method,form.move,step,any,
+vb,form,method,form.mainloop,,any,
+vb,form,method,form.open_context_menu,"choices=None, item=None",any,
+vb,form,method,form.enter,,any,
+vb,form,method,form.frameUpdate,,any,
+vb,form,method,form.values,,any,
+vb,form,method,form.open,,any,Run modal form loop; return clicked button name or -1 on cancel.
+vb,form,method,form.get,"name, fallback=None",any,Get control value by name.
+vb,form,method,form.set,"name, value, announce=False",any,Set control value dynamically; auto-triggers live/progress logic if applicable.
+vb,form,method,form.set_style,"name, **kwargs",any,"Update visual style (color, bg_color, border_color, font, font_size, pos, size, border, margin, padding)."
+vb,form,method,form.quick_nav,"kind_filter, reverse=False",any,"NVDA-style single-key quick navigation (H=heading, B=button, E=input, C=combo, T=table, Q=quote, F=frame)."
+vb,form,method,form.set_cell,"table_name, row, col, val, announce=False",any,Update a specific cell in a table control.
+vb,form,method,form.add_row,"table_name, row_data, announce=False",any,Append a row to a table control dynamically.
+vb,form,method,form.save_values,filepath,any,Save form values using pyaudiogaming.file if available.
+vb,form,method,form.load_values,filepath,any,Load form values using pyaudiogaming.file if available.

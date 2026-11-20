@@ -1,0 +1,48 @@
+﻿Module,Owner,Kind,Symbol,Parameters,Returns,Description
+utils,module,function,convert_to_unicode,name,any,
+utils,module,function,token,"min=4, max=12, more=''",any,
+utils,module,function,run,"cmd, sh=False",any,
+utils,module,function,mkdir,fld,any,
+utils,module,function,get_window,,any,
+utils,module,function,is_url,path_string,any,
+utils,module,function,make_spak,"source, output_path=None, password='', header_path=None, prefix=None, extensions=_SPAK_DEFAULT_EXTS, encrypt_bytes=256",any,Đóng gói một thư mục âm thanh (bao gồm toàn bộ thư mục con) hoặc danh sách/dict các file thành 1 gói .spak duy nhất (hoặc tách kèm file header.inf nếu truyền header_path).
+utils,module,function,load_spak,"spak_path, password='', mode='lazy', target='both', prefix=None, header_path=None, preload_sample=False, callback=None",any,Đọc gói âm thanh .spak (hoặc gói .ogg + header.inf) và cast vào hệ thống âm thanh (hsample / hstream).
+utils,module,function,clamp,"val, low, high",any,"Clamp ``val`` to the inclusive range ``[low, high]``."
+utils,module,function,lerp,"a, b, t",any,Linear interpolation between ``a`` and ``b`` by factor ``t``.
+utils,module,function,inv_lerp,"a, b, value",any,"Inverse linear interpolation: return ``t`` such that ``lerp(a, b, t) == value``."
+utils,module,function,remap,"val, in_min, in_max, out_min, out_max, clamp_out=False",any,"Remap ``val`` from range ``[in_min, in_max]`` to ``[out_min, out_max]``."
+utils,module,function,smoothstep,"edge0, edge1, x",any,Smooth Hermite interpolation between 0 and 1.
+utils,module,function,distance_2d,"x1, y1, x2, y2",any,
+utils,module,function,distance_3d,"x1, y1, z1, x2, y2, z2",any,
+utils,module,function,angle_2d,"x1, y1, x2, y2",any,"Return clockwise bearing in degrees ``[0, 360)`` where North (+Y) = 0, East (+X) = 90."
+utils,module,function,clock_direction,"dx, dy",any,"Convert a 2D delta ``(dx, dy)`` (North = +Y, East = +X) to clock hour ``1..12``."
+utils,module,function,db_to_linear,db,any,Convert decibels (e.g. ``-6.0``) to linear amplitude (``0.0..1.0+``).
+utils,module,function,linear_to_db,"amp, floor_db=-120.0",any,Convert linear amplitude to decibels.
+utils,module,function,percent,"value, total, decimals=1",any,Return percentage ``0.0..100.0`` safely (returns ``0.0`` if ``total == 0``).
+utils,module,function,chance,prob_percent,any,Return ``True`` with probability ``prob_percent``% (0..100).
+utils,module,function,weighted_choice,items,any,"Pick one item by weight. Accepts ``{item: weight}`` or ``[(item, weight), ...]``."
+utils,module,function,roll_dice,"count=1, sides=6, bonus=0",any,Roll ``count`` dice with ``sides`` faces and add ``bonus``.
+utils,module,function,shuffle_copy,seq,any,Return a newly shuffled list without modifying the original sequence.
+utils,module,function,format_bytes,"num_bytes, decimals=2",any,"Format byte count into human-readable units (B, KB, MB, GB, TB)."
+utils,module,function,format_number,"num, sep=','",any,Format integer/float with thousands separators.
+utils,module,function,truncate,"text, max_len, suffix='...'",any,Truncate text cleanly to at most ``max_len`` characters.
+utils,module,function,strip_accents,text,any,Remove diacritical marks for accent-insensitive search/comparison.
+utils,module,function,slugify,"text, sep='_'",any,Convert arbitrary text into a clean ASCII filename/identifier slug.
+utils,module,function,natural_sort_key,text,any,Sort key so ``'item2'`` comes before ``'item10'``.
+utils,module,function,fuzzy_match,"query, candidates, limit=10",any,Accent-insensitive ranked search returning up to ``limit`` matching candidates.
+utils,module,function,deep_merge,"base, override",any,Recursively merge two dictionaries without mutating ``base`` or ``override``.
+utils,module,function,flatten,nested,any,Recursively flatten nested lists/tuples into a single list.
+utils,module,function,chunked,"seq, size",any,Yield consecutive chunks of length ``size`` from ``seq``.
+utils,module,function,safe_int,"val, default=0",any,
+utils,module,function,safe_float,"val, default=0.0",any,
+utils,module,function,safe_bool,"val, default=False",any,
+utils,module,function,ensure_dir,path,any,Create directory (including parents) if missing and return the path.
+utils,module,function,file_hash,"filepath, algo='sha256', chunk_size=65536",any,Compute hexadecimal hash digest of a file efficiently in chunks.
+utils,module,function,open_url,url,any,"Open a URL in the default browser on Windows, macOS, Linux, and Android."
+utils,module,function,copy_text,text,any,"Copy UTF-8 text to system clipboard (Windows, Android, macOS, Linux) with zero external dependencies."
+utils,module,function,paste_text,,any,"Read UTF-8 text from system clipboard (Windows, Android, macOS, Linux)."
+utils,module,function,is_online,"host='1.1.1.1', port=53, timeout=1.5",any,Quick check whether network connectivity is available.
+utils,module,function,retry,"fn, retries=3, delay_ms=100, exceptions=(Exception,)",any,Call ``fn()`` up to ``retries`` times with ``delay_ms`` pause between failures.
+utils,SpakArchive,constructor,SpakArchive.__init__,"spak_path, data_offset, key32, header_info",any,
+utils,SpakArchive,method,SpakArchive.read_entry,"rel_offset, size, enc_len",any,
+utils,SpakArchive,method,SpakArchive.close,,any,

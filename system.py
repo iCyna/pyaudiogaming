@@ -8,10 +8,10 @@ import ctypes
 import struct
 
 def is_frozen():
-	return hasattr(sys, "frozen")
+	return bool(getattr(sys, "frozen", False))
 
 def embedded_data_path():
-	if is_frozen():
+	if is_frozen() and get_platform()["os"] not in ("android", "ios") and sys.executable:
 		return os.path.dirname(sys.executable)
 	return os.path.dirname(__file__)
 
@@ -50,7 +50,13 @@ def get_platform():
 		"is_emulator": False
 	}
 
-	if system == "windows":
+	if sys.platform in ("emscripten", "wasi") or "pyodide" in sys.modules:
+		result["os"] = "web"
+	elif sys.platform == "ios":
+		result["os"] = "ios"
+		if os.environ.get("SIMULATOR_DEVICE_NAME"):
+			result["is_emulator"] = True
+	elif system == "windows":
 		result["os"] = "windows"
 	elif system == "linux":
 		if (
@@ -58,6 +64,7 @@ def get_platform():
 			or "ANDROID_ARGUMENT" in os.environ
 			or "ANDROID_DATA" in os.environ
 			or hasattr(sys, "getandroidapilevel")
+			or "chaquopy" in os.path.abspath(__file__).lower()
 		):
 			result["os"] = "android"
 			if "generic" in os.environ.get("BUILD_FINGERPRINT", "").lower():
@@ -72,6 +79,27 @@ def get_platform():
 			result["os"] = "macos"
 
 	return result
+
+
+def get_android_activity():
+	"""Return ``(activity, bridge_name)`` on Android (Chaquopy or pyjnius), else ``(None, None)``."""
+	if get_platform()["os"] != "android":
+		return None, None
+	try:
+		from .pygame_shim import _android_bridge
+		act = _android_bridge.get_activity()
+		if act is not None:
+			return act, "chaquopy"
+	except Exception:
+		pass
+	try:
+		from jnius import autoclass
+		act = autoclass("org.kivy.android.PythonActivity").mActivity
+		if act is not None:
+			return act, "pyjnius"
+	except Exception:
+		pass
+	return None, None
 
 def get_arch() -> dict:
 	machine = platform.machine().lower()

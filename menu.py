@@ -31,6 +31,7 @@ class menu:
 		self.auto_enter_fMatched = False
 		self.use_shortcut = True
 		self.match_cursor = True # True to wrap around edges
+		self.handle_touch = True # Set False when embedded inside vb.form so form owns TalkBack gestures
 		
 		# Cursor & Navigation
 		self.cursor = 0
@@ -158,8 +159,8 @@ class menu:
 		"""The frame updating function for this menu. Call your window's frameUpdate prior to this."""
 		if not self.items: return None
 		
-		up = self.wnd.keyPressing(self.up_key) or (hasattr(self.wnd, "keySliding") and (self.wnd.keySliding("up") or self.wnd.keySlide("up")))
-		dn = self.wnd.keyPressing(self.down_key) or (hasattr(self.wnd, "keySliding") and (self.wnd.keySliding("down") or self.wnd.keySlide("down")))
+		up = self.wnd.keyPressing(self.up_key)
+		dn = self.wnd.keyPressing(self.down_key)
 		
 		processArrows = False
 		if not up and not dn: 
@@ -175,6 +176,19 @@ class menu:
 		if processArrows:
 			if up: self.moveTo(self.cursor - 1)
 			elif dn: self.moveTo(self.cursor + 1)
+		if self.handle_touch and hasattr(self.wnd, "keySlide"):
+			if self.wnd.keySlide("left", fingers=2) and self.allowed("cancel"):
+				self.cancel()
+				return -1
+			if self.wnd.keySlide("right", fingers=1):
+				self.jumpCursor(self.cursor + 1)
+			elif self.wnd.keySlide("left", fingers=1):
+				self.jumpCursor(self.cursor - 1)
+			elif self.wnd.tap(fingers=1, count=2) and self.allowed("enter") and self.items[self.cursor][3].get("enabled", True):
+				self.enter()
+				return self.cursor
+			elif self.wnd.tap(fingers=1, count=1) == 1 and self.allowed("read"):
+				self.wnd.say(self.getReadStr())
 
 		if self.wnd.keyPressed("home") and self.cursor != 0: 
 			self.jumpCursor(0, wrap=False)
@@ -185,11 +199,11 @@ class menu:
 		if self.wnd.keyPressed("page_up"): self.moveTo(self.cursor - page_step)
 		if self.wnd.keyPressed("page_down"): self.moveTo(self.cursor + page_step)
 
-		if (self.wnd.keyPressed("esc") or (hasattr(self.wnd, "keySlide") and self.wnd.keySlide("left"))) and self.allowed("cancel"):
+		if self.wnd.keyPressed("esc") and self.allowed("cancel"):
 			self.cancel()
 			return -1
 			
-		if (self.wnd.keyPressed("enter") or (hasattr(self.wnd, "tap") and self.wnd.tap())) and self.allowed("enter") and self.items[self.cursor][3].get("enabled", True):
+		if self.wnd.keyPressed("enter") and self.allowed("enter") and self.items[self.cursor][3].get("enabled", True):
 			self.enter()
 			return self.cursor
 

@@ -1,0 +1,10 @@
+﻿Module,Owner,Kind,Symbol,Parameters,Returns,Description
+app_link,module,function,get_launch_files,argv=None,list,Return a list of file paths or URIs passed to the application on launch.
+app_link,module,function,get_launch_file,argv=None,any,"Return the first file path / URI passed on launch, or ``None``."
+app_link,module,function,resolve_uri_to_file,"path_or_uri: str, suffix: str=''",str,Convert an Android ``content://`` URI into a readable local temp file path.
+app_link,module,function,register_file_association,"extensions, app_name: str, prog_id: str=None, exe_path: str=None, description: str='', icon_path: str=None, mime_types=None",dict,Register file extensions so pressing Enter / double-clicking opens your app.
+app_link,module,function,unregister_file_association,"extensions, prog_id: str",bool,Remove previously registered HKCU Windows or Linux .desktop file associations.
+app_link,SingleInstance,constructor,SingleInstance.__init__,"app_id: str, port: int=None",any,
+app_link,SingleInstance,method,SingleInstance.send_args,"args_list, timeout: float=1.5",bool,Send a list of file paths / commands to the primary running instance.
+app_link,SingleInstance,method,SingleInstance.poll,,list,Non-blocking check for messages forwarded by secondary instances. Call inside ``frameUpdate()``.
+app_link,SingleInstance,method,SingleInstance.close,,any,

@@ -8,13 +8,15 @@ import re
 import shutil
 import glob
 import ast
+import struct
 import sysconfig
 import subprocess
 import zipfile
+import zlib
 from pathlib import Path
 
 # Chặn đứng ngay lập tức nếu tiến trình con của Briefcase/Gradle vô tình gọi ngược vào file này
-if os.environ.get("PYAG_BUILDING_ANDROID") == "1":
+if os.environ.get("PYAG_BUILDING_ANDROID") == "1" or os.environ.get("PYAG_BUILDING_BEEWARE") == "1":
 	if __name__ == "__main__":
 		sys.exit(0)
 
@@ -65,19 +67,20 @@ def _load_text(path):
 
 
 def _find_real_python():
-	"""Tìm python.exe thật để tránh trường hợp sys.executable đang trỏ vào file .exe đã đóng gói của compile.py."""
+	"""Tìm trình thông dịch Python thật để tránh trường hợp sys.executable trỏ vào file đã đóng gói của compile.py."""
 	exe = Path(sys.executable).resolve()
 	if exe.stem.lower().startswith("python"):
 		return str(exe)
 
-	for cand in ("python", "python3", "py"):
+	for cand in ("python3", "python", "py"):
 		found = shutil.which(cand)
 		if found and Path(found).resolve() != exe:
 			return found
 
-	base_py = Path(sys.base_prefix) / "python.exe"
-	if base_py.exists():
-		return str(base_py)
+	for rel in ("python.exe", "bin/python3", "bin/python"):
+		base_py = Path(sys.base_prefix) / rel
+		if base_py.exists():
+			return str(base_py)
 
 	return str(exe)
 
@@ -97,6 +100,7 @@ def _get_portable_env():
 	env["BRIEFCASE_HOME"] = str(PORTABLE_HOME)
 	env["GRADLE_USER_HOME"] = str(gradle_home)
 	env["PYAG_BUILDING_ANDROID"] = "1"
+	env["PYAG_BUILDING_BEEWARE"] = "1"
 
 	tools_dir = PORTABLE_HOME / "tools"
 	if tools_dir.is_dir():
@@ -215,7 +219,7 @@ def _patch_android_manifest(manifest_path):
 		return
 	text = _load_text(manifest_path)
 	# Sửa các quyền bị thiếu tiền tố android.permission.
-	for short_perm in ("INTERNET", "ACCESS_NETWORK_STATE", "RECORD_AUDIO", "MODIFY_AUDIO_SETTINGS", "WAKE_LOCK"):
+	for short_perm in ("INTERNET", "ACCESS_NETWORK_STATE", "RECORD_AUDIO", "MODIFY_AUDIO_SETTINGS", "WAKE_LOCK", "VIBRATE", "POST_NOTIFICATIONS", "USE_FULL_SCREEN_INTENT"):
 		bad_tag = f'<uses-permission android:name="{short_perm}"/>'
 		good_tag = f'<uses-permission android:name="android.permission.{short_perm}"/>'
 		if bad_tag in text:
@@ -225,6 +229,8 @@ def _patch_android_manifest(manifest_path):
 				text = text.replace(bad_tag, good_tag)
 	if 'android:extractNativeLibs=' not in text and '<application' in text:
 		text = text.replace('<application', '<application\n        android:extractNativeLibs="true"', 1)
+	if 'android:showWhenLocked=' not in text and '<activity' in text:
+		text = text.replace('<activity', '<activity\n            android:showWhenLocked="true"\n            android:turnScreenOn="true"', 1)
 	_save_text(text, manifest_path)
 
 
@@ -246,7 +252,9 @@ def _inject_gradle_jnilibs(workspace, slug, staging_native_dir, abis):
 			so_list = [p.name for p in dst_abi.glob("*.so")]
 			print(f"[BeeWare] Injected {len(so_list)} native libraries into jniLibs/{abi}: {', '.join(so_list)}")
 
-	java_src_dir = ROOT / "include" / "android" / "java"
+	java_src_dir = ROOT / "pygame_shim" / "java"
+	if not java_src_dir.is_dir():
+		java_src_dir = ROOT / "include" / "android" / "java"
 	if java_src_dir.is_dir():
 		gradle_java_dir = gradle_app_dir / "src" / "main" / "java"
 		shutil.copytree(java_src_dir, gradle_java_dir, dirs_exist_ok=True)
@@ -275,6 +283,9 @@ android {{
         }}
         python {{
             extractPackages "*"
+            pyc {{
+                src true
+            }}
         }}
     }}
     buildTypes {{
@@ -365,6 +376,379 @@ def _ensure_apk_signed(apk_path, env):
 	return apk_path
 
 
+def _chacha20_xor(key, nonce, data, counter=1):
+	"""Pure-Python RFC 8439 ChaCha20 stream cipher (matches native C vault byte-for-byte)."""
+	if len(key) != 32 or len(nonce) != 12:
+		raise ValueError("ChaCha20 requires 32-byte key and 12-byte nonce")
+	consts = (0x61707865, 0x3320646E, 0x79622D32, 0x6B206574)
+	k_words = struct.unpack("<8I", key)
+	n_words = struct.unpack("<3I", nonce)
+	out = bytearray(len(data))
+	pos = 0
+	n = len(data)
+	blk_cnt = counter & 0xFFFFFFFF
+	while pos < n:
+		st = [
+			consts[0], consts[1], consts[2], consts[3],
+			k_words[0], k_words[1], k_words[2], k_words[3],
+			k_words[4], k_words[5], k_words[6], k_words[7],
+			blk_cnt, n_words[0], n_words[1], n_words[2],
+		]
+		x = st[:]
+		for _ in range(10):
+			for a, b, c, d in (
+				(0, 4, 8, 12), (1, 5, 9, 13), (2, 6, 10, 14), (3, 7, 11, 15),
+				(0, 5, 10, 15), (1, 6, 11, 12), (2, 7, 8, 13), (3, 4, 9, 14),
+			):
+				x[a] = (x[a] + x[b]) & 0xFFFFFFFF; v = x[d] ^ x[a]; x[d] = ((v << 16) | (v >> 16)) & 0xFFFFFFFF
+				x[c] = (x[c] + x[d]) & 0xFFFFFFFF; v = x[b] ^ x[c]; x[b] = ((v << 12) | (v >> 20)) & 0xFFFFFFFF
+				x[a] = (x[a] + x[b]) & 0xFFFFFFFF; v = x[d] ^ x[a]; x[d] = ((v << 8) | (v >> 24)) & 0xFFFFFFFF
+				x[c] = (x[c] + x[d]) & 0xFFFFFFFF; v = x[b] ^ x[c]; x[b] = ((v << 7) | (v >> 25)) & 0xFFFFFFFF
+		ks = struct.pack("<16I", *(((x[i] + st[i]) & 0xFFFFFFFF) for i in range(16)))
+		chunk = min(64, n - pos)
+		for i in range(chunk):
+			out[pos + i] = data[pos + i] ^ ks[i]
+		pos += chunk
+		blk_cnt = (blk_cnt + 1) & 0xFFFFFFFF
+	return bytes(out)
+
+
+def _find_android_ndk_bin():
+	"""Locate Android NDK LLVM prebuilt bin directory if installed."""
+	candidates = []
+	for env_var in ("ANDROID_NDK_HOME", "ANDROID_NDK_ROOT", "NDK_HOME"):
+		val = os.environ.get(env_var)
+		if val:
+			candidates.append(Path(val))
+	for sdk_root in (
+		PORTABLE_HOME / "tools" / "android_sdk",
+		Path(os.environ.get("ANDROID_HOME", "")) if os.environ.get("ANDROID_HOME") else None,
+		Path(os.environ.get("LOCALAPPDATA", "")) / "Android" / "Sdk" if os.environ.get("LOCALAPPDATA") else None,
+	):
+		if sdk_root and (sdk_root / "ndk").is_dir():
+			candidates.extend(sorted((sdk_root / "ndk").iterdir(), reverse=True))
+	host_tag = "windows-x86_64" if os.name == "nt" else ("darwin-x86_64" if sys.platform == "darwin" else "linux-x86_64")
+	for ndk_dir in candidates:
+		if not ndk_dir or not ndk_dir.is_dir():
+			continue
+		bin_dir = ndk_dir / "toolchains" / "llvm" / "prebuilt" / host_tag / "bin"
+		if bin_dir.is_dir():
+			return bin_dir
+	return None
+
+
+def _compile_native_vault_so(key, abis, staging_native_dir):
+	"""Auto-compile libpyag_vault.so with obfuscated random key for each ABI using Android NDK."""
+	ndk_bin = _find_android_ndk_bin()
+	if ndk_bin is None:
+		return False
+
+	abi_clang = {
+		"arm64-v8a": "aarch64-linux-android21-clang",
+		"armeabi-v7a": "armv7a-linux-androideabi21-clang",
+		"x86_64": "x86_64-linux-android21-clang",
+		"x86": "i686-linux-android21-clang",
+	}
+	ext = ".cmd" if os.name == "nt" else ""
+	strip_exe = ndk_bin / ("llvm-strip.exe" if os.name == "nt" else "llvm-strip")
+
+	mask = os.urandom(32)
+	obf = bytes(key[i] ^ mask[i] for i in range(32))
+	obf_c = ", ".join(str(b) for b in obf)
+	mask_c = ", ".join(str(b) for b in mask)
+
+	c_code = f"""#include <stdint.h>
+#include <stddef.h>
+
+static inline uint32_t rotl32(uint32_t v, int c) {{ return (v << c) | (v >> (32 - c)); }}
+static inline uint32_t load32(const uint8_t *p) {{
+    return (uint32_t)p[0] | ((uint32_t)p[1] << 8) | ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24);
+}}
+static inline void store32(uint8_t *p, uint32_t v) {{
+    p[0] = (uint8_t)v; p[1] = (uint8_t)(v >> 8); p[2] = (uint8_t)(v >> 16); p[3] = (uint8_t)(v >> 24);
+}}
+static void qr(uint32_t *x, int a, int b, int c, int d) {{
+    x[a] += x[b]; x[d] = rotl32(x[d] ^ x[a], 16);
+    x[c] += x[d]; x[b] = rotl32(x[b] ^ x[c], 12);
+    x[a] += x[b]; x[d] = rotl32(x[d] ^ x[a], 8);
+    x[c] += x[d]; x[b] = rotl32(x[b] ^ x[c], 7);
+}}
+
+__attribute__((visibility("default")))
+int pyag_unlock(const uint8_t *nonce12, uint8_t *buf, size_t len) {{
+    if (!nonce12 || !buf) return -1;
+    static const uint8_t k_a[32] = {{{obf_c}}};
+    static const uint8_t k_b[32] = {{{mask_c}}};
+    uint8_t key[32];
+    for (int i = 0; i < 32; i++) key[i] = (uint8_t)(k_a[i] ^ k_b[i]);
+    uint32_t st[16];
+    st[0] = 0x61707865u; st[1] = 0x3320646eu; st[2] = 0x79622d32u; st[3] = 0x6b206574u;
+    for (int i = 0; i < 8; i++) st[4 + i] = load32(key + i * 4);
+    st[12] = 1u;
+    st[13] = load32(nonce12);
+    st[14] = load32(nonce12 + 4);
+    st[15] = load32(nonce12 + 8);
+    size_t pos = 0;
+    while (pos < len) {{
+        uint32_t x[16];
+        for (int i = 0; i < 16; i++) x[i] = st[i];
+        for (int r = 0; r < 10; r++) {{
+            qr(x, 0, 4, 8, 12); qr(x, 1, 5, 9, 13); qr(x, 2, 6, 10, 14); qr(x, 3, 7, 11, 15);
+            qr(x, 0, 5, 10, 15); qr(x, 1, 6, 11, 12); qr(x, 2, 7, 8, 13); qr(x, 3, 4, 9, 14);
+        }}
+        uint8_t ks[64];
+        for (int i = 0; i < 16; i++) store32(ks + i * 4, x[i] + st[i]);
+        size_t chunk = (len - pos < 64) ? (len - pos) : 64;
+        for (size_t i = 0; i < chunk; i++) buf[pos + i] ^= ks[i];
+        pos += chunk;
+        st[12]++;
+    }}
+    for (int i = 0; i < 32; i++) key[i] = 0;
+    return 0;
+}}
+"""
+	tmp_c = staging_native_dir / "_pyag_vault_tmp.c"
+	tmp_c.write_text(c_code, encoding="utf-8")
+	try:
+		for abi in abis:
+			clang_name = abi_clang.get(abi)
+			if not clang_name:
+				return False
+			clang_exe = ndk_bin / (clang_name + ext)
+			if not clang_exe.exists():
+				clang_exe = ndk_bin / clang_name
+			if not clang_exe.exists():
+				return False
+			out_so = staging_native_dir / abi / "libpyag_vault.so"
+			out_so.parent.mkdir(parents=True, exist_ok=True)
+			cmd = [
+				str(clang_exe), "-shared", "-fPIC", "-O3",
+				"-fvisibility=hidden", "-s",
+				str(tmp_c), "-o", str(out_so)
+			]
+			res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+			if res.returncode != 0 or not out_so.is_file():
+				return False
+			if strip_exe.exists():
+				subprocess.run([str(strip_exe), "--strip-unneeded", str(out_so)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+		return True
+	finally:
+		try:
+			if tmp_c.exists():
+				tmp_c.unlink()
+		except OSError:
+			pass
+
+
+def _pack_android_sources(app_src, abis, staging_native_dir):
+	"""Encrypt all game .py modules into _app.pkg with a per-build random 256-bit key and remove plaintext .py files."""
+	skip_top = {"pyaudiogaming", "pygame", "res", "lib", "include", "utils"}
+	entries = []
+	py_files_to_remove = []
+
+	for py_path in sorted(app_src.rglob("*.py")):
+		rel = py_path.relative_to(app_src)
+		if rel.parts[0] in skip_top:
+			continue
+		if len(rel.parts) == 1 and rel.name in ("__init__.py", "__main__.py"):
+			continue
+		is_pkg = (rel.name == "__init__.py")
+		if is_pkg:
+			mod_name = ".".join(rel.parts[:-1])
+		else:
+			mod_name = ".".join(rel.with_suffix("").parts)
+		if not mod_name:
+			continue
+		src_bytes = py_path.read_bytes()
+		rel_posix = rel.as_posix()
+		entries.append((mod_name, is_pkg, rel_posix, src_bytes))
+		py_files_to_remove.append(py_path)
+
+	if not entries:
+		return "none", None
+
+	buf = bytearray()
+	buf.extend(struct.pack("<I", len(entries)))
+	for mod_name, is_pkg, rel_posix, src_bytes in entries:
+		nb = mod_name.encode("utf-8")
+		rb = rel_posix.encode("utf-8")
+		buf.extend(struct.pack("<H", len(nb)))
+		buf.extend(nb)
+		buf.append(1 if is_pkg else 0)
+		buf.extend(struct.pack("<H", len(rb)))
+		buf.extend(rb)
+		buf.extend(struct.pack("<I", len(src_bytes)))
+		buf.extend(src_bytes)
+
+	compressed = zlib.compress(bytes(buf), 9)
+	key = os.urandom(32)
+	nonce = os.urandom(12)
+	ciphertext = _chacha20_xor(key, nonce, compressed, counter=1)
+
+	pkg_path = app_src / "_app.pkg"
+	pkg_path.write_bytes(b"PYAG" + nonce + ciphertext)
+
+	# Remove all packed plaintext .py files and clean empty package directories
+	for py_path in py_files_to_remove:
+		try:
+			py_path.unlink()
+		except OSError:
+			pass
+	for dir_path in sorted(app_src.rglob("*"), reverse=True):
+		if dir_path.is_dir() and dir_path.relative_to(app_src).parts[0] not in skip_top:
+			try:
+				if not any(dir_path.iterdir()):
+					dir_path.rmdir()
+			except OSError:
+				pass
+
+	native_ok = _compile_native_vault_so(key, abis, staging_native_dir)
+	if native_ok:
+		print(f"[BeeWare] Protected {len(entries)} Python modules into _app.pkg (native C ChaCha20 libpyag_vault.so + random 256-bit key).")
+		return "native", None
+
+	print(f"[BeeWare] Protected {len(entries)} Python modules into _app.pkg (ChaCha20 + random 256-bit key; install Android NDK to auto-compile native libpyag_vault.so).")
+	return "py", key
+
+
+def _build_vault_bootstrap_snippet(vault_mode, vault_key):
+	"""Generate RAM-only sys.meta_path import hook snippet for __main__.py."""
+	if vault_mode == "none":
+		return ""
+	if vault_mode == "native":
+		unlock_fn = r"""def _vault_decrypt(nonce, raw):
+    import ctypes
+    lib = None
+    for _cand in ("libpyag_vault.so", "pyag_vault"):
+        try:
+            lib = ctypes.CDLL(_cand)
+            break
+        except Exception:
+            pass
+    if lib is None:
+        from pyaudiogaming import system as _sys_chk
+        lib = _sys_chk.load_dll("libpyag_vault")
+    buf = ctypes.create_string_buffer(raw, len(raw))
+    fn = lib.pyag_unlock
+    fn.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_size_t]
+    fn.restype = ctypes.c_int
+    if fn(nonce, buf, len(raw)) != 0:
+        raise RuntimeError("Native vault unlock failed")
+    return buf.raw
+"""
+	else:
+		mask = os.urandom(32)
+		obf = bytes(vault_key[i] ^ mask[i] for i in range(32))
+		unlock_fn = f"""_VAULT_A = {list(obf)!r}
+_VAULT_B = {list(mask)!r}
+
+
+def _vault_decrypt(nonce, raw):
+    import struct
+    key = bytes(_VAULT_A[i] ^ _VAULT_B[i] for i in range(32))
+    consts = (0x61707865, 0x3320646E, 0x79622D32, 0x6B206574)
+    kw = struct.unpack("<8I", key)
+    nw = struct.unpack("<3I", nonce)
+    out = bytearray(len(raw))
+    pos, n, cnt = 0, len(raw), 1
+    while pos < n:
+        st = [consts[0], consts[1], consts[2], consts[3], kw[0], kw[1], kw[2], kw[3], kw[4], kw[5], kw[6], kw[7], cnt, nw[0], nw[1], nw[2]]
+        x = st[:]
+        for _ in range(10):
+            for a, b, c, d in ((0,4,8,12),(1,5,9,13),(2,6,10,14),(3,7,11,15),(0,5,10,15),(1,6,11,12),(2,7,8,13),(3,4,9,14)):
+                x[a] = (x[a] + x[b]) & 0xFFFFFFFF; v = x[d] ^ x[a]; x[d] = ((v << 16) | (v >> 16)) & 0xFFFFFFFF
+                x[c] = (x[c] + x[d]) & 0xFFFFFFFF; v = x[b] ^ x[c]; x[b] = ((v << 12) | (v >> 20)) & 0xFFFFFFFF
+                x[a] = (x[a] + x[b]) & 0xFFFFFFFF; v = x[d] ^ x[a]; x[d] = ((v << 8) | (v >> 24)) & 0xFFFFFFFF
+                x[c] = (x[c] + x[d]) & 0xFFFFFFFF; v = x[b] ^ x[c]; x[b] = ((v << 7) | (v >> 25)) & 0xFFFFFFFF
+        ks = struct.pack("<16I", *(((x[i] + st[i]) & 0xFFFFFFFF) for i in range(16)))
+        ch = min(64, n - pos)
+        for i in range(ch):
+            out[pos + i] = raw[pos + i] ^ ks[i]
+        pos += ch
+        cnt = (cnt + 1) & 0xFFFFFFFF
+    return bytes(out)
+"""
+
+	loader_code = r"""
+class _VaultLoader:
+    def __init__(self, fullname, is_pkg, rel_path, src_bytes, app_dir):
+        self.fullname = fullname
+        self.is_pkg = is_pkg
+        self.rel_path = rel_path
+        self.src_bytes = src_bytes
+        self.app_dir = app_dir
+
+    def create_module(self, spec):
+        return None
+
+    def get_code(self, fullname):
+        return compile(self.src_bytes, f"<{self.fullname}>", "exec")
+
+    def get_source(self, fullname):
+        return None
+
+    def is_package(self, fullname):
+        return self.is_pkg
+
+    def exec_module(self, module):
+        module.__file__ = os.path.join(self.app_dir, self.rel_path)
+        if self.is_pkg:
+            module.__path__ = [os.path.dirname(module.__file__)]
+            module.__package__ = self.fullname
+        else:
+            module.__package__ = self.fullname.rpartition(".")[0]
+        exec(self.get_code(self.fullname), module.__dict__)
+
+
+class _VaultFinder:
+    def __init__(self, mods, app_dir):
+        self._mods = mods
+        self._app_dir = app_dir
+
+    def find_spec(self, fullname, path=None, target=None):
+        entry = self._mods.get(fullname)
+        if entry is None:
+            return None
+        import importlib.machinery
+        is_pkg, rel_path, src_bytes = entry
+        loader = _VaultLoader(fullname, is_pkg, rel_path, src_bytes, self._app_dir)
+        spec = importlib.machinery.ModuleSpec(fullname, loader, is_package=is_pkg)
+        if is_pkg:
+            spec.submodule_search_locations = [os.path.dirname(os.path.join(self._app_dir, rel_path))]
+        return spec
+
+
+def _install_vault_hook():
+    import struct, zlib
+    pkg_file = os.path.join(_APP_DIR, "_app.pkg")
+    if not os.path.isfile(pkg_file):
+        return
+    with open(pkg_file, "rb") as _f:
+        blob = _f.read()
+    if len(blob) < 16 or blob[:4] != b"PYAG":
+        raise RuntimeError("Invalid encrypted application bundle")
+    nonce, enc = blob[4:16], blob[16:]
+    plain = zlib.decompress(_vault_decrypt(nonce, enc))
+    off = 0
+    (count,) = struct.unpack_from("<I", plain, off); off += 4
+    mods = {}
+    for _ in range(count):
+        (nlen,) = struct.unpack_from("<H", plain, off); off += 2
+        mname = plain[off:off + nlen].decode("utf-8"); off += nlen
+        is_pkg = bool(plain[off]); off += 1
+        (rlen,) = struct.unpack_from("<H", plain, off); off += 2
+        rpath = plain[off:off + rlen].decode("utf-8"); off += rlen
+        (slen,) = struct.unpack_from("<I", plain, off); off += 4
+        sbytes = plain[off:off + slen]; off += slen
+        mods[mname] = (is_pkg, rpath, sbytes)
+    sys.meta_path.insert(0, _VaultFinder(mods, _APP_DIR))
+
+
+_install_vault_hook()
+"""
+	return unlock_fn + loader_code
+
+
 def _is_ignored_app_dir(item_path, root_path):
 	if item_path.resolve() == root_path.resolve():
 		return True
@@ -447,9 +831,16 @@ def prepare_android(project, name, data=(), arch=None, extra_reqs=()):
 			pygame_shim_src,
 			app_src / "pygame",
 			dirs_exist_ok=True,
-			ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "desktop.ini")
+			ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "desktop.ini", "java")
 		)
 		print("[BeeWare] Embedded native Android pygame shim into app package.")
+
+	staging_native_dir = workspace / "native_libs"
+	package_lib_dir = package / "lib"
+	_collect_and_verify_libs(abis, app_root, staging_native_dir, package_lib_dir)
+
+	vault_mode, vault_key = _pack_android_sources(app_src, abis, staging_native_dir)
+	vault_snippet = _build_vault_bootstrap_snippet(vault_mode, vault_key)
 
 	_save_text("# Auto-generated package init\n", app_src / "__init__.py")
 	bootstrap_code = r"""# -*- coding: utf-8 -*-
@@ -462,6 +853,7 @@ import traceback
 _APP_DIR = os.path.dirname(os.path.abspath(__file__))
 if _APP_DIR not in sys.path:
     sys.path.insert(0, _APP_DIR)
+sys.frozen = True
 try:
     os.chdir(_APP_DIR)
 except Exception:
@@ -486,7 +878,7 @@ try:
                 print(f"[Bootstrap] Warning preloading {_core_lib}: {_e}")
 except Exception:
     pass
-
+""" + "\n" + vault_snippet + r"""
 
 def _show_android_status(msg, is_error=False):
     try:
@@ -497,16 +889,45 @@ def _show_android_status(msg, is_error=False):
         pass
 
 
+def _shutdown_android_app():
+    try:
+        from pyaudiogaming.sound_modules import control as _snd_ctrl
+        _snd_ctrl.shutdown_sound()
+    except Exception:
+        pass
+    try:
+        import pygame
+        if hasattr(pygame, "_android_bridge") and hasattr(pygame._android_bridge, "close_app"):
+            pygame._android_bridge.close_app()
+    except Exception:
+        pass
+
+
+def _show_android_error(title, tb):
+    try:
+        import pygame
+        if hasattr(pygame, "_android_bridge") and hasattr(pygame._android_bridge, "show_error_dialog"):
+            if pygame._android_bridge.show_error_dialog(title, tb):
+                return
+    except Exception:
+        pass
+    _show_android_status(title + ":\n" + tb, is_error=True)
+
+
 def _run_entry():
+    _clean_exit = False
     try:
         _show_android_status("Starting application...", is_error=False)
         runpy.run_module("_pyag_entry", run_name="__main__", alter_sys=True)
+        _clean_exit = True
     except SystemExit:
-        pass
+        _clean_exit = True
     except Exception:
         tb = traceback.format_exc()
         print(tb)
-        _show_android_status("Startup Error:\n" + tb, is_error=True)
+        _show_android_error("Startup Error", tb)
+    if _clean_exit:
+        _shutdown_android_app()
 
 
 if _ANDROID_UI:
@@ -540,10 +961,6 @@ else:
 		else:
 			destination.parent.mkdir(parents=True, exist_ok=True)
 			shutil.copy2(original, destination)
-
-	staging_native_dir = workspace / "native_libs"
-	package_lib_dir = package / "lib"
-	_collect_and_verify_libs(abis, app_root, staging_native_dir, package_lib_dir)
 
 	_save_text("MIT License\n", workspace / "LICENSE")
 
@@ -592,6 +1009,9 @@ build_gradle_dependencies = [
 "android.permission.RECORD_AUDIO" = true
 "android.permission.MODIFY_AUDIO_SETTINGS" = true
 "android.permission.WAKE_LOCK" = true
+"android.permission.VIBRATE" = true
+"android.permission.POST_NOTIFICATIONS" = true
+"android.permission.USE_FULL_SCREEN_INTENT" = true
 """
 	_save_text(pyproject_content, workspace / "pyproject.toml")
 	return workspace, slug, abis, staging_native_dir, app_root
@@ -669,6 +1089,379 @@ def build_android(project, name, data=(), arch=None, args=(), prepare_only=False
 	print("=" * 60)
 	print(f"[BeeWare] Standalone signed APK successfully generated:")
 	print(f" -> {final_apk_path.resolve()}")
+	print("=" * 60)
+	return True
+
+
+# ==============================================================================
+# PHẦN 1B: MULTI-PLATFORM BEEWARE (BRIEFCASE) BUILDER (iOS, macOS, Linux, Windows, Web)
+# ==============================================================================
+
+_BEEWARE_TARGET_MAP = {
+	"ios": "iOS",
+	"macos": "macOS",
+	"darwin": "macOS",
+	"linux": "linux",
+	"windows": "windows",
+	"win": "windows",
+	"web": "web",
+}
+
+
+def _make_app_slug(name):
+	slug = re.sub(r"[^a-z0-9_]", "", str(name).lower().replace(" ", "_"))
+	slug = re.sub(r"_+", "_", slug).strip("_")
+	if not slug or not slug[0].isalpha():
+		slug = "app_" + slug
+	if slug in ("main", "test", "app", "sys", "os", "pyaudiogaming"):
+		slug = "app_" + slug
+	if any(c in str(name) for c in "\r\n"):
+		raise ValueError("Application name must be a single line")
+	return slug
+
+
+def _prepare_beeware_native_libs(package_dir, target_os, arch=None):
+	"""Sao chép đúng thư viện native (BASS, Phonon, Screen Reader...) vào gói pyaudiogaming/lib theo target_os."""
+	target_os = target_os.lower()
+	if target_os == "web":
+		return
+	src_lib = ROOT / "lib"
+	if not src_lib.is_dir():
+		return
+
+	ext, arch_dirs = get_target_lib_info(target_os, arch)
+	dst_lib = package_dir / "lib"
+	dst_lib.mkdir(parents=True, exist_ok=True)
+
+	# Copy top-level libs matching target extension (e.g., screen-reader DLLs on Windows)
+	for item in src_lib.iterdir():
+		if item.is_file() and item.name.lower().endswith(ext):
+			shutil.copy2(item, dst_lib / item.name)
+
+	# On iOS also allow static libs (.a) or frameworks if present
+	allowed_exts = (ext, ".a") if target_os == "ios" else (ext,)
+	extra_dirs = list(arch_dirs)
+	if target_os == "ios" and "iosimulator" not in extra_dirs:
+		extra_dirs.append("iosimulator")
+
+	for sub in extra_dirs:
+		s_sub = src_lib / sub
+		if s_sub.is_dir():
+			d_sub = dst_lib / sub
+			d_sub.mkdir(parents=True, exist_ok=True)
+			for root_dir, _, files in os.walk(s_sub):
+				rel = os.path.relpath(root_dir, s_sub)
+				t_sub = d_sub / rel if rel != "." else d_sub
+				t_sub.mkdir(parents=True, exist_ok=True)
+				for fname in files:
+					if fname.lower().endswith(allowed_exts):
+						shutil.copy2(os.path.join(root_dir, fname), t_sub / fname)
+
+
+def prepare_beeware(project, name, target_os, data=(), arch=None, extra_reqs=()):
+	"""Chuẩn bị workspace Briefcase hoàn chỉnh cho iOS, macOS, Linux, Windows hoặc Web."""
+	target_os = target_os.lower().strip()
+	if target_os not in _BEEWARE_TARGET_MAP:
+		raise ValueError(f"Unsupported BeeWare target platform: {target_os}")
+
+	entry = Path(str(project) + ".py").resolve()
+	if not entry.is_file():
+		raise ValueError(f"Entry script does not exist: {entry}")
+
+	slug = _make_app_slug(name)
+	workspace = ROOT / "include" / "beeware" / "projects" / f"{slug}_{target_os}"
+	app_src = workspace / "src" / slug
+
+	if app_src.exists():
+		shutil.rmtree(app_src)
+	app_src.mkdir(parents=True, exist_ok=True)
+
+	# 1. Copy pyaudiogaming package
+	package = app_src / "pyaudiogaming"
+	package.mkdir(parents=True, exist_ok=True)
+	for item in ROOT.glob("*.py"):
+		if item.name.lower() not in EXCLUDE_BUILD_FILES and not item.name.lower().startswith("compile"):
+			shutil.copy2(item, package / item.name)
+
+	ignore_bin = DESKTOP_BIN_PATTERNS if target_os in ("ios", "web") else ("*.pdb", "*.lib", "*.exp", "*.obj", "*.bat", "*.cmd")
+	for folder in ("sound_modules", "accessible_output2", "include", "utils"):
+		src_folder = ROOT / folder
+		if src_folder.is_dir():
+			ignore_fn = shutil.ignore_patterns(
+				"__pycache__", "*.pyc", "desktop.ini", "android", "beeware",
+				"compile*.py", "android_build.py", "builder.py",
+				*ignore_bin
+			)
+			shutil.copytree(src_folder, package / folder, dirs_exist_ok=True, ignore=ignore_fn)
+
+	_prepare_beeware_native_libs(package, target_os, arch)
+
+	# 2. Copy user project scripts & packages
+	app_root = entry.parent
+	for item in app_root.iterdir():
+		if item.is_file() and item.suffix == ".py":
+			fname_low = item.name.lower()
+			if fname_low not in EXCLUDE_BUILD_FILES and not fname_low.startswith(("compile", "#", "@")):
+				shutil.copy2(item, app_src / item.name)
+		elif item.is_dir() and (item / "__init__.py").exists() and not _is_ignored_app_dir(item, ROOT):
+			shutil.copytree(
+				item,
+				app_src / item.name,
+				dirs_exist_ok=True,
+				ignore=shutil.ignore_patterns(
+					"__pycache__", "*.pyc", "desktop.ini",
+					"compile*.py", "android_build.py", "builder.py",
+					"Lib", "Scripts", "Include",
+					*ignore_bin
+				)
+			)
+
+	shutil.copy2(entry, app_src / "main.py")
+	shutil.copy2(entry, app_src / "_pyag_entry.py")
+
+	# On iOS / Web embed pygame shim if available so pygame imports don't crash where SDL2 wheel is absent
+	if target_os in ("ios", "web"):
+		pygame_shim_src = ROOT / "pygame_shim"
+		if pygame_shim_src.is_dir():
+			shutil.copytree(
+				pygame_shim_src,
+				app_src / "pygame",
+				dirs_exist_ok=True,
+				ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "desktop.ini", "java")
+			)
+
+	# 3. Copy user data files/folders
+	skip_exts = {
+		"ios": (".dll", ".exe", ".pyd", ".so", ".lib", ".pdb"),
+		"macos": (".dll", ".exe", ".pyd", ".so", ".lib", ".pdb"),
+		"linux": (".dll", ".exe", ".pyd", ".dylib", ".lib", ".pdb"),
+		"windows": (".so", ".dylib"),
+		"web": (".dll", ".exe", ".pyd", ".so", ".dylib", ".lib", ".pdb"),
+	}.get(target_os, ())
+
+	for value in (data or ()):
+		relative = Path(value)
+		if relative.is_absolute() or ".." in relative.parts:
+			raise ValueError(f"Data must be a relative path inside the application: {value}")
+		if relative.suffix.lower() in skip_exts:
+			print(f"[BeeWare:{target_os}] Skipping incompatible binary in data: {value}")
+			continue
+		original = app_root / relative
+		if not original.exists():
+			original = Path(value).resolve()
+		if not original.exists():
+			raise ValueError(f"Missing application data: {original}")
+		destination = app_src / relative
+		if original.is_dir():
+			shutil.copytree(
+				original,
+				destination,
+				dirs_exist_ok=True,
+				ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "desktop.ini")
+			)
+		else:
+			destination.parent.mkdir(parents=True, exist_ok=True)
+			shutil.copy2(original, destination)
+
+	# 4. Generate __init__.py & __main__.py bootstrap
+	_save_text("# Auto-generated package init\n", app_src / "__init__.py")
+	bootstrap_code = """# -*- coding: utf-8 -*-
+import os
+import runpy
+import sys
+import traceback
+
+_APP_DIR = os.path.dirname(os.path.abspath(__file__))
+if _APP_DIR not in sys.path:
+    sys.path.insert(0, _APP_DIR)
+sys.frozen = True
+try:
+    os.chdir(_APP_DIR)
+except Exception:
+    pass
+
+try:
+    runpy.run_module("_pyag_entry", run_name="__main__", alter_sys=True)
+except SystemExit:
+    raise
+except Exception:
+    traceback.print_exc()
+    raise
+"""
+	_save_text(bootstrap_code, app_src / "__main__.py")
+	_save_text("MIT License\n", workspace / "LICENSE")
+
+	# 5. Generate pyproject.toml
+	default_reqs = ["pycryptodome", "cryptography", "polib"]
+	if target_os in ("windows", "linux", "macos"):
+		default_reqs.append("pygame")
+	for r in (extra_reqs or ()):
+		r_clean = str(r).strip()
+		if r_clean and not r_clean.startswith("-") and r_clean not in default_reqs:
+			default_reqs.append(r_clean)
+
+	req_formatted = ",\n    ".join(f'"{r}"' for r in default_reqs)
+	safe_name = str(name).replace('"', '\\"')
+	bw_section = _BEEWARE_TARGET_MAP[target_os]
+
+	platform_block = f"""
+[tool.briefcase.app.{slug}.{bw_section}]
+requires = []
+"""
+	if target_os == "ios":
+		platform_block += f"""
+[tool.briefcase.app.{slug}.iOS.info]
+NSMicrophoneUsageDescription = "{safe_name} requires microphone access for voice chat and audio features."
+"""
+	elif target_os == "macos":
+		platform_block += f"""universal_build = true
+
+[tool.briefcase.app.{slug}.macOS.info]
+NSMicrophoneUsageDescription = "{safe_name} requires microphone access for voice chat and audio features."
+"""
+	elif target_os == "linux":
+		platform_block += """
+[tool.briefcase.app.""" + slug + """.linux.system.debian]
+system_requires = []
+system_runtime_requires = ["libasound2", "libsdl2-2.0-0"]
+"""
+
+	pyproject_content = f"""[build-system]
+requires = ["briefcase"]
+
+[tool.briefcase]
+project_name = "{safe_name}"
+bundle = "org.pyaudiogaming"
+version = "0.1.0"
+url = "https://pyaudiogaming.org"
+license = "MIT"
+license-files = ["LICENSE"]
+author = "PyAudioGaming"
+author_email = "dev@pyaudiogaming.org"
+
+[tool.briefcase.app.{slug}]
+formal_name = "{safe_name}"
+description = "{safe_name} built with PyAudioGaming BeeWare Backend"
+sources = ["src/{slug}"]
+requires = [
+    {req_formatted}
+]
+{platform_block}
+"""
+	_save_text(pyproject_content, workspace / "pyproject.toml")
+	return workspace, slug, app_root
+
+
+def build_beeware(project, name, target_os, data=(), arch=None, args=(), prepare_only=False, rename_file=None, out_dir=None):
+	"""Build ứng dụng qua BeeWare (Briefcase) cho iOS, macOS, Linux, Windows hoặc Web."""
+	target_os = target_os.lower().strip()
+	if target_os == "android":
+		return build_android(project, name, data=data, arch=arch, args=args, prepare_only=prepare_only, rename_file=rename_file, out_dir=out_dir)
+
+	bw_plat = _BEEWARE_TARGET_MAP.get(target_os)
+	if not bw_plat:
+		raise ValueError(f"Unsupported BeeWare target platform: {target_os}")
+
+	host_os = sys_checker.get_platform()["os"].lower()
+	extra_reqs = [a for a in (args or ()) if not str(a).startswith("-")]
+	clean_rebuild = "--clean" in (args or ()) or "--clean" in sys.argv
+	use_docker = "--docker" in (args or ()) or "--use-docker" in (args or ())
+
+	workspace, slug, app_root = prepare_beeware(
+		project, name, target_os, data=data, arch=arch, extra_reqs=extra_reqs
+	)
+	print(f"[BeeWare:{bw_plat}] Workspace prepared: {workspace}")
+
+	if prepare_only:
+		return True
+
+	# Kiểm tra điều kiện host OS bắt buộc của từng nền tảng
+	if target_os in ("ios", "macos") and host_os != "macos":
+		print("=" * 64)
+		print(f"[BeeWare:{bw_plat}] Workspace is ready at: {workspace}")
+		print(f"Notice: Building/packaging '{bw_plat}' requires a macOS host with Xcode installed.")
+		print("You can copy the prepared workspace above to a Mac (or run on GitHub Actions 'macos-latest')")
+		print(f"and execute: briefcase create {bw_plat} && briefcase build {bw_plat} && briefcase package {bw_plat}")
+		print("=" * 64)
+		return True
+
+	if target_os == "windows" and host_os != "windows":
+		print("=" * 64)
+		print(f"[BeeWare:{bw_plat}] Workspace is ready at: {workspace}")
+		print("Notice: Packaging Windows MSI via BeeWare requires running on a Windows host.")
+		print("=" * 64)
+		return True
+
+	if target_os == "linux" and host_os != "linux" and not (use_docker and shutil.which("docker")):
+		print("=" * 64)
+		print(f"[BeeWare:{bw_plat}] Workspace is ready at: {workspace}")
+		print("Notice: Packaging Linux via BeeWare requires a Linux host (or pass '--docker' with Docker installed).")
+		print(f"On Linux, run inside workspace: briefcase create linux && briefcase build linux && briefcase package linux")
+		print("=" * 64)
+		return True
+
+	env = _get_portable_env()
+	_ensure_briefcase(env)
+
+	plat_build_dir = workspace / "build" / slug / target_os
+	if clean_rebuild and plat_build_dir.exists():
+		print(f"[BeeWare:{bw_plat}] Cleaning previous build cache...")
+		shutil.rmtree(plat_build_dir)
+
+	if (workspace / "dist").exists():
+		shutil.rmtree(workspace / "dist")
+
+	extra_bw_flags = []
+	if target_os == "linux" and host_os != "linux" and use_docker:
+		extra_bw_flags.append("--use-docker")
+
+	if not plat_build_dir.exists():
+		print(f"[BeeWare:{bw_plat}] Step 1/3: Creating {bw_plat} project template...")
+		_run_briefcase(["create", bw_plat, "--no-input"] + extra_bw_flags, cwd=workspace, env=env)
+	else:
+		print(f"[BeeWare:{bw_plat}] Step 1/3: Updating {bw_plat} project sources...")
+		_run_briefcase(["update", bw_plat, "-r", "--no-input"] + extra_bw_flags, cwd=workspace, env=env)
+
+	print(f"[BeeWare:{bw_plat}] Step 2/3: Building {bw_plat} project...")
+	_run_briefcase(["build", bw_plat, "--no-input"] + extra_bw_flags, cwd=workspace, env=env)
+
+	print(f"[BeeWare:{bw_plat}] Step 3/3: Packaging {bw_plat} distributable...")
+	pkg_cmd = ["package", bw_plat, "--no-input"] + extra_bw_flags
+	if target_os == "macos" and "--adhoc-sign" not in pkg_cmd:
+		pkg_cmd.append("--adhoc-sign")
+	elif target_os == "ios":
+		# On iOS, package may require signing identity; fall back gracefully if no Apple Dev cert is present
+		try:
+			_run_briefcase(pkg_cmd, cwd=workspace, env=env)
+		except RuntimeError as e:
+			print(f"[BeeWare:iOS] Packaging note (code signing may be required for .ipa): {e}")
+			print(f"[BeeWare:iOS] Xcode project built successfully at: {workspace / 'build' / slug / 'ios'}")
+			pkg_cmd = None
+	if pkg_cmd is not None:
+		_run_briefcase(pkg_cmd, cwd=workspace, env=env)
+
+	target_dist = Path(out_dir) if out_dir else (app_root / "dist" / str(name))
+	target_dist.mkdir(parents=True, exist_ok=True)
+
+	copied = []
+	ws_dist = workspace / "dist"
+	if ws_dist.is_dir():
+		for item in ws_dist.iterdir():
+			dst_item = target_dist / item.name
+			if item.is_dir():
+				shutil.copytree(item, dst_item, dirs_exist_ok=True)
+			else:
+				shutil.copy2(item, dst_item)
+			copied.append(dst_item)
+
+	print("=" * 60)
+	if copied:
+		print(f"[BeeWare:{bw_plat}] Build artifacts copied to:")
+		for c in copied:
+			print(f" -> {c.resolve()}")
+	else:
+		print(f"[BeeWare:{bw_plat}] Build finished. Check workspace build directory:")
+		print(f" -> {workspace.resolve()}")
 	print("=" * 60)
 	return True
 
@@ -929,37 +1722,39 @@ def resolve_gcc_binary(host_os, target_os, arch=None, is_cpp=False):
 def build_command(tool, PROJECT, PROJECT_FULL_NAME, rename_file, args_compile, zstandard, target_os, arch=None):
 	tool = tool.lower().strip()
 	host_os = sys_checker.get_platform()["os"].lower()
-	if target_os == "android":
-		raise ValueError("Android builds must use the dedicated BeeWare backend")
+	if target_os in ("android", "ios", "web"):
+		raise ValueError(f"'{target_os}' builds must use the dedicated BeeWare backend")
 	args = list(args_compile) if isinstance(args_compile, list) else []
+	if host_os != "windows":
+		args = [a for a in args if a.strip().lower() != "--mingw64"]
 	out_dir = f"dist/{PROJECT_FULL_NAME}"
 	ext_bin = ".exe" if target_os == "windows" else ""
 	py_exe = _find_real_python()
 
-	if host_os != target_os and tool in ("pyinstaller", "cx_freeze"):
-		print(f"Notice: '{tool}' cannot cross-compile from '{host_os}' to '{target_os}'.")
-		print(f"-> Automatically switching build tool to C/C++ compiler (GCC / VS Build Tools) for target '{target_os}'.")
-		tool = "gcc"
-		pyinst_flags = ("--noconsole", "-w", "--onefile", "-F", "--onedir", "-D", "--console", "-c", "--clean")
-		args = [a for a in args if a.strip() not in pyinst_flags and not a.strip().startswith(("--add-data", "--hidden-import", "--icon", "-i"))]
+	if host_os != target_os and tool in ("pyinstaller", "nuitka", "cx_freeze"):
+		raise RuntimeError(
+			f"'{tool}' cannot cross-compile from '{host_os}' to '{target_os}'. "
+			f"To build for '{target_os}', run compile.py on a '{target_os}' machine (or CI/GitHub Actions), "
+			f"or set 'mode = beeware' to prepare a portable BeeWare project workspace."
+		)
 
 	if tool == "pyinstaller":
 		if zstandard:
 			if not any(a.strip().startswith(("--onefile", "-F", "--onedir", "-D")) for a in args):
 				args.append("--onefile")
 			args = [a for a in args if not a.strip().startswith(("--name", "--distpath"))]
-			args.append(f"--name {rename_file}")
-			args.append(f"--distpath {out_dir}")
-		return f"pyinstaller {' '.join(args)} {PROJECT}.py"
+			args.append(f"--name {quote_arg(rename_file)}")
+			args.append(f"--distpath {quote_arg(out_dir)}")
+		return f"{quote_arg(py_exe)} -m PyInstaller {' '.join(args)} {quote_arg(f'{PROJECT}.py')}"
 
 	elif tool == "nuitka":
 		if zstandard:
 			if not any(a.strip().startswith(("--onefile", "--standalone")) for a in args):
 				args.append("--onefile")
 			args = [a for a in args if not a.strip().startswith(("--output-dir", "--output-filename", "-o"))]
-			args.append(f"--output-dir={out_dir}")
-			args.append(f"--output-filename={rename_file}{ext_bin}")
-		return f"{quote_arg(py_exe)} -m nuitka {' '.join(args)} {PROJECT}.py"
+			args.append(f"--output-dir={quote_arg(out_dir)}")
+			args.append(f"--output-filename={quote_arg(f'{rename_file}{ext_bin}')}")
+		return f"{quote_arg(py_exe)} -m nuitka {' '.join(args)} {quote_arg(f'{PROJECT}.py')}"
 
 	elif tool in ("gcc", "g++", "clang", "msvc", "cl", "cython"):
 		os.makedirs(out_dir, exist_ok=True)
@@ -972,6 +1767,12 @@ def build_command(tool, PROJECT, PROJECT_FULL_NAME, rename_file, args_compile, z
 			comp_type, compiler = ("gcc", "clang")
 		else:
 			comp_type, compiler = resolve_gcc_binary(host_os, target_os, arch, is_cpp)
+
+		if host_os != target_os and comp_type == "msvc":
+			raise RuntimeError(
+				f"Cannot cross-compile from '{host_os}' to '{target_os}' using Windows MSVC. "
+				f"Install a target cross-compiler or build natively on '{target_os}'."
+			)
 
 		out_file = os.path.normpath(f"{out_dir}/{rename_file}{ext_bin}")
 
@@ -1020,14 +1821,33 @@ def build_command(tool, PROJECT, PROJECT_FULL_NAME, rename_file, args_compile, z
 			extra_args = " ".join(filter(None, [arch_flag] + args))
 			
 			inc_dir = sysconfig.get_path("include")
-			libs_dir = os.path.join(sys.base_prefix, "libs")
-			py_ver_num = f"{sys.version_info.major}{sys.version_info.minor}"
 			gcc_flags = []
 			if inc_dir and os.path.exists(inc_dir):
 				gcc_flags.append(f'-I"{inc_dir}"')
-			if os.path.exists(libs_dir):
-				gcc_flags.append(f'-L"{libs_dir}"')
-			gcc_flags.append(f'-lpython{py_ver_num}')
+			if host_os == "windows":
+				libs_dir = os.path.join(sys.base_prefix, "libs")
+				py_ver_num = f"{sys.version_info.major}{sys.version_info.minor}"
+				if os.path.exists(libs_dir):
+					gcc_flags.append(f'-L"{libs_dir}"')
+				gcc_flags.append(f'-lpython{py_ver_num}')
+			else:
+				libs_dir = sysconfig.get_config_var("LIBDIR") or ""
+				if libs_dir and os.path.exists(libs_dir):
+					gcc_flags.append(f'-L"{libs_dir}"')
+				ldlib = sysconfig.get_config_var("LDLIBRARY") or ""
+				py_lib_flag = f"-lpython{sys.version_info.major}.{sys.version_info.minor}"
+				if ldlib.startswith("lib"):
+					stem = ldlib[3:]
+					for suf in (".so", ".dylib", ".a"):
+						if stem.endswith(suf):
+							stem = stem[:-len(suf)]
+							break
+					if stem:
+						py_lib_flag = f"-l{stem}"
+				gcc_flags.append(py_lib_flag)
+				extra_ld = sysconfig.get_config_var("LIBS") or ""
+				if extra_ld:
+					gcc_flags.append(extra_ld)
 			py_flags = " ".join(gcc_flags) if need_cython else ""
 			
 			win_def = "-DMS_WIN64" if (host_os == "windows" and need_cython) else ""
@@ -1036,10 +1856,11 @@ def build_command(tool, PROJECT, PROJECT_FULL_NAME, rename_file, args_compile, z
 		return cmds
 
 	elif tool == "cx_freeze":
-		return f"cxfreeze {PROJECT}.py --target-dir {out_dir} --target-name {rename_file}{ext_bin} {' '.join(args)}"
+		return f"cxfreeze {quote_arg(f'{PROJECT}.py')} --target-dir {quote_arg(out_dir)} --target-name {quote_arg(f'{rename_file}{ext_bin}')} {' '.join(args)}"
 
 	elif tool in ("beeware", "briefcase"):
-		return f"{quote_arg(py_exe)} -I -m briefcase package android --packaging-format debug-apk --no-input"
+		bw_plat = _BEEWARE_TARGET_MAP.get(target_os, "android")
+		return f"{quote_arg(py_exe)} -I -m briefcase package {bw_plat} --no-input"
 
 	else:
 		return f"{tool} {' '.join(args)} {PROJECT}.py"
@@ -1108,6 +1929,25 @@ def build(PROJECT=None, PROJECT_FULL_NAME=None, args_compile=[], data=[], rename
 			build_android(
 				project=PROJECT,
 				name=PROJECT_FULL_NAME,
+				data=data,
+				arch=arch,
+				args=args_compile,
+				prepare_only="--skip-compile" in sys.argv,
+				rename_file=rename_file,
+				out_dir=copydir
+			)
+			if packet:
+				dopackage(PROJECT, current_full_name, target_os)
+			continue
+
+		if target_os in ("ios", "web") or (mode.lower().strip() in ("beeware", "briefcase") and target_os in _BEEWARE_TARGET_MAP):
+			if target_os in ("ios", "web") and mode.lower().strip() not in ("beeware", "briefcase", "ios", "web"):
+				print(f"Notice: Mode '{mode}' is not supported for '{target_os}'. Automatically switching to 'beeware'.")
+
+			build_beeware(
+				project=PROJECT,
+				name=PROJECT_FULL_NAME,
+				target_os=target_os,
 				data=data,
 				arch=arch,
 				args=args_compile,
@@ -1200,8 +2040,8 @@ def interactive_make():
 		("rename_file", "Executable output name after build (Press Enter to use project name)", ""),
 		("packet", "Create installer / zip archive after build? (true/false)", "false"),
 		("zstandard", "Use standard automated flags (zstandard)? (true/false)", "true"),
-		("mode", "Compiler tool (pyinstaller, nuitka, cython, gcc, msvc, cx_freeze, beeware for Android)", "pyinstaller"),
-		("platforms", "Target OS (windows, linux, android, macos, ios, or null for auto-detect)", "null"),
+		("mode", "Compiler tool (pyinstaller, nuitka, cython, gcc, msvc, cx_freeze, beeware for Android/iOS/Desktop/Web)", "pyinstaller"),
+		("platforms", "Target OS (windows, linux, android, macos, ios, web, or null for auto-detect)", "null"),
 		("arch", "Target CPU architecture (x64, x86, a64, arm64-v8a... or null for auto-detect)", "null"),
 		("save_action", "Save config or build immediately? (Enter .txt filename to save only, 'both' to save & build, or press Enter to build now)", "")
 	]
@@ -1281,15 +2121,15 @@ def interactive_make():
 
 
 def work(config_file):
-	# Nếu đang ở trong tiến trình con của Android build thì thoát êm ngay, không báo lỗi build.txt
-	if os.environ.get("PYAG_BUILDING_ANDROID") == "1" or "briefcase" in " ".join(sys.argv).lower():
+	# Nếu đang ở trong tiến trình con của BeeWare/Android build thì thoát êm ngay, không báo lỗi build.txt
+	if os.environ.get("PYAG_BUILDING_ANDROID") == "1" or os.environ.get("PYAG_BUILDING_BEEWARE") == "1" or "briefcase" in " ".join(sys.argv).lower():
 		return
 
 	f = File(password="", encode=False, aes=False)
 	if not f.check(config_file):
-		# Nếu bị gọi nhầm từ thư mục workspace của Android thì bỏ qua, không sys.exit(1)
+		# Nếu bị gọi nhầm từ thư mục workspace của BeeWare/Android thì bỏ qua, không sys.exit(1)
 		cwd_lower = os.getcwd().lower()
-		if "android" in cwd_lower or "projects" in cwd_lower:
+		if "android" in cwd_lower or "beeware" in cwd_lower or "projects" in cwd_lower:
 			return
 		print(f"Error: Config file '{config_file}' not found!")
 		return
@@ -1373,7 +2213,7 @@ if __name__ == "__main__":
 	briefcase_subcommands = {"new", "dev", "upgrade", "update", "open", "build", "run", "package", "publish", "log", "--version", "-V", "--help", "-h"}
 	if user_input.lower() in briefcase_subcommands:
 		sys.exit(0)
-	if user_input.lower() == "create" and len(sys.argv) > 2 and sys.argv[2].lower() in ("android", "ios", "windows", "linux", "macos"):
+	if user_input.lower() == "create" and len(sys.argv) > 2 and sys.argv[2].lower() in ("android", "ios", "windows", "linux", "macos", "web"):
 		sys.exit(0)
 
 	if user_input.lower() == "make":

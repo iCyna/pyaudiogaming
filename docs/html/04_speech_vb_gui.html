@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>04. Speech, Virtual Box (vb) &amp; 4-Backend GUI (gui)</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header role="banner">
+    <h1>04. Speech, Virtual Box (vb) &amp; 4-Backend GUI (gui)</h1>
+    <nav aria-label="Documentation Navigation">
+    <a href="index.html" class="">Home</a>
+    <a href="01_getting_started.html" class="">01. Getting Started</a>
+    <a href="02_window_input_menu.html" class="">02. Input &amp; Menu</a>
+    <a href="03_audio_3d_fx.html" class="">03. 3D Audio</a>
+    <a href="04_speech_vb_gui.html" class="active">04. Speech, VB &amp; GUI</a>
+    <a href="05_timer_worker_storage_haptics.html" class="">05. Advanced Systems</a>
+    <a href="06_building_cross_platform.html" class="">06. Building</a>
+    <a href="api_reference.html" class="">Module Reference</a>
+    </nav>
+  </header>
+  <main id="main-content" role="main">
+
+<h2>1. Virtual Box Input &amp; Neutral Keyboard Mode Switcher</h2>
+<p>Press <strong><code>Ctrl + Shift + Alt + Backspace</code></strong> inside <code>vb.input()</code> to cycle neutral virtual keyboard modes (<code>standard</code>, <code>numeric</code>, <code>symbols</code>, <code>emoji</code>, or your own <code>custom_keyboards</code>).</p>
+<pre><code>from pyaudiogaming import vb
+
+msg = vb.input("Message", placeholder="Press Ctrl+Shift+Alt+Backspace for symbols...", window=wnd)
+vb.info_box("Sent", f"You typed: {msg}")</code></pre>
+<h2>2. 4-Backend Cross-Platform GUI (wx / Qt / Tk / Audio)</h2>
+<pre><code>from pyaudiogaming import gui
+
+w = gui.Window("Settings", (520, 420), backend="auto")
+with w.page("General"):
+    with w.group("Profile"):
+        w.input("Username", value="player1")
+        w.spin("Level", 1, 99, 10)
+    with w.row():
+        w.button("Save", lambda _: w.alert("Saved", str(w.values())))
+        w.button("Close", lambda _: w.close())
+w.run()</code></pre>
+<p>Module References: <a href="modules/speech.html">speech</a> | <a href="modules/vb.html">vb</a> | <a href="modules/gui.html">gui</a></p>
+
+  </main>
+  <footer role="contentinfo">
+    PyAudioGaming Official Documentation &mdash; Cross-Platform Audio Gaming for Windows, Linux, macOS, Android, iOS &amp; Web.
+  </footer>
+</body>
+</html>

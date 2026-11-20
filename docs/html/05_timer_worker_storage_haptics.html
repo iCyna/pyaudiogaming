@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>05. Timer, Worker, Storage, Haptics &amp; Utils</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header role="banner">
+    <h1>05. Timer, Worker, Storage, Haptics &amp; Utils</h1>
+    <nav aria-label="Documentation Navigation">
+    <a href="index.html" class="">Home</a>
+    <a href="01_getting_started.html" class="">01. Getting Started</a>
+    <a href="02_window_input_menu.html" class="">02. Input &amp; Menu</a>
+    <a href="03_audio_3d_fx.html" class="">03. 3D Audio</a>
+    <a href="04_speech_vb_gui.html" class="">04. Speech, VB &amp; GUI</a>
+    <a href="05_timer_worker_storage_haptics.html" class="active">05. Advanced Systems</a>
+    <a href="06_building_cross_platform.html" class="">06. Building</a>
+    <a href="api_reference.html" class="">Module Reference</a>
+    </nav>
+  </header>
+  <main id="main-content" role="main">
+
+<h2>1. Timers, Cooldowns &amp; Single-Threaded Scheduler</h2>
+<pre><code>from pyaudiogaming.timer import Timer, CooldownManager, TimerScheduler, FrameClock
+
+cd = CooldownManager()
+sched = TimerScheduler()
+if cd.use("dash", 2000):
+    sched.after(2000, lambda: wnd.say("Dash ready!"))
+sched.update()</code></pre>
+<h2>2. Mobile-Safe Storage, Background Workers &amp; Haptics</h2>
+<pre><code>from pyaudiogaming.storage import ConfigStore
+from pyaudiogaming.worker import TaskPool
+from pyaudiogaming import haptics
+
+cfg = ConfigStore("my_game", defaults={"vol": 90.0}, portable=True)
+cfg.load(); cfg["vol"] = 80.0; cfg.save()
+
+pool = TaskPool(mode="auto")
+pool.submit(sum, range(500000), on_done=lambda total: print("Total:", total))
+pool.poll()
+
+haptics.preset("hit_heavy")
+haptics.update()</code></pre>
+<p>Module References: <a href="modules/timer.html">timer</a> | <a href="modules/storage.html">storage</a> | <a href="modules/worker.html">worker</a> | <a href="modules/haptics.html">haptics</a> | <a href="modules/utils.html">utils</a></p>
+
+  </main>
+  <footer role="contentinfo">
+    PyAudioGaming Official Documentation &mdash; Cross-Platform Audio Gaming for Windows, Linux, macOS, Android, iOS &amp; Web.
+  </footer>
+</body>
+</html>

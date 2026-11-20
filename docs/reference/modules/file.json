@@ -1,0 +1,273 @@
+{
+  "module": "file",
+  "classes": [
+    {
+      "name": "File",
+      "doc": "",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "password: str, encode: bool=False, aes: bool=False",
+          "params": [
+            {
+              "name": "password",
+              "type": "str",
+              "default": "required"
+            },
+            {
+              "name": "encode",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "aes",
+              "type": "bool",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "generate_key",
+          "kind": "method",
+          "signature": "password: str",
+          "params": [
+            {
+              "name": "password",
+              "type": "str",
+              "default": "required"
+            }
+          ],
+          "returns": "bytes",
+          "doc": "Tạo key từ mật khẩu bằng cách băm SHA-256."
+        },
+        {
+          "name": "dokey",
+          "kind": "method",
+          "signature": "key: bytes",
+          "params": [
+            {
+              "name": "key",
+              "type": "bytes",
+              "default": "required"
+            }
+          ],
+          "returns": "Fernet",
+          "doc": "Tạo đối tượng Fernet từ key."
+        },
+        {
+          "name": "aes_encrypt",
+          "kind": "method",
+          "signature": "data: bytes",
+          "params": [
+            {
+              "name": "data",
+              "type": "bytes",
+              "default": "required"
+            }
+          ],
+          "returns": "bytes",
+          "doc": "Mã hóa dữ liệu bằng AES."
+        },
+        {
+          "name": "aes_decrypt",
+          "kind": "method",
+          "signature": "data: bytes",
+          "params": [
+            {
+              "name": "data",
+              "type": "bytes",
+              "default": "required"
+            }
+          ],
+          "returns": "bytes",
+          "doc": "Giải mã dữ liệu bằng AES."
+        },
+        {
+          "name": "open",
+          "kind": "method",
+          "signature": "file_path, mode",
+          "params": [
+            {
+              "name": "file_path",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "mode",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "close",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "save",
+          "kind": "method",
+          "signature": "data, file_path, mode='w+', type=''",
+          "params": [
+            {
+              "name": "data",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "file_path",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "mode",
+              "type": "any",
+              "default": "'w+'"
+            },
+            {
+              "name": "type",
+              "type": "any",
+              "default": "''"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "load",
+          "kind": "method",
+          "signature": "file_path: str, mode='r+', type: str=''",
+          "params": [
+            {
+              "name": "file_path",
+              "type": "str",
+              "default": "required"
+            },
+            {
+              "name": "mode",
+              "type": "any",
+              "default": "'r+'"
+            },
+            {
+              "name": "type",
+              "type": "str",
+              "default": "''"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "remove",
+          "kind": "method",
+          "signature": "file_path: str",
+          "params": [
+            {
+              "name": "file_path",
+              "type": "str",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "create",
+          "kind": "method",
+          "signature": "file_path: str",
+          "params": [
+            {
+              "name": "file_path",
+              "type": "str",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "check",
+          "kind": "method",
+          "signature": "file_path: str",
+          "params": [
+            {
+              "name": "file_path",
+              "type": "str",
+              "default": "required"
+            }
+          ],
+          "returns": "bool",
+          "doc": ""
+        },
+        {
+          "name": "replace",
+          "kind": "method",
+          "signature": "old_file, new_file",
+          "params": [
+            {
+              "name": "old_file",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "new_file",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "copy",
+          "kind": "method",
+          "signature": "src: str, dest: str",
+          "params": [
+            {
+              "name": "src",
+              "type": "str",
+              "default": "required"
+            },
+            {
+              "name": "dest",
+              "type": "str",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "move",
+          "kind": "method",
+          "signature": "src, dest",
+          "params": [
+            {
+              "name": "src",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "dest",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    }
+  ],
+  "functions": [],
+  "title": "file — Encrypted File I/O (Fernet + AES-CBC)",
+  "summary": "File helper supporting JSON, Pickle, and plain-text serialization with optional two-layer Fernet + AES-CBC encryption."
+}

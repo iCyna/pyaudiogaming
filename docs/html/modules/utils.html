@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>utils — Math, Spatial, Formatting, Search, Clipboard &amp; SPAK Archive Toolkit — PyAudioGaming</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header role="banner">
+    <h1>utils — Math, Spatial, Formatting, Search, Clipboard &amp; SPAK Archive Toolkit — PyAudioGaming</h1>
+    <nav aria-label="Documentation Navigation">
+    <a href="../index.html" class="">Home</a>
+    <a href="../01_getting_started.html" class="">01. Getting Started</a>
+    <a href="../02_window_input_menu.html" class="">02. Input &amp; Menu</a>
+    <a href="../03_audio_3d_fx.html" class="">03. 3D Audio</a>
+    <a href="../04_speech_vb_gui.html" class="">04. Speech, VB &amp; GUI</a>
+    <a href="../05_timer_worker_storage_haptics.html" class="">05. Advanced Systems</a>
+    <a href="../06_building_cross_platform.html" class="">06. Building</a>
+    <a href="../api_reference.html" class="">Module Reference</a>
+    </nav>
+  </header>
+  <main id="main-content" role="main">
+<p><a href="../api_reference.html">&larr; Back to All Modules</a></p>
+<div class="callout"><strong>Summary:</strong> Zero-dependency game utilities: clamp/lerp/remap/clock_direction/db_to_linear, weighted random, fuzzy search, cross-platform clipboard (copy_text/paste_text), open_url, SHA-256 hashing, and SPAK binary audio archiving.</div>
+<h2>Usage Guide &amp; Examples</h2>
+
+<h3>How to Use</h3>
+<pre><code>from pyaudiogaming import utils
+
+hour = utils.clock_direction(dx=5, dy=1)             # 3 (3 o'clock)
+hits = utils.fuzzy_match("aud", ["Audio", "Video"])
+utils.copy_text("Hello clipboard!")
+utils.make_spak("res/sounds", "res/sounds.zb", password="pw")</code></pre>
+
+<h2>Parameter &amp; API Tables</h2>
+<label for="mod-search">Filter symbols in this module:</label>
+<input id="mod-search" type="search" placeholder="Type method or parameter name..." oninput="filterMod(this.value)">
+<h3>Module-Level Functions</h3>
+<table class="api-tbl" id="tbl_utils_funcs">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">function</span><code>convert_to_unicode(name)</code></td><td><code>name</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>token(min=4, max=12, more=&#x27;&#x27;)</code></td><td><code>min</code> (any, default: <code>4</code>)<br><code>max</code> (any, default: <code>12</code>)<br><code>more</code> (any, default: <code>&#x27;&#x27;</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>run(cmd, sh=False)</code></td><td><code>cmd</code> (any, default: <code>required</code>)<br><code>sh</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>mkdir(fld)</code></td><td><code>fld</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>get_window()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>is_url(path_string)</code></td><td><code>path_string</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>make_spak(source, output_path=None, password=&#x27;&#x27;, header_path=None, prefix=None, extensions=_SPAK_DEFAULT_EXTS, encrypt_bytes=256)</code></td><td><code>source</code> (any, default: <code>required</code>)<br><code>output_path</code> (any, default: <code>None</code>)<br><code>password</code> (any, default: <code>&#x27;&#x27;</code>)<br><code>header_path</code> (any, default: <code>None</code>)<br><code>prefix</code> (any, default: <code>None</code>)<br><code>extensions</code> (any, default: <code>_SPAK_DEFAULT_EXTS</code>)<br><code>encrypt_bytes</code> (any, default: <code>256</code>)</td><td><code>any</code></td><td>Đóng gói một thư mục âm thanh (bao gồm toàn bộ thư mục con) hoặc danh sách/dict các file thành 1 gói .spak duy nhất (hoặc tách kèm file header.inf nếu truyền header_path).</td></tr>
+    <tr><td><span class="badge">function</span><code>load_spak(spak_path, password=&#x27;&#x27;, mode=&#x27;lazy&#x27;, target=&#x27;both&#x27;, prefix=None, header_path=None, preload_sample=False, callback=None)</code></td><td><code>spak_path</code> (any, default: <code>required</code>)<br><code>password</code> (any, default: <code>&#x27;&#x27;</code>)<br><code>mode</code> (any, default: <code>&#x27;lazy&#x27;</code>)<br><code>target</code> (any, default: <code>&#x27;both&#x27;</code>)<br><code>prefix</code> (any, default: <code>None</code>)<br><code>header_path</code> (any, default: <code>None</code>)<br><code>preload_sample</code> (any, default: <code>False</code>)<br><code>callback</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>Đọc gói âm thanh .spak (hoặc gói .ogg + header.inf) và cast vào hệ thống âm thanh (hsample / hstream).</td></tr>
+    <tr><td><span class="badge">function</span><code>clamp(val, low, high)</code></td><td><code>val</code> (any, default: <code>required</code>)<br><code>low</code> (any, default: <code>required</code>)<br><code>high</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>Clamp ``val`` to the inclusive range ``[low, high]``.</td></tr>
+    <tr><td><span class="badge">function</span><code>lerp(a, b, t)</code></td><td><code>a</code> (any, default: <code>required</code>)<br><code>b</code> (any, default: <code>required</code>)<br><code>t</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>Linear interpolation between ``a`` and ``b`` by factor ``t``.</td></tr>
+    <tr><td><span class="badge">function</span><code>inv_lerp(a, b, value)</code></td><td><code>a</code> (any, default: <code>required</code>)<br><code>b</code> (any, default: <code>required</code>)<br><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>Inverse linear interpolation: return ``t`` such that ``lerp(a, b, t) == value``.</td></tr>
+    <tr><td><span class="badge">function</span><code>remap(val, in_min, in_max, out_min, out_max, clamp_out=False)</code></td><td><code>val</code> (any, default: <code>required</code>)<br><code>in_min</code> (any, default: <code>required</code>)<br><code>in_max</code> (any, default: <code>required</code>)<br><code>out_min</code> (any, default: <code>required</code>)<br><code>out_max</code> (any, default: <code>required</code>)<br><code>clamp_out</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>Remap ``val`` from range ``[in_min, in_max]`` to ``[out_min, out_max]``.</td></tr>
+    <tr><td><span class="badge">function</span><code>smoothstep(edge0, edge1, x)</code></td><td><code>edge0</code> (any, default: <code>required</code>)<br><code>edge1</code> (any, default: <code>required</code>)<br><code>x</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>Smooth Hermite interpolation between 0 and 1.</td></tr>
+    <tr><td><span class="badge">function</span><code>distance_2d(x1, y1, x2, y2)</code></td><td><code>x1</code> (any, default: <code>required</code>)<br><code>y1</code> (any, default: <code>required</code>)<br><code>x2</code> (any, default: <code>required</code>)<br><code>y2</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>distance_3d(x1, y1, z1, x2, y2, z2)</code></td><td><code>x1</code> (any, default: <code>required</code>)<br><code>y1</code> (any, default: <code>required</code>)<br><code>z1</code> (any, default: <code>required</code>)<br><code>x2</code> (any, default: <code>required</code>)<br><code>y2</code> (any, default: <code>required</code>)<br><code>z2</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>angle_2d(x1, y1, x2, y2)</code></td><td><code>x1</code> (any, default: <code>required</code>)<br><code>y1</code> (any, default: <code>required</code>)<br><code>x2</code> (any, default: <code>required</code>)<br><code>y2</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>Return clockwise bearing in degrees ``[0, 360)`` where North (+Y) = 0, East (+X) = 90.</td></tr>
+    <tr><td><span class="badge">function</span><code>clock_direction(dx, dy)</code></td><td><code>dx</code> (any, default: <code>required</code>)<br><code>dy</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>Convert a 2D delta ``(dx, dy)`` (North = +Y, East = +X) to clock hour ``1..12``.</td></tr>
+    <tr><td><span class="badge">function</span><code>db_to_linear(db)</code></td><td><code>db</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>Convert decibels (e.g. ``-6.0``) to linear amplitude (``0.0..1.0+``).</td></tr>
+    <tr><td><span class="badge">function</span><code>linear_to_db(amp, floor_db=-120.0)</code></td><td><code>amp</code> (any, default: <code>required</code>)<br><code>floor_db</code> (any, default: <code>-120.0</code>)</td><td><code>any</code></td><td>Convert linear amplitude to decibels.</td></tr>
+    <tr><td><span class="badge">function</span><code>percent(value, total, decimals=1)</code></td><td><code>value</code> (any, default: <code>required</code>)<br><code>total</code> (any, default: <code>required</code>)<br><code>decimals</code> (any, default: <code>1</code>)</td><td><code>any</code></td><td>Return percentage ``0.0..100.0`` safely (returns ``0.0`` if ``total == 0``).</td></tr>
+    <tr><td><span class="badge">function</span><code>chance(prob_percent)</code></td><td><code>prob_percent</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>Return ``True`` with probability ``prob_percent``% (0..100).</td></tr>
+    <tr><td><span class="badge">function</span><code>weighted_choice(items)</code></td><td><code>items</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>Pick one item by weight. Accepts ``{item: weight}`` or ``[(item, weight), ...]``.</td></tr>
+    <tr><td><span class="badge">function</span><code>roll_dice(count=1, sides=6, bonus=0)</code></td><td><code>count</code> (any, default: <code>1</code>)<br><code>sides</code> (any, default: <code>6</code>)<br><code>bonus</code> (any, default: <code>0</code>)</td><td><code>any</code></td><td>Roll ``count`` dice with ``sides`` faces and add ``bonus``.</td></tr>
+    <tr><td><span class="badge">function</span><code>shuffle_copy(seq)</code></td><td><code>seq</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>Return a newly shuffled list without modifying the original sequence.</td></tr>
+    <tr><td><span class="badge">function</span><code>format_bytes(num_bytes, decimals=2)</code></td><td><code>num_bytes</code> (any, default: <code>required</code>)<br><code>decimals</code> (any, default: <code>2</code>)</td><td><code>any</code></td><td>Format byte count into human-readable units (B, KB, MB, GB, TB).</td></tr>
+    <tr><td><span class="badge">function</span><code>format_number(num, sep=&#x27;,&#x27;)</code></td><td><code>num</code> (any, default: <code>required</code>)<br><code>sep</code> (any, default: <code>&#x27;,&#x27;</code>)</td><td><code>any</code></td><td>Format integer/float with thousands separators.</td></tr>
+    <tr><td><span class="badge">function</span><code>truncate(text, max_len, suffix=&#x27;...&#x27;)</code></td><td><code>text</code> (any, default: <code>required</code>)<br><code>max_len</code> (any, default: <code>required</code>)<br><code>suffix</code> (any, default: <code>&#x27;...&#x27;</code>)</td><td><code>any</code></td><td>Truncate text cleanly to at most ``max_len`` characters.</td></tr>
+    <tr><td><span class="badge">function</span><code>strip_accents(text)</code></td><td><code>text</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>Remove diacritical marks for accent-insensitive search/comparison.</td></tr>
+    <tr><td><span class="badge">function</span><code>slugify(text, sep=&#x27;_&#x27;)</code></td><td><code>text</code> (any, default: <code>required</code>)<br><code>sep</code> (any, default: <code>&#x27;_&#x27;</code>)</td><td><code>any</code></td><td>Convert arbitrary text into a clean ASCII filename/identifier slug.</td></tr>
+    <tr><td><span class="badge">function</span><code>natural_sort_key(text)</code></td><td><code>text</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>Sort key so ``&#x27;item2&#x27;`` comes before ``&#x27;item10&#x27;``.</td></tr>
+    <tr><td><span class="badge">function</span><code>fuzzy_match(query, candidates, limit=10)</code></td><td><code>query</code> (any, default: <code>required</code>)<br><code>candidates</code> (any, default: <code>required</code>)<br><code>limit</code> (any, default: <code>10</code>)</td><td><code>any</code></td><td>Accent-insensitive ranked search returning up to ``limit`` matching candidates.</td></tr>
+    <tr><td><span class="badge">function</span><code>deep_merge(base, override)</code></td><td><code>base</code> (any, default: <code>required</code>)<br><code>override</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>Recursively merge two dictionaries without mutating ``base`` or ``override``.</td></tr>
+    <tr><td><span class="badge">function</span><code>flatten(nested)</code></td><td><code>nested</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>Recursively flatten nested lists/tuples into a single list.</td></tr>
+    <tr><td><span class="badge">function</span><code>chunked(seq, size)</code></td><td><code>seq</code> (any, default: <code>required</code>)<br><code>size</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>Yield consecutive chunks of length ``size`` from ``seq``.</td></tr>
+    <tr><td><span class="badge">function</span><code>safe_int(val, default=0)</code></td><td><code>val</code> (any, default: <code>required</code>)<br><code>default</code> (any, default: <code>0</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>safe_float(val, default=0.0)</code></td><td><code>val</code> (any, default: <code>required</code>)<br><code>default</code> (any, default: <code>0.0</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>safe_bool(val, default=False)</code></td><td><code>val</code> (any, default: <code>required</code>)<br><code>default</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>ensure_dir(path)</code></td><td><code>path</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>Create directory (including parents) if missing and return the path.</td></tr>
+    <tr><td><span class="badge">function</span><code>file_hash(filepath, algo=&#x27;sha256&#x27;, chunk_size=65536)</code></td><td><code>filepath</code> (any, default: <code>required</code>)<br><code>algo</code> (any, default: <code>&#x27;sha256&#x27;</code>)<br><code>chunk_size</code> (any, default: <code>65536</code>)</td><td><code>any</code></td><td>Compute hexadecimal hash digest of a file efficiently in chunks.</td></tr>
+    <tr><td><span class="badge">function</span><code>open_url(url)</code></td><td><code>url</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>Open a URL in the default browser on Windows, macOS, Linux, and Android.</td></tr>
+    <tr><td><span class="badge">function</span><code>copy_text(text)</code></td><td><code>text</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>Copy UTF-8 text to system clipboard (Windows, Android, macOS, Linux) with zero external dependencies.</td></tr>
+    <tr><td><span class="badge">function</span><code>paste_text()</code></td><td><em>None</em></td><td><code>any</code></td><td>Read UTF-8 text from system clipboard (Windows, Android, macOS, Linux).</td></tr>
+    <tr><td><span class="badge">function</span><code>is_online(host=&#x27;1.1.1.1&#x27;, port=53, timeout=1.5)</code></td><td><code>host</code> (any, default: <code>&#x27;1.1.1.1&#x27;</code>)<br><code>port</code> (any, default: <code>53</code>)<br><code>timeout</code> (any, default: <code>1.5</code>)</td><td><code>any</code></td><td>Quick check whether network connectivity is available.</td></tr>
+    <tr><td><span class="badge">function</span><code>retry(fn, retries=3, delay_ms=100, exceptions=(Exception,))</code></td><td><code>fn</code> (any, default: <code>required</code>)<br><code>retries</code> (any, default: <code>3</code>)<br><code>delay_ms</code> (any, default: <code>100</code>)<br><code>exceptions</code> (any, default: <code>(Exception,)</code>)</td><td><code>any</code></td><td>Call ``fn()`` up to ``retries`` times with ``delay_ms`` pause between failures.</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>SpakArchive</code></h3>
+<p>Manages a loaded .spak package and provides thread-safe O(1) seek &amp; slice reading.</p>
+<table class="api-tbl" id="tbl_utils_SpakArchive">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__(spak_path, data_offset, key32, header_info)</code></td><td><code>spak_path</code> (any, default: <code>required</code>)<br><code>data_offset</code> (any, default: <code>required</code>)<br><code>key32</code> (any, default: <code>required</code>)<br><code>header_info</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>read_entry(rel_offset, size, enc_len)</code></td><td><code>rel_offset</code> (any, default: <code>required</code>)<br><code>size</code> (any, default: <code>required</code>)<br><code>enc_len</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>close()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<script>
+function filterMod(q) {
+  q = (q || '').toLowerCase();
+  var rows = document.querySelectorAll('.api-tbl tbody tr');
+  for (var i = 0; i < rows.length; i++) {
+    rows[i].style.display = rows[i].innerText.toLowerCase().indexOf(q) !== -1 ? '' : 'none';
+  }
+}
+</script>
+  </main>
+  <footer role="contentinfo">
+    PyAudioGaming Official Documentation &mdash; Cross-Platform Audio Gaming for Windows, Linux, macOS, Android, iOS &amp; Web.
+  </footer>
+</body>
+</html>

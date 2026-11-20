@@ -1,0 +1,52 @@
+========================================================================
+MODULE: pyaudiogaming.menu
+menu — Non-Blocking Accessible Menus
+========================================================================
+
+SUMMARY:
+Accessible game menu supporting keyboard arrows, '&K' shortcut hotkeys, wrap-around navigation, custom cursor/enter/cancel sounds, and mobile TalkBack touch gestures.
+
+
+[CLASS menu]
+----------------------------------------
+A simple nonblocking menu class.
+* menu.__init__() -> any [constructor]
+* menu.initialize(wnd, ttl='no title', items=None, cursorSound=None, enterSound=None, cancelSound=None, openSound=None, keyRead=False, readNP=False, config=None) -> any [method]
+* menu.allowed(name) -> any [method]
+* menu.parseShortcut(elem) -> any [method]
+  Accept &x, &{ctrl+x}, a tab suffix, or a label/hotkey dict.
+* menu.append(elem) -> any [method]
+  Adds a menu item.
+* menu.insert(index, elem) -> any [method]
+  Inserts an item at the specified position.
+* menu.remove(index) -> any [method]
+  Deletes the item at the specified index.
+* menu.modify(index, new_elem) -> any [method]
+  Modifies an existing menu item.
+* menu.open() -> any [method]
+  Starts the menu.
+* menu.jumpCursor(c, wrap=None) -> any [method]
+  Jumps to a specific cursor position, handling sounds, edge hits, and wrap-arounds.
+* menu.moveTo(c) -> any [method]
+  Alias for jumpCursor to maintain backward compatibility.
+* menu.frameUpdate() -> any [method]
+  The frame updating function for this menu. Call your window's frameUpdate prior to this.
+* menu.processShortcut(code, shortcut=None) -> any [method]
+  Search for shortcut matches dynamically in self.items (avoids maintaining a 2nd list).
+* menu.cancel() -> any [method]
+* menu.enter() -> any [method]
+* menu.getCursorPos() -> any [method]
+* menu.getString(index=None, hotkey=False) -> any [method]
+* menu.getReadStr() -> any [method]
+* menu.hotkey(line) -> any [method]
+* menu.Len() -> any [method]
+* menu.exit() -> any [method]
+* menu.isLast(index) -> any [method]
+* menu.getTitle() -> any [method]
+* menu.setTitle(newTitle) -> any [method]
+* menu.getOpenSound() -> any [method]
+* menu.setOpenSound(newSound) -> any [method]
+* menu.getCancelSound() -> any [method]
+* menu.setCancelSound(newSound) -> any [method]
+* menu.getEnterSound() -> any [method]
+* menu.setEnterSound(newSound) -> any [method]

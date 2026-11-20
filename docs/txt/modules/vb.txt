@@ -1,0 +1,77 @@
+========================================================================
+MODULE: pyaudiogaming.vb
+vb — Virtual Box (Accessible Input, Rich Forms & Modal Boxes)
+========================================================================
+
+SUMMARY:
+NVDA & TalkBack accessible UI engine featuring advanced text input (with Ctrl+Shift+Alt+Backspace neutral keyboard mode switcher), 23-control forms (group, tab, link, switch, table, tree, slider), and ready-to-use modal boxes.
+
+[MODULE FUNCTIONS]
+----------------------------------------
+* dialog(title='Dialog', text='', buttons=('OK', 'Cancel'), default=0, cancel=1, callback=None, window=None) -> any
+  Interactive modal dialog with multi-button navigation and touch support.
+* message(m, callback=None, open=None, move=None, close=None, window=None) -> any
+* get_conput(name, key, fallback=None) -> any
+* set_conput(data, fallback={}) -> any
+* input(title='', text='', callback=None, password=False, get_data=True, new_config=None, window=None) -> any
+* get_form_config(key='', fallback=None) -> any
+  Get FORM_CONFIG key or copy of full config.
+* set_form_config(data, fallback=None) -> any
+  Update global FORM_CONFIG dictionary in-place.
+* confirm(title='Confirm', text='Are you sure?', yes_text='Yes', no_text='No', window=None) -> any
+  Quick Yes/No modal dialog returning True if Yes is chosen.
+* prompt_chat(title='Message', placeholder='Type a message...', send_label='Send', suggestions=None, window=None) -> any
+  Android-style inline Input + adjacent Send button form; pressing Enter in input auto-clicks Send.
+* info_box(title='Information', text='', ok_text='OK', window=None) -> any
+  Accessible information dialog with subtle haptic feedback.
+* warning_box(title='Warning', text='', ok_text='OK', window=None) -> any
+  Accessible warning dialog with warning haptic feedback.
+* success_box(title='Success', text='', ok_text='OK', window=None) -> any
+  Accessible success dialog with success haptic feedback.
+* error_box(title='Error', text='', details=None, ok_text='OK', copy_text='Copy Details', window=None) -> any
+  Accessible error dialog with optional Copy Details button for tracebacks/error logs.
+* choice_box(title='Select', text='', choices=(), ok_text='OK', cancel_text='Cancel', window=None) -> any
+  Quick single-choice accessible selection box returning selected item string or None.
+* progress_box(title='Working', text='', step_fn=None, cancelable=True, announce_step=10, cancel_text='Cancel', window=None) -> any
+  Accessible modal progress dialog.
+
+[CLASS form]
+----------------------------------------
+NVDA & Android TalkBack accessible form with Rich Controls, Table, Tree, Dialog & Auto-Submit.
+* form.__init__(window=None, config=None) -> any [constructor]
+* form.add(name, kind='button', value=None, choices=None, callback=None, config=None, **kwargs) -> any [method]
+* form.notify_live(name_or_text, new_value=None, interrupt=True) -> any [method]
+  Dynamic live region announcement (NVDA aria-live style).
+* form.update_progress(name, value, announce_step=10) -> any [method]
+  Update progress bar dynamically and announce milestone percentages.
+* form.begin_group(label) -> any [method]
+  Start a logical NVDA grouping container; subsequent ``add()`` calls inherit it until ``end_group()``.
+* form.end_group() -> any [method]
+* form.validate(announce=True) -> any [method]
+  Validate all visible controls with ``required=True`` or ``validator=fn``. Returns ``(ok, errors)``.
+* form.allowed(action, item=None) -> any [method]
+* form.read() -> any [method]
+* form.move(step) -> any [method]
+* form.mainloop() -> any [method]
+* form.open_context_menu(choices=None, item=None) -> any [method]
+* form.enter() -> any [method]
+* form.frameUpdate() -> any [method]
+* form.values() -> any [method]
+* form.open() -> any [method]
+  Run modal form loop; return clicked button name or -1 on cancel.
+* form.get(name, fallback=None) -> any [method]
+  Get control value by name.
+* form.set(name, value, announce=False) -> any [method]
+  Set control value dynamically; auto-triggers live/progress logic if applicable.
+* form.set_style(name, **kwargs) -> any [method]
+  Update visual style (color, bg_color, border_color, font, font_size, pos, size, border, margin, padding).
+* form.quick_nav(kind_filter, reverse=False) -> any [method]
+  NVDA-style single-key quick navigation (H=heading, B=button, E=input, C=combo, T=table, Q=quote, F=frame).
+* form.set_cell(table_name, row, col, val, announce=False) -> any [method]
+  Update a specific cell in a table control.
+* form.add_row(table_name, row_data, announce=False) -> any [method]
+  Append a row to a table control dynamically.
+* form.save_values(filepath) -> any [method]
+  Save form values using pyaudiogaming.file if available.
+* form.load_values(filepath) -> any [method]
+  Load form values using pyaudiogaming.file if available.

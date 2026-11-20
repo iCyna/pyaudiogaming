@@ -313,6 +313,75 @@ def present_bitmap(bitmap):
         v.presentBitmap(bitmap)
 
 
+def set_overlay_text(text, is_error=False):
+    v = get_view()
+    if v is not None:
+        try:
+            v.setOverlayText(str(text), bool(is_error))
+        except Exception:
+            pass
+
+
+def show_error_dialog(title, message):
+    """Show native Android AlertDialog with scrollable traceback, Copy and Close buttons."""
+    v = get_view()
+    if v is not None and hasattr(v, "showErrorDialog"):
+        try:
+            v.showErrorDialog(str(title), str(message))
+            return True
+        except Exception:
+            pass
+    set_overlay_text(f"{title}\n{message}", is_error=True)
+    return False
+
+
+def close_app():
+    """Finish Android Activity and terminate native window cleanly on game exit."""
+    if not _HAS_JAVA:
+        return False
+    v = _VIEW
+    if v is not None and hasattr(v, "closeApp"):
+        try:
+            v.closeApp()
+            return True
+        except Exception:
+            pass
+    act = get_activity()
+    if act is not None:
+        try:
+            def _do_finish():
+                try:
+                    act.finishAndRemoveTask()
+                except Exception:
+                    try:
+                        act.finishAffinity()
+                    except Exception:
+                        try:
+                            act.finish()
+                        except Exception:
+                            pass
+                try:
+                    Process = jclass("android.os.Process")
+                    Process.killProcess(Process.myPid())
+                except Exception:
+                    pass
+                try:
+                    jclass("java.lang.System").exit(0)
+                except Exception:
+                    pass
+
+            _run_on_ui_sync(_do_finish, timeout=1.0)
+            return True
+        except Exception:
+            pass
+    try:
+        Process = jclass("android.os.Process")
+        Process.killProcess(Process.myPid())
+        return True
+    except Exception:
+        return False
+
+
 def set_title(title):
     act = get_activity()
     if act is None or not hasattr(act, "setTitle"):

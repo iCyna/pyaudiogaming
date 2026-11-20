@@ -1,0 +1,14 @@
+﻿Module,Owner,Kind,Symbol,Parameters,Returns,Description
+system,module,function,is_frozen,,any,
+system,module,function,embedded_data_path,,any,
+system,module,function,abspath,path,any,
+system,module,function,match,"*args, abspath=True",any,
+system,module,function,module_path,,any,
+system,module,function,get_functype,,any,
+system,module,function,get_path,name,any,
+system,module,function,get_platform,,any,
+system,module,function,get_android_activity,,any,"Return ``(activity, bridge_name)`` on Android (Chaquopy or pyjnius), else ``(None, None)``."
+system,module,function,get_arch,,dict,
+system,module,function,get_arch_dir,,any,
+system,module,function,get_ext,,any,
+system,module,function,load_dll,"name, ot='all', WinDLL=False",any,

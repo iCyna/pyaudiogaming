@@ -1,0 +1,2361 @@
+{
+  "module": "sound_pool",
+  "classes": [
+    {
+      "name": "OutputManager",
+      "doc": "",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "device=-1, frequency=44100, period=10, bbuffer=500, flags=0, clsid=None",
+          "params": [
+            {
+              "name": "device",
+              "type": "any",
+              "default": "-1"
+            },
+            {
+              "name": "frequency",
+              "type": "any",
+              "default": "44100"
+            },
+            {
+              "name": "period",
+              "type": "any",
+              "default": "10"
+            },
+            {
+              "name": "bbuffer",
+              "type": "any",
+              "default": "500"
+            },
+            {
+              "name": "flags",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "clsid",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "start",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "pause",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "stop",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "free",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_device",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_device",
+          "kind": "method",
+          "signature": "device",
+          "params": [
+            {
+              "name": "device",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_volume",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_volume",
+          "kind": "method",
+          "signature": "volume",
+          "params": [
+            {
+              "name": "volume",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "find_user_provided_device",
+          "kind": "method",
+          "signature": "name",
+          "params": [
+            {
+              "name": "name",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "InputManager",
+      "doc": "",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "device=-1",
+          "params": [
+            {
+              "name": "device",
+              "type": "any",
+              "default": "-1"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "free",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_device",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_device",
+          "kind": "method",
+          "signature": "device",
+          "params": [
+            {
+              "name": "device",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "find_user_provided_device",
+          "kind": "method",
+          "signature": "name",
+          "params": [
+            {
+              "name": "name",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "SoundBase",
+      "doc": "",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "channel",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_frame_size",
+          "kind": "method",
+          "signature": "frame_size",
+          "params": [
+            {
+              "name": "frame_size",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_frame_size",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "is_fading",
+          "kind": "method",
+          "signature": "attr_type=None",
+          "params": [
+            {
+              "name": "attr_type",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_faded_value",
+          "kind": "method",
+          "signature": "attr_type='volume', default_val=100.0",
+          "params": [
+            {
+              "name": "attr_type",
+              "type": "any",
+              "default": "'volume'"
+            },
+            {
+              "name": "default_val",
+              "type": "any",
+              "default": "100.0"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_mixer",
+          "kind": "method",
+          "signature": "target_mixer=None",
+          "params": [
+            {
+              "name": "target_mixer",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "attach_hrtf_dsp",
+          "kind": "method",
+          "signature": "priority=0",
+          "params": [
+            {
+              "name": "priority",
+              "type": "any",
+              "default": "0"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "detach_hrtf_dsp",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_hrtf_enabled",
+          "kind": "method",
+          "signature": "enabled=True",
+          "params": [
+            {
+              "name": "enabled",
+              "type": "any",
+              "default": "True"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "setPaused",
+          "kind": "method",
+          "signature": "p",
+          "params": [
+            {
+              "name": "p",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "fade",
+          "kind": "method",
+          "signature": "fadetime, value=0, type='volume'",
+          "params": [
+            {
+              "name": "fadetime",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "type",
+              "type": "any",
+              "default": "'volume'"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "fadeout",
+          "kind": "method",
+          "signature": "fadetime, value=0, type='volume'",
+          "params": [
+            {
+              "name": "fadetime",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "type",
+              "type": "any",
+              "default": "'volume'"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "fadein",
+          "kind": "method",
+          "signature": "fadetime, value=100, type='volume'",
+          "params": [
+            {
+              "name": "fadetime",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "100"
+            },
+            {
+              "name": "type",
+              "type": "any",
+              "default": "'volume'"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "setfx",
+          "kind": "method",
+          "signature": "fx_key, priority=0, **overrides",
+          "params": [
+            {
+              "name": "fx_key",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "priority",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "**overrides",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "any",
+          "doc": "Add or enable an audio effect preset (BASS_FX, DX8, Filter, or Steam Audio FX)."
+        },
+        {
+          "name": "set_fx_param",
+          "kind": "method",
+          "signature": "fx_key=None, **params",
+          "params": [
+            {
+              "name": "fx_key",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "**params",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "any",
+          "doc": "Update parameters of an active BASS_FX or Steam Audio FX without recreating the effect."
+        },
+        {
+          "name": "set_param",
+          "kind": "method",
+          "signature": "param_name=None, value=None, fx_key=None, **kwargs",
+          "params": [
+            {
+              "name": "param_name",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "fx_key",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "**kwargs",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "any",
+          "doc": "Direct parameter setter for Steam Audio HRTF or an active FX (distinct from setfx)."
+        },
+        {
+          "name": "get_param",
+          "kind": "method",
+          "signature": "param_name, fx_key=None",
+          "params": [
+            {
+              "name": "param_name",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "fx_key",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": "Query a parameter value from Steam Audio HRTF or an active BASS_FX."
+        },
+        {
+          "name": "remove_fx",
+          "kind": "method",
+          "signature": "fx_key",
+          "params": [
+            {
+              "name": "fx_key",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": "Remove a single active BASS_FX or Steam Audio FX."
+        },
+        {
+          "name": "remove_all_fx",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_steam_reverb",
+          "kind": "method",
+          "signature": "preset='steam_medium_room', wet=-1.0, **overrides",
+          "params": [
+            {
+              "name": "preset",
+              "type": "any",
+              "default": "'steam_medium_room'"
+            },
+            {
+              "name": "wet",
+              "type": "any",
+              "default": "-1.0"
+            },
+            {
+              "name": "**overrides",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_steam_reflection_params",
+          "kind": "method",
+          "signature": "reverb_low=1.2, reverb_mid=1.0, reverb_high=0.7, eq_low=1.0, eq_mid=0.9, eq_high=0.7, delay_ms=20.0, wet_mix=0.25",
+          "params": [
+            {
+              "name": "reverb_low",
+              "type": "any",
+              "default": "1.2"
+            },
+            {
+              "name": "reverb_mid",
+              "type": "any",
+              "default": "1.0"
+            },
+            {
+              "name": "reverb_high",
+              "type": "any",
+              "default": "0.7"
+            },
+            {
+              "name": "eq_low",
+              "type": "any",
+              "default": "1.0"
+            },
+            {
+              "name": "eq_mid",
+              "type": "any",
+              "default": "0.9"
+            },
+            {
+              "name": "eq_high",
+              "type": "any",
+              "default": "0.7"
+            },
+            {
+              "name": "delay_ms",
+              "type": "any",
+              "default": "20.0"
+            },
+            {
+              "name": "wet_mix",
+              "type": "any",
+              "default": "0.25"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_steam_path_params",
+          "kind": "method",
+          "signature": "eq_low=0.9, eq_mid=0.7, eq_high=0.45, sh0=1.0, sh1=0.5, sh2=0.5, sh3=0.5, wet_mix=0.25",
+          "params": [
+            {
+              "name": "eq_low",
+              "type": "any",
+              "default": "0.9"
+            },
+            {
+              "name": "eq_mid",
+              "type": "any",
+              "default": "0.7"
+            },
+            {
+              "name": "eq_high",
+              "type": "any",
+              "default": "0.45"
+            },
+            {
+              "name": "sh0",
+              "type": "any",
+              "default": "1.0"
+            },
+            {
+              "name": "sh1",
+              "type": "any",
+              "default": "0.5"
+            },
+            {
+              "name": "sh2",
+              "type": "any",
+              "default": "0.5"
+            },
+            {
+              "name": "sh3",
+              "type": "any",
+              "default": "0.5"
+            },
+            {
+              "name": "wet_mix",
+              "type": "any",
+              "default": "0.25"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_steam_material",
+          "kind": "method",
+          "signature": "material_preset, enable_direct=True",
+          "params": [
+            {
+              "name": "material_preset",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "enable_direct",
+              "type": "any",
+              "default": "True"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_steam_physical_params",
+          "kind": "method",
+          "signature": "x=0.0, y=0.0, z=0.0, occlusion=0.0, air_absorption=1.0, trans_low=None, trans_mid=None, trans_high=None",
+          "params": [
+            {
+              "name": "x",
+              "type": "any",
+              "default": "0.0"
+            },
+            {
+              "name": "y",
+              "type": "any",
+              "default": "0.0"
+            },
+            {
+              "name": "z",
+              "type": "any",
+              "default": "0.0"
+            },
+            {
+              "name": "occlusion",
+              "type": "any",
+              "default": "0.0"
+            },
+            {
+              "name": "air_absorption",
+              "type": "any",
+              "default": "1.0"
+            },
+            {
+              "name": "trans_low",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "trans_mid",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "trans_high",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_steam_directivity",
+          "kind": "method",
+          "signature": "directivity=1.0, dipole_weight=None, dipole_power=1.0, ahead=(0.0, 1.0, 0.0)",
+          "params": [
+            {
+              "name": "directivity",
+              "type": "any",
+              "default": "1.0"
+            },
+            {
+              "name": "dipole_weight",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "dipole_power",
+              "type": "any",
+              "default": "1.0"
+            },
+            {
+              "name": "ahead",
+              "type": "any",
+              "default": "(0.0, 1.0, 0.0)"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_steam_mode",
+          "kind": "method",
+          "signature": "mode=0, ambi_order=1, surround_layout=1",
+          "params": [
+            {
+              "name": "mode",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "ambi_order",
+              "type": "any",
+              "default": "1"
+            },
+            {
+              "name": "surround_layout",
+              "type": "any",
+              "default": "1"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_data",
+          "kind": "method",
+          "signature": "frame_size=None, data_type='raw'",
+          "params": [
+            {
+              "name": "frame_size",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "data_type",
+              "type": "any",
+              "default": "'raw'"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_length",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "volume",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "pitch",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "pan",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "playing",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "is_playing",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "stopped",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "stalled",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "position",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "seek",
+          "kind": "method",
+          "signature": "ms_value",
+          "params": [
+            {
+              "name": "ms_value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set3d",
+          "kind": "method",
+          "signature": "listener_x, listener_y, listener_z, source_x, source_y, source_z, rotation=0, head=180, pan_step=2.5, volume_step=2.5, behind_pitch_decrease=0, behind_volume_decrease=0, pitch_step=1, pitch_range=92, pan_range=70, start_pan=0, start_volume=100, start_pitch=100, soft=False, mix_pan_with_hrtf=False, bilinear=True",
+          "params": [
+            {
+              "name": "listener_x",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "listener_y",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "listener_z",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "source_x",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "source_y",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "source_z",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "rotation",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "head",
+              "type": "any",
+              "default": "180"
+            },
+            {
+              "name": "pan_step",
+              "type": "any",
+              "default": "2.5"
+            },
+            {
+              "name": "volume_step",
+              "type": "any",
+              "default": "2.5"
+            },
+            {
+              "name": "behind_pitch_decrease",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "behind_volume_decrease",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "pitch_step",
+              "type": "any",
+              "default": "1"
+            },
+            {
+              "name": "pitch_range",
+              "type": "any",
+              "default": "92"
+            },
+            {
+              "name": "pan_range",
+              "type": "any",
+              "default": "70"
+            },
+            {
+              "name": "start_pan",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "start_volume",
+              "type": "any",
+              "default": "100"
+            },
+            {
+              "name": "start_pitch",
+              "type": "any",
+              "default": "100"
+            },
+            {
+              "name": "soft",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "mix_pan_with_hrtf",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "bilinear",
+              "type": "any",
+              "default": "True"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set3dsoft",
+          "kind": "method",
+          "signature": "listener_x, listener_y, listener_z, source_x, source_y, source_z, rotation=0, start_volume=100, volume_step=2.5, start_pitch=100, start_pan=0, pan_step=0.0, behind_pitch_decrease=0, behind_volume_decrease=0, pitch_step=0, pitch_range=92, pan_range=70, bilinear=True",
+          "params": [
+            {
+              "name": "listener_x",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "listener_y",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "listener_z",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "source_x",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "source_y",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "source_z",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "rotation",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "start_volume",
+              "type": "any",
+              "default": "100"
+            },
+            {
+              "name": "volume_step",
+              "type": "any",
+              "default": "2.5"
+            },
+            {
+              "name": "start_pitch",
+              "type": "any",
+              "default": "100"
+            },
+            {
+              "name": "start_pan",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "pan_step",
+              "type": "any",
+              "default": "0.0"
+            },
+            {
+              "name": "behind_pitch_decrease",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "behind_volume_decrease",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "pitch_step",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "pitch_range",
+              "type": "any",
+              "default": "92"
+            },
+            {
+              "name": "pan_range",
+              "type": "any",
+              "default": "70"
+            },
+            {
+              "name": "bilinear",
+              "type": "any",
+              "default": "True"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "math3d",
+          "kind": "method",
+          "signature": "listener_x, listener_y, listener_z, source_x, source_y, source_z, pan_step, volume_step, behind_pitch_decrease, behind_volume_decrease, pitch_step, pitch_range, pan_range, start_pan, start_volume, start_pitch, soft=False, rotation=0.0",
+          "params": [
+            {
+              "name": "listener_x",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "listener_y",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "listener_z",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "source_x",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "source_y",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "source_z",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "pan_step",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "volume_step",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "behind_pitch_decrease",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "behind_volume_decrease",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "pitch_step",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "pitch_range",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "pan_range",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "start_pan",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "start_volume",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "start_pitch",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "soft",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "rotation",
+              "type": "any",
+              "default": "0.0"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "is_sliding3d",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "slide3d",
+          "kind": "method",
+          "signature": "*args, **kwargs",
+          "params": [
+            {
+              "name": "*args",
+              "type": "tuple",
+              "default": "optional"
+            },
+            {
+              "name": "**kwargs",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "update_slide3d",
+          "kind": "method",
+          "signature": "listener_x, listener_y, listener_z, rotation=0",
+          "params": [
+            {
+              "name": "listener_x",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "listener_y",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "listener_z",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "rotation",
+              "type": "any",
+              "default": "0"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "vst",
+      "doc": "",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "create_instrument",
+          "kind": "method",
+          "signature": "dll_path, frequency=44100, channels=2, flags=0, ThreeD=False, decode=False, **kwargs",
+          "params": [
+            {
+              "name": "dll_path",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "frequency",
+              "type": "any",
+              "default": "44100"
+            },
+            {
+              "name": "channels",
+              "type": "any",
+              "default": "2"
+            },
+            {
+              "name": "flags",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "ThreeD",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "decode",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "**kwargs",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "play",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "stop",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "close",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "mixer",
+      "doc": "",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "parent=None",
+          "params": [
+            {
+              "name": "parent",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "create",
+          "kind": "method",
+          "signature": "frequency=44100, channels=2, flags=control.BASS_MIXER_NONSTOP | control.BASS_MIXER_RESUME, ThreeD=False, parent=None, **kwargs",
+          "params": [
+            {
+              "name": "frequency",
+              "type": "any",
+              "default": "44100"
+            },
+            {
+              "name": "channels",
+              "type": "any",
+              "default": "2"
+            },
+            {
+              "name": "flags",
+              "type": "any",
+              "default": "control.BASS_MIXER_NONSTOP | control.BASS_MIXER_RESUME"
+            },
+            {
+              "name": "ThreeD",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "parent",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "**kwargs",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_parent_mixer",
+          "kind": "method",
+          "signature": "parent_mixer=None",
+          "params": [
+            {
+              "name": "parent_mixer",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "add",
+          "kind": "method",
+          "signature": "source, flags=control.BASS_MIXER_CHAN_NORAMPIN, start=None, length=None, **kwargs",
+          "params": [
+            {
+              "name": "source",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "flags",
+              "type": "any",
+              "default": "control.BASS_MIXER_CHAN_NORAMPIN"
+            },
+            {
+              "name": "start",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "length",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "**kwargs",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "remove",
+          "kind": "method",
+          "signature": "source",
+          "params": [
+            {
+              "name": "source",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "play",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "stop",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "close",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "record",
+      "doc": "",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "stream",
+          "kind": "method",
+          "signature": "filename, draw=False, mono=False, ThreeD=False, decode=False, autofree=False, use_dsp_hrtf=True, preload=True, frame_size=None, **kwargs",
+          "params": [
+            {
+              "name": "filename",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "draw",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "mono",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "ThreeD",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "decode",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "autofree",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "use_dsp_hrtf",
+              "type": "any",
+              "default": "True"
+            },
+            {
+              "name": "preload",
+              "type": "any",
+              "default": "True"
+            },
+            {
+              "name": "frame_size",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "**kwargs",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "push",
+          "kind": "method",
+          "signature": "data",
+          "params": [
+            {
+              "name": "data",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_sample",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "clear_sample",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "stop",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "close",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "musical",
+      "doc": "",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "load_font",
+          "kind": "method",
+          "signature": "font_path, flags=0, **kwargs",
+          "params": [
+            {
+              "name": "font_path",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "flags",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "**kwargs",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "stream",
+          "kind": "method",
+          "signature": "filename, mono=False, ThreeD=False, decode=False, use_dsp_hrtf=True, **kwargs",
+          "params": [
+            {
+              "name": "filename",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "mono",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "ThreeD",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "decode",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "use_dsp_hrtf",
+              "type": "any",
+              "default": "True"
+            },
+            {
+              "name": "**kwargs",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "play",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "stop",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "close",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "sound",
+      "doc": "",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "stream",
+          "kind": "method",
+          "signature": "filename='', draw=False, mono=False, ThreeD=False, decode=False, autofree=False, use_dsp_hrtf=False, preload=False, frame_size=None, **kwargs",
+          "params": [
+            {
+              "name": "filename",
+              "type": "any",
+              "default": "''"
+            },
+            {
+              "name": "draw",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "mono",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "ThreeD",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "decode",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "autofree",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "use_dsp_hrtf",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "preload",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "frame_size",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "**kwargs",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "music",
+          "kind": "method",
+          "signature": "filename, mono=False, ThreeD=False, decode=False, autofree=False, use_dsp_hrtf=True, prescan=True, ramp=True, frame_size=None, **kwargs",
+          "params": [
+            {
+              "name": "filename",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "mono",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "ThreeD",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "decode",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "autofree",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "use_dsp_hrtf",
+              "type": "any",
+              "default": "True"
+            },
+            {
+              "name": "prescan",
+              "type": "any",
+              "default": "True"
+            },
+            {
+              "name": "ramp",
+              "type": "any",
+              "default": "True"
+            },
+            {
+              "name": "frame_size",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "**kwargs",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "any",
+          "doc": "Load MOD/XM/IT/S3M/MO3 tracker music (HMUSIC) with full HRTF DSP & Decode Stream compatibility."
+        },
+        {
+          "name": "load",
+          "kind": "method",
+          "signature": "filename='', mono=False, ThreeD=False, decode=False, use_dsp_hrtf=True, frame_size=None, **kwargs",
+          "params": [
+            {
+              "name": "filename",
+              "type": "any",
+              "default": "''"
+            },
+            {
+              "name": "mono",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "ThreeD",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "decode",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "use_dsp_hrtf",
+              "type": "any",
+              "default": "True"
+            },
+            {
+              "name": "frame_size",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "**kwargs",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "play",
+          "kind": "method",
+          "signature": "reset_loop=True",
+          "params": [
+            {
+              "name": "reset_loop",
+              "type": "any",
+              "default": "True"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "play_looped",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "stop",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "close",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "push",
+          "kind": "method",
+          "signature": "data",
+          "params": [
+            {
+              "name": "data",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "music",
+      "doc": "Dedicated HMUSIC wrapper class for tracker music (.mod, .xm, .it, .s3m, .mo3) with HRTF & FX.",
+      "methods": [
+        {
+          "name": "load",
+          "kind": "method",
+          "signature": "filename='', mono=False, ThreeD=False, decode=False, use_dsp_hrtf=True, **kwargs",
+          "params": [
+            {
+              "name": "filename",
+              "type": "any",
+              "default": "''"
+            },
+            {
+              "name": "mono",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "ThreeD",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "decode",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "use_dsp_hrtf",
+              "type": "any",
+              "default": "True"
+            },
+            {
+              "name": "**kwargs",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "stream",
+          "kind": "method",
+          "signature": "filename='', mono=False, ThreeD=False, decode=False, use_dsp_hrtf=True, **kwargs",
+          "params": [
+            {
+              "name": "filename",
+              "type": "any",
+              "default": "''"
+            },
+            {
+              "name": "mono",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "ThreeD",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "decode",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "use_dsp_hrtf",
+              "type": "any",
+              "default": "True"
+            },
+            {
+              "name": "**kwargs",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "name": "set_hrtf_frame_size",
+      "kind": "function",
+      "signature": "frame_size=512",
+      "params": [
+        {
+          "name": "frame_size",
+          "type": "any",
+          "default": "512"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "get_hrtf_frame_size",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "set_hrtf_distance_model",
+      "kind": "function",
+      "signature": "min_dist=1.0, max_dist=50.0, rolloff=0.12, blend_step=0.25",
+      "params": [
+        {
+          "name": "min_dist",
+          "type": "any",
+          "default": "1.0"
+        },
+        {
+          "name": "max_dist",
+          "type": "any",
+          "default": "50.0"
+        },
+        {
+          "name": "rolloff",
+          "type": "any",
+          "default": "0.12"
+        },
+        {
+          "name": "blend_step",
+          "type": "any",
+          "default": "0.25"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "update_hrtf_listener",
+      "kind": "function",
+      "signature": "listener_x, listener_y, listener_z, yaw=0.0, pitch=0.0, roll=0.0",
+      "params": [
+        {
+          "name": "listener_x",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "listener_y",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "listener_z",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "yaw",
+          "type": "any",
+          "default": "0.0"
+        },
+        {
+          "name": "pitch",
+          "type": "any",
+          "default": "0.0"
+        },
+        {
+          "name": "roll",
+          "type": "any",
+          "default": "0.0"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "add_hrtf_env_box",
+      "kind": "function",
+      "signature": "material_preset, min_x, max_x, min_y, max_y, min_z, max_z",
+      "params": [
+        {
+          "name": "material_preset",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "min_x",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "max_x",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "min_y",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "max_y",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "min_z",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "max_z",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "clear_hrtf_env_boxes",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "set_hrtf_auto_raycast",
+      "kind": "function",
+      "signature": "enabled=True",
+      "params": [
+        {
+          "name": "enabled",
+          "type": "any",
+          "default": "True"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "get_global_sound",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "set_global_sound",
+      "kind": "function",
+      "signature": "value",
+      "params": [
+        {
+          "name": "value",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "set_focus",
+      "kind": "function",
+      "signature": "value",
+      "params": [
+        {
+          "name": "value",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "output",
+      "kind": "function",
+      "signature": "period=10, bbuffer=500, ThreeD=False, sample_rate=44100, dev=-1, frame_size=None, **kwargs",
+      "params": [
+        {
+          "name": "period",
+          "type": "any",
+          "default": "10"
+        },
+        {
+          "name": "bbuffer",
+          "type": "any",
+          "default": "500"
+        },
+        {
+          "name": "ThreeD",
+          "type": "any",
+          "default": "False"
+        },
+        {
+          "name": "sample_rate",
+          "type": "any",
+          "default": "44100"
+        },
+        {
+          "name": "dev",
+          "type": "any",
+          "default": "-1"
+        },
+        {
+          "name": "frame_size",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "**kwargs",
+          "type": "dict",
+          "default": "optional"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "input",
+      "kind": "function",
+      "signature": "device=-1",
+      "params": [
+        {
+          "name": "device",
+          "type": "any",
+          "default": "-1"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "set_output_device",
+      "kind": "function",
+      "signature": "device",
+      "params": [
+        {
+          "name": "device",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "get_output_device",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "set_input_device",
+      "kind": "function",
+      "signature": "device",
+      "params": [
+        {
+          "name": "device",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "get_input_device",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "clean_oneshots",
+      "kind": "function",
+      "signature": "force=False",
+      "params": [
+        {
+          "name": "force",
+          "type": "any",
+          "default": "False"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "playsingle",
+      "kind": "function",
+      "signature": "filename, volume=100, pitch=100, pan=0, mono=False, ThreeD=False, **kwargs",
+      "params": [
+        {
+          "name": "filename",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "volume",
+          "type": "any",
+          "default": "100"
+        },
+        {
+          "name": "pitch",
+          "type": "any",
+          "default": "100"
+        },
+        {
+          "name": "pan",
+          "type": "any",
+          "default": "0"
+        },
+        {
+          "name": "mono",
+          "type": "any",
+          "default": "False"
+        },
+        {
+          "name": "ThreeD",
+          "type": "any",
+          "default": "False"
+        },
+        {
+          "name": "**kwargs",
+          "type": "dict",
+          "default": "optional"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    }
+  ],
+  "title": "sound_pool — BASS Audio Engine, 3D HRTF, Steam Audio & Recording",
+  "summary": "Full-featured BASS audio engine: output/input device management, streaming & cached samples, fading, binaural HRTF, Steam Audio wall occlusion, push streams, and microphone recording."
+}

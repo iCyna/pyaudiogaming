@@ -1,0 +1,20 @@
+﻿Module,Owner,Kind,Symbol,Parameters,Returns,Description
+haptics,module,function,vibrate,"duration_ms: int=40, strength: float=0.6, low_freq=None, high_freq=None, device: int=0",bool,
+haptics,module,function,stop,device: int=0,any,
+haptics,module,function,pattern,"steps, repeat: int=1, device: int=0",bool,
+haptics,module,function,preset,"name: str, repeat: int=1, device: int=0",bool,
+haptics,module,function,update,,any,
+haptics,module,function,set_enabled,enabled: bool,any,
+haptics,module,function,set_intensity,value: float,any,
+haptics,module,function,is_supported,,bool,
+haptics,HapticEngine,constructor,HapticEngine.__init__,"enabled: bool=True, intensity: float=1.0",any,
+haptics,HapticEngine,property,HapticEngine.enabled,,bool,
+haptics,HapticEngine,method,HapticEngine.set_enabled,enabled: bool,any,
+haptics,HapticEngine,property,HapticEngine.intensity,,float,
+haptics,HapticEngine,method,HapticEngine.set_intensity,value: float,any,
+haptics,HapticEngine,method,HapticEngine.is_supported,,bool,
+haptics,HapticEngine,method,HapticEngine.vibrate,"duration_ms: int=40, strength: float=0.6, low_freq=None, high_freq=None, device: int=0",bool,Trigger a single vibration pulse. Returns True if a hardware backend accepted it.
+haptics,HapticEngine,method,HapticEngine.stop,device: int=0,any,Immediately stop all active vibrations and cancel queued patterns.
+haptics,HapticEngine,method,HapticEngine.pattern,"steps, repeat: int=1, device: int=0",any,"Play a sequence of ``(duration_ms, strength)`` tuples non-blockingly."
+haptics,HapticEngine,method,HapticEngine.preset,"name: str, repeat: int=1, device: int=0",bool,"Play a named preset from ``PRESETS`` (e.g. ``'click'``, ``'hit_heavy'``, ``'error'``)."
+haptics,HapticEngine,method,HapticEngine.update,,any,Advance active haptic patterns and auto-stop timed XInput motors. Call once per frame.

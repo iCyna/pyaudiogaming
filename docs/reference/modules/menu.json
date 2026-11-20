@@ -1,0 +1,426 @@
+{
+  "module": "menu",
+  "classes": [
+    {
+      "name": "menu",
+      "doc": "A simple nonblocking menu class.",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "initialize",
+          "kind": "method",
+          "signature": "wnd, ttl='no title', items=None, cursorSound=None, enterSound=None, cancelSound=None, openSound=None, keyRead=False, readNP=False, config=None",
+          "params": [
+            {
+              "name": "wnd",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "ttl",
+              "type": "any",
+              "default": "'no title'"
+            },
+            {
+              "name": "items",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "cursorSound",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "enterSound",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "cancelSound",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "openSound",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "keyRead",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "readNP",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "config",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "allowed",
+          "kind": "method",
+          "signature": "name",
+          "params": [
+            {
+              "name": "name",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "parseShortcut",
+          "kind": "method",
+          "signature": "elem",
+          "params": [
+            {
+              "name": "elem",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": "Accept &x, &{ctrl+x}, a tab suffix, or a label/hotkey dict."
+        },
+        {
+          "name": "append",
+          "kind": "method",
+          "signature": "elem",
+          "params": [
+            {
+              "name": "elem",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": "Adds a menu item."
+        },
+        {
+          "name": "insert",
+          "kind": "method",
+          "signature": "index, elem",
+          "params": [
+            {
+              "name": "index",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "elem",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": "Inserts an item at the specified position."
+        },
+        {
+          "name": "remove",
+          "kind": "method",
+          "signature": "index",
+          "params": [
+            {
+              "name": "index",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": "Deletes the item at the specified index."
+        },
+        {
+          "name": "modify",
+          "kind": "method",
+          "signature": "index, new_elem",
+          "params": [
+            {
+              "name": "index",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "new_elem",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": "Modifies an existing menu item."
+        },
+        {
+          "name": "open",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": "Starts the menu."
+        },
+        {
+          "name": "jumpCursor",
+          "kind": "method",
+          "signature": "c, wrap=None",
+          "params": [
+            {
+              "name": "c",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "wrap",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": "Jumps to a specific cursor position, handling sounds, edge hits, and wrap-arounds."
+        },
+        {
+          "name": "moveTo",
+          "kind": "method",
+          "signature": "c",
+          "params": [
+            {
+              "name": "c",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": "Alias for jumpCursor to maintain backward compatibility."
+        },
+        {
+          "name": "frameUpdate",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": "The frame updating function for this menu. Call your window's frameUpdate prior to this."
+        },
+        {
+          "name": "processShortcut",
+          "kind": "method",
+          "signature": "code, shortcut=None",
+          "params": [
+            {
+              "name": "code",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "shortcut",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": "Search for shortcut matches dynamically in self.items (avoids maintaining a 2nd list)."
+        },
+        {
+          "name": "cancel",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "enter",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "getCursorPos",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "getString",
+          "kind": "method",
+          "signature": "index=None, hotkey=False",
+          "params": [
+            {
+              "name": "index",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "hotkey",
+              "type": "any",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "getReadStr",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "hotkey",
+          "kind": "method",
+          "signature": "line",
+          "params": [
+            {
+              "name": "line",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "Len",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "exit",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "isLast",
+          "kind": "method",
+          "signature": "index",
+          "params": [
+            {
+              "name": "index",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "getTitle",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "setTitle",
+          "kind": "method",
+          "signature": "newTitle",
+          "params": [
+            {
+              "name": "newTitle",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "getOpenSound",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "setOpenSound",
+          "kind": "method",
+          "signature": "newSound",
+          "params": [
+            {
+              "name": "newSound",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "getCancelSound",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "setCancelSound",
+          "kind": "method",
+          "signature": "newSound",
+          "params": [
+            {
+              "name": "newSound",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "getEnterSound",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "setEnterSound",
+          "kind": "method",
+          "signature": "newSound",
+          "params": [
+            {
+              "name": "newSound",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    }
+  ],
+  "functions": [],
+  "title": "menu — Non-Blocking Accessible Menus",
+  "summary": "Accessible game menu supporting keyboard arrows, '&K' shortcut hotkeys, wrap-around navigation, custom cursor/enter/cancel sounds, and mobile TalkBack touch gestures."
+}

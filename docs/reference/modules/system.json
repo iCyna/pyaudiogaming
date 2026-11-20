@@ -1,0 +1,151 @@
+{
+  "module": "system",
+  "classes": [],
+  "functions": [
+    {
+      "name": "is_frozen",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "embedded_data_path",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "abspath",
+      "kind": "function",
+      "signature": "path",
+      "params": [
+        {
+          "name": "path",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "match",
+      "kind": "function",
+      "signature": "*args, abspath=True",
+      "params": [
+        {
+          "name": "*args",
+          "type": "tuple",
+          "default": "optional"
+        },
+        {
+          "name": "abspath",
+          "type": "any",
+          "default": "True"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "module_path",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "get_functype",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "get_path",
+      "kind": "function",
+      "signature": "name",
+      "params": [
+        {
+          "name": "name",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "get_platform",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "get_android_activity",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "any",
+      "doc": "Return ``(activity, bridge_name)`` on Android (Chaquopy or pyjnius), else ``(None, None)``."
+    },
+    {
+      "name": "get_arch",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "dict",
+      "doc": ""
+    },
+    {
+      "name": "get_arch_dir",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "get_ext",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "load_dll",
+      "kind": "function",
+      "signature": "name, ot='all', WinDLL=False",
+      "params": [
+        {
+          "name": "name",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "ot",
+          "type": "any",
+          "default": "'all'"
+        },
+        {
+          "name": "WinDLL",
+          "type": "any",
+          "default": "False"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    }
+  ],
+  "title": "system — Platform, Architecture & Native Library Loader",
+  "summary": "Detects OS (Windows/Linux/macOS/Android/iOS), CPU architecture (x64/x86/arm64-v8a/aarch64/armhf), frozen bundle paths, and loads platform-specific native libraries (.dll/.so/.dylib)."
+}

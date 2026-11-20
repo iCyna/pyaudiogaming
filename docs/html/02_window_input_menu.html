@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>02. Window, InputMap &amp; Non-Blocking Menus</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header role="banner">
+    <h1>02. Window, InputMap &amp; Non-Blocking Menus</h1>
+    <nav aria-label="Documentation Navigation">
+    <a href="index.html" class="">Home</a>
+    <a href="01_getting_started.html" class="">01. Getting Started</a>
+    <a href="02_window_input_menu.html" class="active">02. Input &amp; Menu</a>
+    <a href="03_audio_3d_fx.html" class="">03. 3D Audio</a>
+    <a href="04_speech_vb_gui.html" class="">04. Speech, VB &amp; GUI</a>
+    <a href="05_timer_worker_storage_haptics.html" class="">05. Advanced Systems</a>
+    <a href="06_building_cross_platform.html" class="">06. Building</a>
+    <a href="api_reference.html" class="">Module Reference</a>
+    </nav>
+  </header>
+  <main id="main-content" role="main">
+
+<h2>1. Unified Controls Across PC, Mobile &amp; Gamepad</h2>
+<pre><code>from pyaudiogaming.input_map import InputMap
+
+imap = InputMap({
+    "jump":       ["space", "tap:1:2:left-play", "pad:a"],
+    "attack":     ["ctrl+space", "tap:2:1", "pad:x"],
+    "move_left":  ["left", "a", "swipe:left", "pad:lx-"],
+    "move_right": ["right", "d", "swipe:right", "pad:lx+"],
+})
+if imap.pressed("jump", wnd): player.jump()
+dx = imap.axis("move_left", "move_right", wnd)
+imap.save("keymap.json")</code></pre>
+<h2>2. Non-Blocking Accessible Menu</h2>
+<pre><code>from pyaudiogaming.menu import menu
+
+m = menu()
+m.init(wnd, ttl="Main Menu", items=["Start&amp;S", "Settings&amp;O", "Exit&amp;E"], keyRead=True, readNP=True)
+m.open()
+while True:
+    wnd.frameUpdate()
+    choice = m.frameUpdate()
+    if choice == 0: play_game()
+    elif choice == 1: open_settings()
+    elif choice in (2, -1): break</code></pre>
+<p>Module References: <a href="modules/input_map.html">input_map</a> | <a href="modules/menu.html">menu</a> | <a href="modules/window.html">window</a></p>
+
+  </main>
+  <footer role="contentinfo">
+    PyAudioGaming Official Documentation &mdash; Cross-Platform Audio Gaming for Windows, Linux, macOS, Android, iOS &amp; Web.
+  </footer>
+</body>
+</html>

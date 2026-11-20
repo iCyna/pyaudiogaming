@@ -1,0 +1,269 @@
+PYAUDIOGAMING — COMPLETE API & PARAMETER REFERENCE
+========================================================================
+
+
+[WINDOW]
+----------------------------------------
+* Window.init(x, y, ttl, vv=0, show_vv=False, author='')
+  Types  : int, int, str, int, bool, str  ->  Returns: None
+  Desc   : Initialize the game window, title, and keyboard/mouse/touch input handlers.
+  Example: wnd = Window(); wnd.init(800, 600, 'My Audio Game')
+* Window.frameUpdate()
+  Types  : None  ->  Returns: None
+  Desc   : Process one frame of input events (keyboard, mouse, touch) and keep the loop responsive.
+  Example: while True: wnd.frameUpdate()
+* Window.keyPressed(key)
+  Types  : str | int  ->  Returns: bool
+  Desc   : Return True on the exact frame a key is newly pressed.
+  Example: if wnd.keyPressed('space'): player.jump()
+* Window.keyPressing(key, t=0)
+  Types  : str | int, int (ms)  ->  Returns: bool
+  Desc   : Return True while a key is held down, optionally throttling repeats every t milliseconds.
+  Example: if wnd.keyPressing('right', 150): player.step_right()
+* Window.tap(fingers=1, count=1, zone=None)
+  Types  : int, int, str | None  ->  Returns: bool | int
+  Desc   : Detect single or multi-finger taps on mobile touchscreens, optionally filtered by screen zone.
+  Example: if wnd.tap(fingers=1, count=2, zone='left-play'): player.jump()
+* Window.swipe / keySlide(direction, fingers=1, zone=None)
+  Types  : str, int, str | None  ->  Returns: bool
+  Desc   : Detect directional touch swipes ('left', 'right', 'up', 'down') on mobile devices.
+  Example: if wnd.swipe('right', fingers=1): menu_next()
+* Window.say(text, i=True, split=False)
+  Types  : str | list, bool, bool  ->  Returns: None
+  Desc   : Speak text via active Screen Reader or TTS (i=True interrupts current speech).
+  Example: wnd.say('Welcome to the game!', i=True)
+* Window.wait(ms)
+  Types  : int  ->  Returns: None
+  Desc   : Pause safely for ms milliseconds.
+  Example: wnd.wait(100)
+
+[SPEECH]
+----------------------------------------
+* Speech.say(text, i=True, split=False)
+  Types  : str | list, bool, bool  ->  Returns: None
+  Desc   : Output speech via NVDA, JAWS, SAPI5, VoiceOver, or TalkBack and append to speech_history.
+  Example: wnd.speech.say(['HP: 100', 'MP: 50'], split=True)
+* Speech.saync(string, i=True)
+  Types  : str, bool  ->  Returns: None
+  Desc   : Speak text without adding it to speech_history.
+  Example: wnd.speech.saync('Typing...', i=True)
+* Speech.say3d(text, lx, ly, lz, sx, sy, sz, i=True)
+  Types  : str, float x6, bool  ->  Returns: None
+  Desc   : Speak TTS positioned in 3D space between listener (l) and source (s).
+  Example: wnd.speech.say3d('Over here!', 0, 0, 0, 8, 2, 0)
+* Speech.set_speech_rate / pitch / volume(value)
+  Types  : int  ->  Returns: bool
+  Desc   : Adjust TTS speaking rate, pitch, or volume.
+  Example: wnd.speech.set_speech_rate(60)
+
+[SOUND_POOL]
+----------------------------------------
+* output / OutputManager(device=-1, frequency=44100, period=10, bbuffer=500)
+  Types  : int, int, int, int  ->  Returns: OutputManager
+  Desc   : Initialize the BASS audio output device (-1 selects the default OS device).
+  Example: audio = output(device=-1, frequency=44100)
+* sound.stream(filename, mono=False, decode=False, draw=False)
+  Types  : str, bool, bool, bool  ->  Returns: bool
+  Desc   : Load an audio stream from disk, SPAK archive, or create a live push stream (draw=True).
+  Example: bgm = sound(); bgm.stream('res/sounds/theme.ogg')
+* sound.play / play_looped / pause / stop()
+  Types  : None  ->  Returns: bool
+  Desc   : Start, loop continuously, pause, or stop playback.
+  Example: bgm.volume = 60; bgm.play_looped()
+* sound.fadeout / fadein(duration_ms, value=...)
+  Types  : int, float  ->  Returns: None
+  Desc   : Smoothly fade volume down or up over duration_ms milliseconds.
+  Example: bgm.fadeout(900)
+* sound.attach_hrtf_dsp(priority=0)
+  Types  : int  ->  Returns: bool
+  Desc   : Attach real-time binaural 3D HRTF (Steam Audio / Phonon) DSP to this channel.
+  Example: s = sound(); s.stream('step.ogg', mono=True); s.attach_hrtf_dsp()
+* record(filename='', mono=True, freq=44100, draw=False)
+  Types  : str, bool, int, bool  ->  Returns: record
+  Desc   : Record live microphone audio to disk or push PCM buffers for real-time voice chat.
+  Example: rec = record(mono=True, freq=44100)
+
+[MENU]
+----------------------------------------
+* menu.initialize(wnd, ttl='no title', items=None, cursorSound=None, enterSound=None, cancelSound=None, openSound=None, keyRead=False, readNP=False, config=None)
+  Types  : Window, str, list, str x4, bool, bool, dict  ->  Returns: None
+  Desc   : Initialize a non-blocking accessible menu with '&K' hotkeys, audio cues, and TalkBack support.
+  Example: m = menu(); m.init(wnd, ttl='Main Menu', items=['Start&S', 'Exit&E'], keyRead=True)
+* menu.append / modify / remove(item / index, text)
+  Types  : str / int, str  ->  Returns: None
+  Desc   : Dynamically add, edit, or delete menu entries.
+  Example: m.append('Settings&O'); m.modify(0, 'Continue&C')
+* menu.open / frameUpdate()
+  Types  : None  ->  Returns: int | None
+  Desc   : Open the menu and poll each frame; returns item index, -1 on cancel, or None while browsing.
+  Example: m.open(); res = m.frameUpdate()
+
+[VB]
+----------------------------------------
+* vb.input(title='', text='', callback=None, password=False, get_data=True, new_config=None, window=None)
+  Types  : str, str, callable, bool, bool, dict, Window  ->  Returns: str | None
+  Desc   : Full-featured accessible text input with Undo/Redo, selection, autocomplete, and Ctrl+Shift+Alt+Backspace keyboard mode switcher (standard/numeric/symbols/emoji/custom).
+  Example: name = vb.input('Enter Username', placeholder='Type here...')
+* vb.form(window=None, config=None)
+  Types  : Window, dict  ->  Returns: form
+  Desc   : Accessible NVDA/TalkBack form supporting 23 rich control types.
+  Example: f = vb.form(window=wnd, config={'label': 'Settings'})
+* form.add(name, kind='button', value=None, choices=None, callback=None, config=None, **kwargs)
+  Types  : str, str, any, list, callable, dict  ->  Returns: dict
+  Desc   : Add a control: button, check, switch, link, separator, input, list, radio, combo, tree, dir_tree, slider, tab, progress, table, heading, quote, note, emphasis, frame, live.
+  Example: f.add('site', 'link', url='https://example.com', label='Website')
+* form.begin_group / end_group(label)
+  Types  : str  ->  Returns: form
+  Desc   : Group controls with NVDA-style enter/leave grouping announcements.
+  Example: f.begin_group('Audio'); f.add('vol', 'slider', value=80); f.end_group()
+* form.validate(announce=True)
+  Types  : bool  ->  Returns: (bool, list)
+  Desc   : Validate all required=True and validator=fn controls; jumps focus to the first invalid field.
+  Example: ok, errors = f.validate(announce=True)
+* vb.info_box / warning_box / success_box(title, text, ok_text='OK', window=None)
+  Types  : str, str, str, Window  ->  Returns: str
+  Desc   : Show a modal info, warning, or success dialog with haptic feedback.
+  Example: vb.info_box('Saved', 'Configuration saved successfully.')
+* vb.error_box(title, text, details=None, ok_text='OK', copy_text='Copy Details', window=None)
+  Types  : str, str, str | None, str, str, Window  ->  Returns: str
+  Desc   : Show an error dialog with an optional 'Copy Details' button for stack traces.
+  Example: vb.error_box('Error', 'Connection failed.', details=traceback.format_exc())
+* vb.progress_box(title, text, step_fn=None, cancelable=True, announce_step=10, window=None)
+  Types  : str, str, callable, bool, int, Window  ->  Returns: bool
+  Desc   : Modal progress dialog announcing percentage milestones and supporting Esc cancellation.
+  Example: done = vb.progress_box('Downloading', 'Fetching assets...', step_fn=my_step)
+* vb.choice_box / confirm / dialog(title, text, choices / buttons, window=None)
+  Types  : str, str, list / tuple, Window  ->  Returns: str | bool | None
+  Desc   : Quick single-choice picker, Yes/No confirmation, or custom multi-button modal dialog.
+  Example: if vb.confirm('Quit', 'Exit now?'): sys.exit()
+
+[GUI]
+----------------------------------------
+* gui.Window(title='PyAudioGaming App', size=(500, 400), backend='auto', window=None)
+  Types  : str, tuple, str, Window  ->  Returns: Wx|Qt|Tk|AudioWindow
+  Desc   : Cross-platform GUI factory automatically choosing wx (Windows), qt (Linux/macOS), tk (stdlib), or audio (Android/iOS/Web).
+  Example: w = gui.Window('Preferences', (520, 420), backend='auto')
+* Window.row / group / page(label / title (used with 'with'))
+  Types  : str  ->  Returns: ContextManager
+  Desc   : Create horizontal rows, titled group boxes, or tabbed pages identically across all 4 backends.
+  Example: with w.row(): w.button('Save', on_save); w.button('Close', lambda _: w.close())
+* Window.button / input / checkbox / switch / slider / spin / combo / listbox / radio / progress / table / link(label, ...)
+  Types  : str, ...  ->  Returns: Widget
+  Desc   : Unified widget creation API across wx, PySide6/PyQt6, Tkinter, and AudioWindow.
+  Example: w.slider('Volume', 0, 100, 80); w.table('Scores', ['User', 'Pts'], [['Ana', 50]])
+* Window.get / set / values / enable / show / focus(label, value / bool)
+  Types  : str, any  ->  Returns: any
+  Desc   : Read/write values, toggle visibility/enabled state, or move focus uniformly.
+  Example: vol = w.get('Volume'); w.set('Volume', 50); w.focus('Volume')
+* Window.alert / confirm / prompt / open_file / save_file / open_folder(title, text, ...)
+  Types  : str, ...  ->  Returns: any
+  Desc   : Standard system dialogs across all 4 backends.
+  Example: path = w.open_file('Select Audio File')
+* Window.build(schema)
+  Types  : list[dict]  ->  Returns: Window
+  Desc   : Declaratively build an entire GUI from a compact list of dictionaries.
+  Example: w.build([{'type': 'input', 'label': 'Host', 'value': '127.0.0.1'}])
+
+[TIMER]
+----------------------------------------
+* Timer(duration=0, paused=False, scale=1.0, auto_start=True)
+  Types  : float, bool, float, bool  ->  Returns: Timer
+  Desc   : Monotonic nanosecond-precision timer (no pygame.init required) with pause, time-scale, countdown, and serialization.
+  Example: t = Timer(duration=3000); print(t.elapsed, t.remaining, t.progress)
+* Timer.ready / consume / consume_all(ms, auto_restart=False)
+  Types  : float, bool  ->  Returns: bool | int
+  Desc   : One-line cooldown check or drift-free fixed-interval tick consumption.
+  Example: if t.ready(500, auto_restart=True): shoot()
+* CooldownManager(scale=1.0)
+  Types  : float  ->  Returns: CooldownManager
+  Desc   : Manage named cooldowns in one place: use(), is_ready(), remaining(), reduce(), pause_all().
+  Example: cd = CooldownManager(); if cd.use('dash', 2000): player.dash()
+* TimerScheduler(scale=1.0, on_error=None)
+  Types  : float, callable  ->  Returns: TimerScheduler
+  Desc   : Single-threaded min-heap callback scheduler: after(), every(), cancel(), cancel_by_tag(), update().
+  Example: sched = TimerScheduler(); sched.after(1500, on_expire); sched.update()
+* FrameClock(target_fps=0.0, max_dt_ms=100.0)
+  Types  : float, float  ->  Returns: FrameClock
+  Desc   : Game-loop delta time (dt), smoothed FPS, frame limiter, and fixed_steps() physics accumulator.
+  Example: clk = FrameClock(target_fps=60); dt = clk.tick()
+* Stopwatch / RateLimiter(max_calls, per_ms)
+  Types  : int, float  ->  Returns: Object
+  Desc   : Split lap profiling (Stopwatch) and token-bucket anti-spam throttling (RateLimiter).
+  Example: rl = RateLimiter(max_calls=5, per_ms=1000); if rl.allow(): send_chat()
+
+[HAPTICS]
+----------------------------------------
+* haptics.vibrate(duration_ms=40, strength=0.6, low_freq=None, high_freq=None, device=0)
+  Types  : int, float, float, float, int  ->  Returns: bool
+  Desc   : Trigger a vibration pulse on Android Vibrator, iOS UIImpact, Windows XInput, or SDL2 Joystick.
+  Example: haptics.vibrate(duration_ms=80, strength=0.75)
+* haptics.preset(name, repeat=1, device=0)
+  Types  : str, int, int  ->  Returns: bool
+  Desc   : Play a built-in preset: tick, click, select, double_tap, success, warning, error, blocked, footstep, hit_light, hit_heavy, explosion, heartbeat.
+  Example: haptics.preset('hit_heavy')
+* haptics.pattern / update / stop(steps, repeat=1, device=0)
+  Types  : list[(ms, float)], int, int  ->  Returns: bool
+  Desc   : Play non-blocking multi-pulse haptic patterns; call haptics.update() each frame.
+  Example: haptics.pattern([(40, 0.8), (60, 0.0), (100, 1.0)]); haptics.update()
+
+[STORAGE]
+----------------------------------------
+* Storage(app_name, portable=False, portable_dir='res')
+  Types  : str, bool, str  ->  Returns: Storage
+  Desc   : Cross-platform persistent storage (filesDir on Android/iOS, AppData/XDG/portable on Desktop) with atomic writes and .bak auto-recovery.
+  Example: st = Storage('my_game', portable=True); st.save_json('data/save.json', {'lv': 5})
+* ConfigStore(app_name, filename='data/config.json', defaults=None, fmt='json', password=None, portable=False, version=1)
+  Types  : str, str, dict, str, str, bool, int  ->  Returns: ConfigStore
+  Desc   : Dict-like persistent configuration with schema defaults, JSON/Pickle/AES support, and migrate_fn.
+  Example: cfg = ConfigStore('my_game', defaults={'vol': 90}); cfg.load(); cfg['vol'] = 70; cfg.save()
+
+[WORKER]
+----------------------------------------
+* TaskPool(mode='auto', max_workers=None)
+  Types  : str, int | None  ->  Returns: TaskPool
+  Desc   : Cross-platform background runner (process on Desktop with freeze_support, thread on Mobile, inline on Web).
+  Example: pool = TaskPool(mode='auto'); pool.submit(heavy_fn, 100, on_done=print); pool.poll()
+* SharedState(mode='auto', initial=None)
+  Types  : str, dict  ->  Returns: SharedState
+  Desc   : Simple dict-like shared state safe across process, thread, and inline workers.
+  Example: state = SharedState(initial={'progress': 0}); state['progress'] = 50
+
+[INPUT_MAP]
+----------------------------------------
+* InputMap(bindings=None, deadzone=0.35)
+  Types  : dict, float  ->  Returns: InputMap
+  Desc   : Unify keyboard keys/chords, mobile touch gestures, mouse buttons, and gamepad inputs under named actions.
+  Example: imap = InputMap({'jump': ['space', 'tap:1:2', 'pad:a']}); if imap.pressed('jump', wnd): jump()
+* InputMap.axis / capture_next_binding / describe / save / load(args)
+  Types  : various  ->  Returns: float | str | bool
+  Desc   : Read analog/digital axes [-1..1], capture rebind input, generate TTS-friendly descriptions, and save/load JSON.
+  Example: dx = imap.axis('left', 'right', wnd); wnd.say(imap.describe('jump'))
+
+[FILE]
+----------------------------------------
+* File(password, encode=False, aes=False)
+  Types  : str, bool, bool  ->  Returns: File
+  Desc   : Read/write JSON, Pickle, or TXT files with optional Fernet + AES-CBC encryption.
+  Example: f = File('secret', encode=True, aes=True); f.save({'a': 1}, 'out.dat', mode='wb+', type='json')
+
+[UTILS]
+----------------------------------------
+* make_spak / load_spak(source, output_path, password='', mode='lazy')
+  Types  : str | dict, str, str, str  ->  Returns: dict
+  Desc   : Pack and load encrypted binary .spak sound archives with O(1) lazy streaming.
+  Example: load_spak('res/sounds.zb', password='pw', mode='lazy', target='both')
+* clamp / lerp / remap / distance_3d / clock_direction / db_to_linear(numbers)
+  Types  : float  ->  Returns: float | int
+  Desc   : Game math, 3D distance, 1-12 clock-face bearing, and audio decibel conversion helpers.
+  Example: hour = utils.clock_direction(dx=5, dy=1)  # 3 o'clock
+* copy_text / paste_text / open_url / fuzzy_match / deep_merge / file_hash(args)
+  Types  : str / dict  ->  Returns: any
+  Desc   : Zero-dependency cross-platform clipboard, browser launcher, accent-insensitive fuzzy search, and SHA-256 hashing.
+  Example: utils.copy_text('Copied!'); matches = utils.fuzzy_match('aud', ['Audio', 'Video'])
+
+[COMPILE]
+----------------------------------------
+* compile.work / compile.build(config_file / PROJECT, mode, platforms, arch, data)
+  Types  : str / ...  ->  Returns: bool
+  Desc   : Unified builder for Windows (PyInstaller/Nuitka/BeeWare), Linux, macOS, Android (APK), iOS, and Web.
+  Example: python -m pyaudiogaming.compile build.txt

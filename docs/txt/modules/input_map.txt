@@ -1,0 +1,42 @@
+========================================================================
+MODULE: pyaudiogaming.input_map
+input_map — Unified Keyboard, Touch, Mouse & Gamepad Action Mapping
+========================================================================
+
+SUMMARY:
+Map named actions to keyboard keys/chords, mobile touch taps/swipes, mouse buttons, and gamepad buttons/sticks, with interactive rebinding, TTS descriptions, and JSON persistence.
+
+
+[CLASS InputMap]
+----------------------------------------
+Maps named game actions to keyboard, touch gesture, mouse, and gamepad bindings.
+* InputMap.__init__(bindings=None, deadzone: float=0.35) -> any [constructor]
+* InputMap.bind(action: str, *bindings: str) -> any [method]
+  Add one or more bindings to ``action``.
+* InputMap.unbind(action: str, binding: str=None) -> any [method]
+  Remove a specific binding from ``action``, or all bindings if ``binding is None``.
+* InputMap.rebind(action: str, old_binding: str, new_binding: str) -> bool [method]
+  Replace ``old_binding`` with ``new_binding`` for ``action``.
+* InputMap.set_bindings(action: str, bindings: list) -> any [method]
+* InputMap.get_bindings(action: str) -> list [method]
+* InputMap.actions() -> list [method]
+* InputMap.clear(action: str=None) -> any [method]
+* InputMap.reset_defaults() -> any [method]
+* InputMap.pressed(action: str, wnd) -> bool [method]
+  Return True on the frame any binding of ``action`` is newly triggered.
+* InputMap.pressing(action: str, wnd, repeat_ms: int=0) -> bool [method]
+  Return True while any binding of ``action`` is held (with optional ``repeat_ms`` throttle).
+* InputMap.released(action: str, wnd) -> bool [method]
+  Return True on the frame a binding of ``action`` is released.
+* InputMap.any_pressed(actions, wnd) -> any [method]
+  Return the first action name in ``actions`` that was pressed this frame, else ``None``.
+* InputMap.axis(neg_action: str, pos_action: str, wnd) -> float [method]
+  Return an axis value in ``[-1.0, 1.0]`` combining keyboard & gamepad sticks.
+* InputMap.capture_next_binding(wnd, cancel_key: str='escape') -> any [method]
+  Poll once for a newly pressed key/combo or gamepad button; returns binding string or ``None``.
+* InputMap.describe(action: str, separator: str=', ') -> str [method]
+  Return a human-readable / TTS-friendly description of an action's bindings.
+* InputMap.to_dict() -> dict [method]
+* InputMap.from_dict(data, deadzone: float=0.35) -> 'InputMap' [method]
+* InputMap.save(filepath) -> Path [method]
+* InputMap.load(filepath) -> bool [method]

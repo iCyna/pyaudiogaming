@@ -1,0 +1,158 @@
+========================================================================
+MODULE: pyaudiogaming.sound_pool
+sound_pool — BASS Audio Engine, 3D HRTF, Steam Audio & Recording
+========================================================================
+
+SUMMARY:
+Full-featured BASS audio engine: output/input device management, streaming & cached samples, fading, binaural HRTF, Steam Audio wall occlusion, push streams, and microphone recording.
+
+[MODULE FUNCTIONS]
+----------------------------------------
+* set_hrtf_frame_size(frame_size=512) -> any
+* get_hrtf_frame_size() -> any
+* set_hrtf_distance_model(min_dist=1.0, max_dist=50.0, rolloff=0.12, blend_step=0.25) -> any
+* update_hrtf_listener(listener_x, listener_y, listener_z, yaw=0.0, pitch=0.0, roll=0.0) -> any
+* add_hrtf_env_box(material_preset, min_x, max_x, min_y, max_y, min_z, max_z) -> any
+* clear_hrtf_env_boxes() -> any
+* set_hrtf_auto_raycast(enabled=True) -> any
+* get_global_sound() -> any
+* set_global_sound(value) -> any
+* set_focus(value) -> any
+* output(period=10, bbuffer=500, ThreeD=False, sample_rate=44100, dev=-1, frame_size=None, **kwargs) -> any
+* input(device=-1) -> any
+* set_output_device(device) -> any
+* get_output_device() -> any
+* set_input_device(device) -> any
+* get_input_device() -> any
+* clean_oneshots(force=False) -> any
+* playsingle(filename, volume=100, pitch=100, pan=0, mono=False, ThreeD=False, **kwargs) -> any
+
+[CLASS OutputManager]
+----------------------------------------
+* OutputManager.__init__(device=-1, frequency=44100, period=10, bbuffer=500, flags=0, clsid=None) -> any [constructor]
+* OutputManager.start() -> any [method]
+* OutputManager.pause() -> any [method]
+* OutputManager.stop() -> any [method]
+* OutputManager.free() -> any [method]
+* OutputManager.get_device() -> any [method]
+* OutputManager.set_device(device) -> any [method]
+* OutputManager.get_volume() -> any [method]
+* OutputManager.set_volume(volume) -> any [method]
+* OutputManager.find_user_provided_device(name) -> any [method]
+
+[CLASS InputManager]
+----------------------------------------
+* InputManager.__init__(device=-1) -> any [constructor]
+* InputManager.free() -> any [method]
+* InputManager.get_device() -> any [method]
+* InputManager.set_device(device) -> any [method]
+* InputManager.find_user_provided_device(name) -> any [method]
+
+[CLASS SoundBase]
+----------------------------------------
+* SoundBase.__init__() -> any [constructor]
+* SoundBase.channel() -> any [property]
+* SoundBase.set_frame_size(frame_size) -> any [method]
+* SoundBase.get_frame_size() -> any [method]
+* SoundBase.is_fading(attr_type=None) -> any [method]
+* SoundBase.get_faded_value(attr_type='volume', default_val=100.0) -> any [method]
+* SoundBase.set_mixer(target_mixer=None) -> any [method]
+* SoundBase.attach_hrtf_dsp(priority=0) -> any [method]
+* SoundBase.detach_hrtf_dsp() -> any [method]
+* SoundBase.set_hrtf_enabled(enabled=True) -> any [method]
+* SoundBase.setPaused(p) -> any [method]
+* SoundBase.fade(fadetime, value=0, type='volume') -> any [method]
+* SoundBase.fadeout(fadetime, value=0, type='volume') -> any [method]
+* SoundBase.fadein(fadetime, value=100, type='volume') -> any [method]
+* SoundBase.setfx(fx_key, priority=0, **overrides) -> any [method]
+  Add or enable an audio effect preset (BASS_FX, DX8, Filter, or Steam Audio FX).
+* SoundBase.set_fx_param(fx_key=None, **params) -> any [method]
+  Update parameters of an active BASS_FX or Steam Audio FX without recreating the effect.
+* SoundBase.set_param(param_name=None, value=None, fx_key=None, **kwargs) -> any [method]
+  Direct parameter setter for Steam Audio HRTF or an active FX (distinct from setfx).
+* SoundBase.get_param(param_name, fx_key=None) -> any [method]
+  Query a parameter value from Steam Audio HRTF or an active BASS_FX.
+* SoundBase.remove_fx(fx_key) -> any [method]
+  Remove a single active BASS_FX or Steam Audio FX.
+* SoundBase.remove_all_fx() -> any [method]
+* SoundBase.set_steam_reverb(preset='steam_medium_room', wet=-1.0, **overrides) -> any [method]
+* SoundBase.set_steam_reflection_params(reverb_low=1.2, reverb_mid=1.0, reverb_high=0.7, eq_low=1.0, eq_mid=0.9, eq_high=0.7, delay_ms=20.0, wet_mix=0.25) -> any [method]
+* SoundBase.set_steam_path_params(eq_low=0.9, eq_mid=0.7, eq_high=0.45, sh0=1.0, sh1=0.5, sh2=0.5, sh3=0.5, wet_mix=0.25) -> any [method]
+* SoundBase.set_steam_material(material_preset, enable_direct=True) -> any [method]
+* SoundBase.set_steam_physical_params(x=0.0, y=0.0, z=0.0, occlusion=0.0, air_absorption=1.0, trans_low=None, trans_mid=None, trans_high=None) -> any [method]
+* SoundBase.set_steam_directivity(directivity=1.0, dipole_weight=None, dipole_power=1.0, ahead=(0.0, 1.0, 0.0)) -> any [method]
+* SoundBase.set_steam_mode(mode=0, ambi_order=1, surround_layout=1) -> any [method]
+* SoundBase.get_data(frame_size=None, data_type='raw') -> any [method]
+* SoundBase.get_length() -> any [method]
+* SoundBase.volume() -> any [property]
+* SoundBase.pitch() -> any [property]
+* SoundBase.pan() -> any [property]
+* SoundBase.playing() -> any [property]
+* SoundBase.is_playing() -> any [property]
+* SoundBase.stopped() -> any [property]
+* SoundBase.stalled() -> any [property]
+* SoundBase.position() -> any [property]
+* SoundBase.seek(ms_value) -> any [method]
+* SoundBase.set3d(listener_x, listener_y, listener_z, source_x, source_y, source_z, rotation=0, head=180, pan_step=2.5, volume_step=2.5, behind_pitch_decrease=0, behind_volume_decrease=0, pitch_step=1, pitch_range=92, pan_range=70, start_pan=0, start_volume=100, start_pitch=100, soft=False, mix_pan_with_hrtf=False, bilinear=True) -> any [method]
+* SoundBase.set3dsoft(listener_x, listener_y, listener_z, source_x, source_y, source_z, rotation=0, start_volume=100, volume_step=2.5, start_pitch=100, start_pan=0, pan_step=0.0, behind_pitch_decrease=0, behind_volume_decrease=0, pitch_step=0, pitch_range=92, pan_range=70, bilinear=True) -> any [method]
+* SoundBase.math3d(listener_x, listener_y, listener_z, source_x, source_y, source_z, pan_step, volume_step, behind_pitch_decrease, behind_volume_decrease, pitch_step, pitch_range, pan_range, start_pan, start_volume, start_pitch, soft=False, rotation=0.0) -> any [method]
+* SoundBase.is_sliding3d() -> any [property]
+* SoundBase.slide3d(*args, **kwargs) -> any [method]
+* SoundBase.update_slide3d(listener_x, listener_y, listener_z, rotation=0) -> any [method]
+
+[CLASS vst]
+----------------------------------------
+* vst.__init__() -> any [constructor]
+* vst.create_instrument(dll_path, frequency=44100, channels=2, flags=0, ThreeD=False, decode=False, **kwargs) -> any [method]
+* vst.play() -> any [method]
+* vst.stop() -> any [method]
+* vst.close() -> any [method]
+
+[CLASS mixer]
+----------------------------------------
+* mixer.__init__(parent=None) -> any [constructor]
+* mixer.create(frequency=44100, channels=2, flags=control.BASS_MIXER_NONSTOP | control.BASS_MIXER_RESUME, ThreeD=False, parent=None, **kwargs) -> any [method]
+* mixer.set_parent_mixer(parent_mixer=None) -> any [method]
+* mixer.add(source, flags=control.BASS_MIXER_CHAN_NORAMPIN, start=None, length=None, **kwargs) -> any [method]
+* mixer.remove(source) -> any [method]
+* mixer.play() -> any [method]
+* mixer.stop() -> any [method]
+* mixer.close() -> any [method]
+
+[CLASS record]
+----------------------------------------
+* record.__init__() -> any [constructor]
+* record.stream(filename, draw=False, mono=False, ThreeD=False, decode=False, autofree=False, use_dsp_hrtf=True, preload=True, frame_size=None, **kwargs) -> any [method]
+* record.push(data) -> any [method]
+* record.get_sample() -> any [method]
+* record.clear_sample() -> any [method]
+* record.stop() -> any [method]
+* record.close() -> any [method]
+
+[CLASS musical]
+----------------------------------------
+* musical.__init__() -> any [constructor]
+* musical.load_font(font_path, flags=0, **kwargs) -> any [method]
+* musical.stream(filename, mono=False, ThreeD=False, decode=False, use_dsp_hrtf=True, **kwargs) -> any [method]
+* musical.play() -> any [method]
+* musical.stop() -> any [method]
+* musical.close() -> any [method]
+
+[CLASS sound]
+----------------------------------------
+* sound.__init__() -> any [constructor]
+* sound.stream(filename='', draw=False, mono=False, ThreeD=False, decode=False, autofree=False, use_dsp_hrtf=False, preload=False, frame_size=None, **kwargs) -> any [method]
+* sound.music(filename, mono=False, ThreeD=False, decode=False, autofree=False, use_dsp_hrtf=True, prescan=True, ramp=True, frame_size=None, **kwargs) -> any [method]
+  Load MOD/XM/IT/S3M/MO3 tracker music (HMUSIC) with full HRTF DSP & Decode Stream compatibility.
+* sound.load(filename='', mono=False, ThreeD=False, decode=False, use_dsp_hrtf=True, frame_size=None, **kwargs) -> any [method]
+* sound.play(reset_loop=True) -> any [method]
+* sound.play_looped() -> any [method]
+* sound.stop() -> any [method]
+* sound.close() -> any [method]
+* sound.push(data) -> any [method]
+
+[CLASS music]
+----------------------------------------
+Dedicated HMUSIC wrapper class for tracker music (.mod, .xm, .it, .s3m, .mo3) with HRTF & FX.
+* music.load(filename='', mono=False, ThreeD=False, decode=False, use_dsp_hrtf=True, **kwargs) -> any [method]
+* music.stream(filename='', mono=False, ThreeD=False, decode=False, use_dsp_hrtf=True, **kwargs) -> any [method]

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Module Reference Hub — PyAudioGaming</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header role="banner">
+    <h1>Module Reference Hub — PyAudioGaming</h1>
+    <nav aria-label="Documentation Navigation">
+    <a href="index.html" class="">Home</a>
+    <a href="01_getting_started.html" class="">01. Getting Started</a>
+    <a href="02_window_input_menu.html" class="">02. Input &amp; Menu</a>
+    <a href="03_audio_3d_fx.html" class="">03. 3D Audio</a>
+    <a href="04_speech_vb_gui.html" class="">04. Speech, VB &amp; GUI</a>
+    <a href="05_timer_worker_storage_haptics.html" class="">05. Advanced Systems</a>
+    <a href="06_building_cross_platform.html" class="">06. Building</a>
+    <a href="api_reference.html" class="active">Module Reference</a>
+    </nav>
+  </header>
+  <main id="main-content" role="main">
+
+<h2>Per-Module API &amp; Parameter Reference Hub</h2>
+<p>Each module has its own dedicated page with complete usage guides, code examples, and cleanly split parameter tables. Separate CSV/JSON/TXT files per module are also available in <code>docs/reference/modules/</code> and <code>docs/txt/modules/</code>.</p>
+<label for="hub-search">Filter modules:</label>
+<input id="hub-search" type="search" placeholder="Search module name or topic (e.g. audio, gui, timer, storage)..." oninput="filterHub(this.value)">
+<div class="grid" id="mod-grid">
+  <div class="card"><h3><a href="modules/window.html">pyaudiogaming.window</a></h3><div><span class="badge">4 classes</span><span class="badge">37 APIs</span></div><p>Core application window managing the SDL2/pygame loop, keyboard edge/hold detection, mobile touch gestures (tap/swipe), screen-reader speech forwarding, and SPAK loading.</p></div>
+  <div class="card"><h3><a href="modules/speech.html">pyaudiogaming.speech</a></h3><div><span class="badge">1 classes</span><span class="badge">36 APIs</span></div><p>Unified speech wrapper supporting NVDA, JAWS, SAPI5, VoiceOver, TalkBack, speech history, voice/rate/pitch/volume controls, and 3D positional TTS.</p></div>
+  <div class="card"><h3><a href="modules/sound_pool.html">pyaudiogaming.sound_pool</a></h3><div><span class="badge">9 classes</span><span class="badge">114 APIs</span></div><p>Full-featured BASS audio engine: output/input device management, streaming &amp; cached samples, fading, binaural HRTF, Steam Audio wall occlusion, push streams, and microphone recording.</p></div>
+  <div class="card"><h3><a href="modules/sound_fx.html">pyaudiogaming.sound_fx</a></h3><div><span class="badge">1 classes</span><span class="badge">65 APIs</span></div><p>High-level DSP effect presets and real-time BASS_FX / DX8 effect chains attached to any sound or mixer channel.</p></div>
+  <div class="card"><h3><a href="modules/menu.html">pyaudiogaming.menu</a></h3><div><span class="badge">1 classes</span><span class="badge">30 APIs</span></div><p>Accessible game menu supporting keyboard arrows, &#x27;&amp;K&#x27; shortcut hotkeys, wrap-around navigation, custom cursor/enter/cancel sounds, and mobile TalkBack touch gestures.</p></div>
+  <div class="card"><h3><a href="modules/vb.html">pyaudiogaming.vb</a></h3><div><span class="badge">1 classes</span><span class="badge">39 APIs</span></div><p>NVDA &amp; TalkBack accessible UI engine featuring advanced text input (with Ctrl+Shift+Alt+Backspace neutral keyboard mode switcher), 23-control forms (group, tab, link, switch, table, tree, slider), and ready-to-use modal boxes.</p></div>
+  <div class="card"><h3><a href="modules/gui.html">pyaudiogaming.gui</a></h3><div><span class="badge">5 classes</span><span class="badge">146 APIs</span></div><p>Write GUI code once and run natively on wxPython (Windows), PySide6/PyQt6 (Linux/macOS), Tkinter (stdlib fallback), or AudioWindow/vb.form (Android/iOS/Web).</p></div>
+  <div class="card"><h3><a href="modules/timer.html">pyaudiogaming.timer</a></h3><div><span class="badge">7 classes</span><span class="badge">86 APIs</span></div><p>Zero-thread, nanosecond-precision monotonic timing suite: Timer (pause/scale/countdown/drift-free), CooldownManager, TimerScheduler (min-heap), FrameClock (FPS/dt/fixed_steps), Stopwatch, and RateLimiter.</p></div>
+  <div class="card"><h3><a href="modules/haptics.html">pyaudiogaming.haptics</a></h3><div><span class="badge">1 classes</span><span class="badge">19 APIs</span></div><p>Unified vibration &amp; rumble controller for Android (Vibrator/VibrationEffect), iOS (UIImpactFeedbackGenerator), Windows XInput gamepads, and SDL2/pygame joysticks with 13 built-in presets and non-blocking patterns.</p></div>
+  <div class="card"><h3><a href="modules/notify.html">pyaudiogaming.notify</a></h3><div><span class="badge">0 classes</span><span class="badge">6 APIs</span></div><p>Send native OS notifications (Windows Toast, Android NotificationManager, macOS, Linux) and wake locked/sleeping screens with Full-Screen Intent (Android) or Win32 display wake &amp; foreground bring-to-front (Windows).</p></div>
+  <div class="card"><h3><a href="modules/app_link.html">pyaudiogaming.app_link</a></h3><div><span class="badge">1 classes</span><span class="badge">9 APIs</span></div><p>Register file extensions (.mp3, .ogg, .wav) without Admin on Windows (HKCU) or Linux (.desktop), read launched files / Android content:// URIs, and forward newly opened files to an already-running app instance.</p></div>
+  <div class="card"><h3><a href="modules/storage.html">pyaudiogaming.storage</a></h3><div><span class="badge">2 classes</span><span class="badge">28 APIs</span></div><p>Guaranteed-writable persistent storage solving mobile APK asset overwrites: uses filesDir ($HOME) on Android/iOS, AppData/XDG/portable on Desktop, with atomic writes (.tmp + fsync + os.replace) and automatic .bak recovery.</p></div>
+  <div class="card"><h3><a href="modules/worker.html">pyaudiogaming.worker</a></h3><div><span class="badge">3 classes</span><span class="badge">27 APIs</span></div><p>Run heavy CPU/IO tasks without freezing your game loop. Automatically selects process on Desktop (with freeze_support and auto-thread fallback for lambdas), thread on Android/iOS, and inline on Web.</p></div>
+  <div class="card"><h3><a href="modules/input_map.html">pyaudiogaming.input_map</a></h3><div><span class="badge">1 classes</span><span class="badge">20 APIs</span></div><p>Map named actions to keyboard keys/chords, mobile touch taps/swipes, mouse buttons, and gamepad buttons/sticks, with interactive rebinding, TTS descriptions, and JSON persistence.</p></div>
+  <div class="card"><h3><a href="modules/file.html">pyaudiogaming.file</a></h3><div><span class="badge">1 classes</span><span class="badge">15 APIs</span></div><p>File helper supporting JSON, Pickle, and plain-text serialization with optional two-layer Fernet + AES-CBC encryption.</p></div>
+  <div class="card"><h3><a href="modules/utils.html">pyaudiogaming.utils</a></h3><div><span class="badge">1 classes</span><span class="badge">47 APIs</span></div><p>Zero-dependency game utilities: clamp/lerp/remap/clock_direction/db_to_linear, weighted random, fuzzy search, cross-platform clipboard (copy_text/paste_text), open_url, SHA-256 hashing, and SPAK binary audio archiving.</p></div>
+  <div class="card"><h3><a href="modules/system.html">pyaudiogaming.system</a></h3><div><span class="badge">0 classes</span><span class="badge">13 APIs</span></div><p>Detects OS (Windows/Linux/macOS/Android/iOS), CPU architecture (x64/x86/arm64-v8a/aarch64/armhf), frozen bundle paths, and loads platform-specific native libraries (.dll/.so/.dylib).</p></div>
+  <div class="card"><h3><a href="modules/compile.html">pyaudiogaming.compile</a></h3><div><span class="badge">0 classes</span><span class="badge">18 APIs</span></div><p>Single-config build tool driving PyInstaller, Nuitka, Cython/GCC/MSVC, cx_Freeze, and BeeWare (Briefcase) for Desktop, Android APK, iOS Xcode/IPA, and Web.</p></div>
+</div>
+<script>
+function filterHub(q) {
+  q = (q || '').toLowerCase();
+  var cards = document.querySelectorAll('#mod-grid .card');
+  for (var i = 0; i < cards.length; i++) {
+    cards[i].style.display = cards[i].innerText.toLowerCase().indexOf(q) !== -1 ? '' : 'none';
+  }
+}
+</script>
+
+  </main>
+  <footer role="contentinfo">
+    PyAudioGaming Official Documentation &mdash; Cross-Platform Audio Gaming for Windows, Linux, macOS, Android, iOS &amp; Web.
+  </footer>
+</body>
+</html>

@@ -1,0 +1,165 @@
+========================================================================
+MODULE: pyaudiogaming.timer
+timer — Single-Threaded High-Precision Timers, Cooldowns & Scheduler
+========================================================================
+
+SUMMARY:
+Zero-thread, nanosecond-precision monotonic timing suite: Timer (pause/scale/countdown/drift-free), CooldownManager, TimerScheduler (min-heap), FrameClock (FPS/dt/fixed_steps), Stopwatch, and RateLimiter.
+
+[MODULE FUNCTIONS]
+----------------------------------------
+* get_ticks() -> int
+  Return monotonic milliseconds since module import (high-resolution, never jumps backwards).
+* get_ticks_us() -> int
+  Return monotonic microseconds since module import.
+* get_ticks_sec() -> float
+  Return monotonic seconds (float) since module import.
+* format_duration(ms: float, style: str='clock') -> str
+  Format milliseconds into a human-readable string.
+
+[CLASS Timer]
+----------------------------------------
+High-precision game timer supporting pause/resume, time scaling, countdowns, fixed-interval ticks, forcing/advancing, serialization, and context-manager profiling.
+* Timer.__init__(duration: float=0, paused: bool=False, scale: float=1.0, auto_start: bool=True) -> any [constructor]
+* Timer.elapsed() -> int [property]
+  Elapsed time in integer milliseconds (backwards-compatible).
+* Timer.elapsed_float() -> float [property]
+  Elapsed time in floating-point milliseconds.
+* Timer.elapsed_us() -> int [property]
+  Elapsed time in integer microseconds.
+* Timer.elapsed_seconds() -> float [property]
+  Elapsed time in seconds (float).
+* Timer.paused() -> bool [property]
+* Timer.running() -> bool [property]
+* Timer.scale() -> float [property]
+  Time dilation factor (1.0 = normal, 0.5 = slow-mo, 2.0 = 2x speed).
+* Timer.duration() -> float [property]
+  Configured countdown duration in milliseconds (0 if none).
+* Timer.remaining() -> int [property]
+  Remaining milliseconds until ``duration`` expires (clamped to >= 0).
+* Timer.remaining_float() -> float [property]
+* Timer.remaining_seconds() -> float [property]
+* Timer.progress() -> float [property]
+  Completion ratio from 0.0 to 1.0 when ``duration > 0``.
+* Timer.expired() -> bool [property]
+  True when ``duration > 0`` and elapsed >= duration.
+* Timer.restart(duration: float=None, paused: bool=False) -> any [method]
+  Reset elapsed time to 0 and start (unless ``paused=True``).
+* Timer.start(duration: float=None) -> any [method]
+  Start or resume the timer. Optionally set a new duration and reset.
+* Timer.pause() -> any [method]
+  Freeze the timer at its current elapsed value.
+* Timer.resume() -> any [method]
+  Resume a paused timer from where it left off.
+* Timer.toggle_pause() -> bool [method]
+  Toggle paused state and return the new ``paused`` boolean.
+* Timer.stop() -> any [method]
+  Stop and reset elapsed time to 0.
+* Timer.force(ms: float) -> any [method]
+  Force the timer's elapsed time to a specific millisecond value (like BGT ``timer.force``).
+* Timer.advance(delta_ms: float) -> any [method]
+  Add ``delta_ms`` milliseconds to the current elapsed time.
+* Timer.rewind(delta_ms: float, clamp_zero: bool=True) -> any [method]
+  Subtract ``delta_ms`` milliseconds from the current elapsed time.
+* Timer.ready(cooldown_ms: float=None, auto_restart: bool=False) -> bool [method]
+  Check whether ``cooldown_ms`` (or ``self.duration``) has elapsed.
+* Timer.consume(interval_ms: float=None) -> bool [method]
+  Drift-free periodic trigger: if ``elapsed >= interval``, subtracts one interval (preserving sub-millisecond remainder) and returns ``True``.
+* Timer.consume_all(interval_ms: float=None, max_ticks: int=None) -> int [method]
+  Consume all completed intervals and return how many occurred (drift-free).
+* Timer.format(style: str='clock', remaining: bool=False) -> str [method]
+  Format either elapsed or remaining time using ``format_duration``.
+* Timer.to_dict() -> dict [method]
+* Timer.from_dict(data) -> 'Timer' [method]
+
+[CLASS Stopwatch]
+----------------------------------------
+Timer with lap recording for profiling and split timing.
+* Stopwatch.__init__(auto_start: bool=True) -> any [constructor]
+* Stopwatch.restart(duration: float=None, paused: bool=False) -> any [method]
+* Stopwatch.lap(label: str='') -> dict [method]
+  Record a lap split and return ``{"index", "label", "split_ms", "total_ms"}``.
+* Stopwatch.laps() -> list [property]
+* Stopwatch.last_lap() -> any [property]
+* Stopwatch.summary() -> str [method]
+
+[CLASS CooldownManager]
+----------------------------------------
+Manage named cooldowns (skills, attacks, actions, anti-spam) in one place.
+* CooldownManager.__init__(scale: float=1.0) -> any [constructor]
+* CooldownManager.start(name: str, duration_ms: float) -> Timer [method]
+* CooldownManager.is_ready(name: str) -> bool [method]
+* CooldownManager.use(name: str, duration_ms: float) -> bool [method]
+  If ``name`` is ready, start its cooldown and return ``True``; otherwise ``False``.
+* CooldownManager.remaining(name: str) -> int [method]
+* CooldownManager.remaining_seconds(name: str) -> float [method]
+* CooldownManager.progress(name: str) -> float [method]
+* CooldownManager.reduce(name: str, delta_ms: float) -> any [method]
+* CooldownManager.reduce_all(delta_ms: float) -> any [method]
+* CooldownManager.reset(name: str) -> any [method]
+* CooldownManager.clear() -> any [method]
+* CooldownManager.pause_all() -> any [method]
+* CooldownManager.resume_all() -> any [method]
+* CooldownManager.set_scale(scale: float) -> any [method]
+* CooldownManager.active() -> list [method]
+  Return names of cooldowns that have not expired yet.
+* CooldownManager.prune() -> any [method]
+  Remove expired cooldown entries to keep memory clean.
+* CooldownManager.to_dict() -> dict [method]
+* CooldownManager.from_dict(data) -> 'CooldownManager' [method]
+
+[CLASS ScheduledTask]
+----------------------------------------
+Handle representing a task scheduled in ``TimerScheduler``.
+* ScheduledTask.__init__(task_id, callback, args, kwargs, delay_ms, interval_ms=0.0, count=1, due_ms=0.0, tag=None) -> any [constructor]
+* ScheduledTask.cancel() -> any [method]
+
+[CLASS TimerScheduler]
+----------------------------------------
+Non-blocking, min-heap event scheduler designed for game loops.
+* TimerScheduler.__init__(scale: float=1.0, on_error=None) -> any [constructor]
+* TimerScheduler.now_ms() -> float [property]
+* TimerScheduler.scale() -> float [property]
+* TimerScheduler.paused() -> bool [property]
+* TimerScheduler.pause_all() -> any [method]
+* TimerScheduler.resume_all() -> any [method]
+* TimerScheduler.after(delay_ms: float, callback, *args, tag=None, **kwargs) -> int [method]
+  Schedule ``callback(*args, **kwargs)`` once after ``delay_ms`` milliseconds.
+* TimerScheduler.every(interval_ms: float, callback, *args, count: int=None, start_immediately: bool=False, tag=None, **kwargs) -> int [method]
+  Schedule ``callback`` repeatedly every ``interval_ms`` (optionally ``count`` times).
+* TimerScheduler.cancel(task_id: int) -> bool [method]
+* TimerScheduler.cancel_by_tag(tag) -> int [method]
+* TimerScheduler.pause_task(task_id: int) -> bool [method]
+* TimerScheduler.resume_task(task_id: int) -> bool [method]
+* TimerScheduler.clear() -> any [method]
+* TimerScheduler.pending_count() -> int [method]
+* TimerScheduler.next_due_ms() -> any [method]
+  Milliseconds until next active task fires, or ``None`` if queue is empty.
+* TimerScheduler.update(max_callbacks: int=64) -> int [method]
+  Run all due callbacks. Returns the number of callbacks executed.
+
+[CLASS FrameClock]
+----------------------------------------
+Game-loop clock providing delta time, smoothed FPS, frame limiting, and fixed timesteps.
+* FrameClock.__init__(target_fps: float=0.0, max_dt_ms: float=100.0) -> any [constructor]
+* FrameClock.tick(target_fps: float=None) -> float [method]
+  Advance one frame, sleep if ``target_fps > 0``, and return delta time in **seconds**.
+* FrameClock.fixed_steps(step_ms: float=16.6666667, max_steps: int=5) -> any [method]
+  Yield fixed-timestep ``dt`` (seconds) to keep physics/movement deterministic.
+* FrameClock.dt() -> float [property]
+  Last frame delta time in seconds.
+* FrameClock.dt_ms() -> float [property]
+  Last frame delta time in milliseconds.
+* FrameClock.fps() -> float [property]
+  Exponentially smoothed FPS.
+* FrameClock.frame_count() -> int [property]
+
+[CLASS RateLimiter]
+----------------------------------------
+Token-bucket rate limiter for network packets, chat anti-spam, or TTS throttling.
+* RateLimiter.__init__(max_calls: int, per_ms: float) -> any [constructor]
+* RateLimiter.allow(cost: float=1.0) -> bool [method]
+  Return ``True`` and consume ``cost`` tokens if allowed, else ``False``.
+* RateLimiter.retry_after_ms(cost: float=1.0) -> float [method]
+  Milliseconds until ``cost`` tokens will be available.
+* RateLimiter.reset() -> any [method]

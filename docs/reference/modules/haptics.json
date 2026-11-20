@@ -1,0 +1,330 @@
+{
+  "module": "haptics",
+  "classes": [
+    {
+      "name": "HapticEngine",
+      "doc": "Unified cross-platform haptic feedback controller with pattern sequencer & presets.",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "enabled: bool=True, intensity: float=1.0",
+          "params": [
+            {
+              "name": "enabled",
+              "type": "bool",
+              "default": "True"
+            },
+            {
+              "name": "intensity",
+              "type": "float",
+              "default": "1.0"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "enabled",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "bool",
+          "doc": ""
+        },
+        {
+          "name": "set_enabled",
+          "kind": "method",
+          "signature": "enabled: bool",
+          "params": [
+            {
+              "name": "enabled",
+              "type": "bool",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "intensity",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "float",
+          "doc": ""
+        },
+        {
+          "name": "set_intensity",
+          "kind": "method",
+          "signature": "value: float",
+          "params": [
+            {
+              "name": "value",
+              "type": "float",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "is_supported",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "bool",
+          "doc": ""
+        },
+        {
+          "name": "vibrate",
+          "kind": "method",
+          "signature": "duration_ms: int=40, strength: float=0.6, low_freq=None, high_freq=None, device: int=0",
+          "params": [
+            {
+              "name": "duration_ms",
+              "type": "int",
+              "default": "40"
+            },
+            {
+              "name": "strength",
+              "type": "float",
+              "default": "0.6"
+            },
+            {
+              "name": "low_freq",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "high_freq",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "device",
+              "type": "int",
+              "default": "0"
+            }
+          ],
+          "returns": "bool",
+          "doc": "Trigger a single vibration pulse. Returns True if a hardware backend accepted it."
+        },
+        {
+          "name": "stop",
+          "kind": "method",
+          "signature": "device: int=0",
+          "params": [
+            {
+              "name": "device",
+              "type": "int",
+              "default": "0"
+            }
+          ],
+          "returns": "any",
+          "doc": "Immediately stop all active vibrations and cancel queued patterns."
+        },
+        {
+          "name": "pattern",
+          "kind": "method",
+          "signature": "steps, repeat: int=1, device: int=0",
+          "params": [
+            {
+              "name": "steps",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "repeat",
+              "type": "int",
+              "default": "1"
+            },
+            {
+              "name": "device",
+              "type": "int",
+              "default": "0"
+            }
+          ],
+          "returns": "any",
+          "doc": "Play a sequence of ``(duration_ms, strength)`` tuples non-blockingly."
+        },
+        {
+          "name": "preset",
+          "kind": "method",
+          "signature": "name: str, repeat: int=1, device: int=0",
+          "params": [
+            {
+              "name": "name",
+              "type": "str",
+              "default": "required"
+            },
+            {
+              "name": "repeat",
+              "type": "int",
+              "default": "1"
+            },
+            {
+              "name": "device",
+              "type": "int",
+              "default": "0"
+            }
+          ],
+          "returns": "bool",
+          "doc": "Play a named preset from ``PRESETS`` (e.g. ``'click'``, ``'hit_heavy'``, ``'error'``)."
+        },
+        {
+          "name": "update",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": "Advance active haptic patterns and auto-stop timed XInput motors. Call once per frame."
+        }
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "name": "vibrate",
+      "kind": "function",
+      "signature": "duration_ms: int=40, strength: float=0.6, low_freq=None, high_freq=None, device: int=0",
+      "params": [
+        {
+          "name": "duration_ms",
+          "type": "int",
+          "default": "40"
+        },
+        {
+          "name": "strength",
+          "type": "float",
+          "default": "0.6"
+        },
+        {
+          "name": "low_freq",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "high_freq",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "device",
+          "type": "int",
+          "default": "0"
+        }
+      ],
+      "returns": "bool",
+      "doc": ""
+    },
+    {
+      "name": "stop",
+      "kind": "function",
+      "signature": "device: int=0",
+      "params": [
+        {
+          "name": "device",
+          "type": "int",
+          "default": "0"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "pattern",
+      "kind": "function",
+      "signature": "steps, repeat: int=1, device: int=0",
+      "params": [
+        {
+          "name": "steps",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "repeat",
+          "type": "int",
+          "default": "1"
+        },
+        {
+          "name": "device",
+          "type": "int",
+          "default": "0"
+        }
+      ],
+      "returns": "bool",
+      "doc": ""
+    },
+    {
+      "name": "preset",
+      "kind": "function",
+      "signature": "name: str, repeat: int=1, device: int=0",
+      "params": [
+        {
+          "name": "name",
+          "type": "str",
+          "default": "required"
+        },
+        {
+          "name": "repeat",
+          "type": "int",
+          "default": "1"
+        },
+        {
+          "name": "device",
+          "type": "int",
+          "default": "0"
+        }
+      ],
+      "returns": "bool",
+      "doc": ""
+    },
+    {
+      "name": "update",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "set_enabled",
+      "kind": "function",
+      "signature": "enabled: bool",
+      "params": [
+        {
+          "name": "enabled",
+          "type": "bool",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "set_intensity",
+      "kind": "function",
+      "signature": "value: float",
+      "params": [
+        {
+          "name": "value",
+          "type": "float",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "is_supported",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "bool",
+      "doc": ""
+    }
+  ],
+  "title": "haptics — Cross-Platform Vibration & Gamepad Rumble",
+  "summary": "Unified vibration & rumble controller for Android (Vibrator/VibrationEffect), iOS (UIImpactFeedbackGenerator), Windows XInput gamepads, and SDL2/pygame joysticks with 13 built-in presets and non-blocking patterns."
+}

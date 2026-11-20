@@ -1,0 +1,30 @@
+========================================================================
+MODULE: pyaudiogaming.file
+file — Encrypted File I/O (Fernet + AES-CBC)
+========================================================================
+
+SUMMARY:
+File helper supporting JSON, Pickle, and plain-text serialization with optional two-layer Fernet + AES-CBC encryption.
+
+
+[CLASS File]
+----------------------------------------
+* File.__init__(password: str, encode: bool=False, aes: bool=False) -> any [constructor]
+* File.generate_key(password: str) -> bytes [method]
+  Tạo key từ mật khẩu bằng cách băm SHA-256.
+* File.dokey(key: bytes) -> Fernet [method]
+  Tạo đối tượng Fernet từ key.
+* File.aes_encrypt(data: bytes) -> bytes [method]
+  Mã hóa dữ liệu bằng AES.
+* File.aes_decrypt(data: bytes) -> bytes [method]
+  Giải mã dữ liệu bằng AES.
+* File.open(file_path, mode) -> any [method]
+* File.close() -> any [method]
+* File.save(data, file_path, mode='w+', type='') -> any [method]
+* File.load(file_path: str, mode='r+', type: str='') -> any [method]
+* File.remove(file_path: str) -> any [method]
+* File.create(file_path: str) -> any [method]
+* File.check(file_path: str) -> bool [method]
+* File.replace(old_file, new_file) -> any [method]
+* File.copy(src: str, dest: str) -> any [method]
+* File.move(src, dest) -> any [method]

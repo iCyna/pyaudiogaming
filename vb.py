@@ -2,16 +2,64 @@
 # virtual box multifunctional
 # copyright 2025 belong ihcyna (Labubu)<phucnggo29@gmail.com>.
 
-import os, time, pygame
+import os, time, unicodedata, webbrowser, pygame
 from copy import deepcopy
 from .sound_pool import playsingle
-from .utils import get_window
+from .utils import get_window, open_url as _open_url
 from . import system
+try:
+	from . import haptics as _haptics
+except Exception:
+	_haptics = None
+
+
+def _haptic_preset(name):
+	if _haptics is not None:
+		try: _haptics.preset(name)
+		except Exception: pass
+
+
+def _unicode_label(ch):
+	"""Return a neutral, language-unbiased descriptive name for any symbol/emoji."""
+	if not ch: return ""
+	if len(ch) == 1:
+		try: return unicodedata.name(ch).lower()
+		except ValueError: return ch
+	names = []
+	for c in ch:
+		if ord(c) in (0xFE0F, 0x200D): continue
+		try: names.append(unicodedata.name(c).lower())
+		except ValueError: names.append(c)
+	return " ".join(names) if names else ch
+
+
+# Neutral, general-purpose virtual keyboard layouts (zero language or genre bias).
+# Applications may override or extend via INPUT_CONFIG["custom_keyboards"].
+VIRTUAL_KEYBOARDS = {
+	"numeric": {
+		"Digits & Math": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ".", ",", "+", "-", "*", "/", "=", "%", "(", ")", ":", "#"],
+	},
+	"symbols": {
+		"Punctuation": ["!", "?", "@", "#", "&", "_", "~", "^", "|", "\\", "/", ":", ";", "'", "\"", "`", "(", ")", "[", "]", "{", "}", "<", ">", "…", "•", "·", "«", "»", "—", "–"],
+		"Currency & Legal": ["$", "€", "£", "¥", "¢", "₹", "₩", "₫", "©", "®", "™", "§", "¶", "°", "‰"],
+		"Math & Arrows": ["±", "×", "÷", "≠", "≈", "≤", "≥", "∞", "√", "π", "∑", "∆", "µ", "←", "→", "↑", "↓", "↔", "↕", "✓", "✗", "★", "☆"],
+	},
+	"emoji": {
+		"Smileys": ["😀", "😄", "😊", "😉", "😍", "🤔", "😮", "😢", "😡", "😴", "😎", "🥳", "😅", "🙏"],
+		"Gestures": ["👍", "👎", "👏", "🙌", "🤝", "✌️", "👌", "☝️", "👉", "👈", "✋", "👋"],
+		"Hearts & Mood": ["❤️", "🧡", "💛", "💚", "💙", "💜", "🤍", "💔", "✨", "⭐", "🔥", "💯"],
+		"Nature": ["☀️", "🌙", "☁️", "🌧️", "⚡", "❄️", "🌈", "🌸", "🌿", "🌳", "🌊", "🌍"],
+		"Objects & Signs": ["📌", "📎", "📝", "📁", "🔍", "🔔", "🔒", "🔓", "🔑", "⚙️", "💡", "⏰", "✅", "❌", "⚠️", "ℹ️"],
+	},
+}
 
 INPUT_CONFIG = {
 	"callback-default": None, "read char": True, "read word": True, "readonly": False,
 	"multiline": True, "number_only": False, "max_length": 0, "placeholder": "",
 	"announce_type": False, "suggestions": [], "autocomplete": True,
+	"keyboard_modes": ["standard", "numeric", "symbols", "emoji"],
+	"custom_keyboards": {},
+	"keyboard-mode-text": "keyboard mode: %s",
 	"edit-text": "edit", "readonly-text": "read only", "multiline-text": "multi line",
 	"password-text": "password", "number-text": "number only",
 	"suggestion-text": "%d suggestions, %s",
@@ -34,7 +82,10 @@ INPUT_CONFIG = {
 
 FORM_CONFIG = {
 	"permissions": ["read", "move", "enter", "edit", "check", "cancel", "context"],
-	"button-text": "button", "check-text": "check box", "list-text": "list", "input-text": "edit",
+	"button-text": "button", "check-text": "check box", "switch-text": "switch",
+	"on-text": "on", "off-text": "off", "link-text": "link", "group-text": "grouping",
+	"out-of-group-text": "out of %s", "page-text": "page", "unavailable-text": "unavailable",
+	"required-text": "required", "list-text": "list", "input-text": "edit",
 	"readonly-text": "read only", "multiline-text": "multi line", "number-text": "number only",
 	"radio-text": "radio button", "combo-text": "combo box", "tree-text": "tree view",
 	"dir_tree-text": "folder tree view", "slider-text": "slider", "tab-text": "tab",
@@ -48,14 +99,15 @@ FORM_CONFIG = {
 	"edge-table-text": "edge of table", "blank-text": "blank", "star-text": "star",
 	"sep-text": ", ", "np-text": "%d of %d", "readNP": False, "password-text": "password",
 	"readonly": False, "multiline": False, "number_only": False, "max_length": 0, "placeholder": "",
-	"tab_page": None, "auto_submit": True, "adjacent_submit": True,
+	"tab_page": None, "group": None, "disabled": False, "hidden": False, "required": False,
+	"auto_submit": True, "adjacent_submit": True,
 	"table_read_header": True, "table_read_coords": True, "table_cell_border": True,
 	"color": None, "bg_color": None, "border_color": None, "font": None, "font_size": 17,
 	"pos": None, "size": None, "border": 1, "margin": 6, "padding": 10, "level": 1,
 	"focus-sound": None, "enter-sound": None, "check-sound": None, "edit-sound": None,
 	"cancel-sound": None, "open-sound": None, "expand-sound": None, "collapse-sound": None,
 	"context-sound": None, "slider-sound": None, "tab-sound": None, "progress-sound": None,
-	"table-sound": None, "live-sound": None, "dialog-sound": None,
+	"table-sound": None, "live-sound": None, "dialog-sound": None, "link-sound": None,
 	"label": "", "hint": "", "input": {}, "menu": {}, "context": [],
 }
 
@@ -68,10 +120,10 @@ class _TouchEngine:
 	def update(self, events):
 		now, acts, self.double_hold = time.time(), [], False
 		for e in events:
-			if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
+			if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1 and not getattr(e, "touch", False):
 				self.down_t, self.down_pos, self.holding = now, e.pos, True
 				self.taps = [t for t in self.taps if now - t[0] < 0.45] + [(now, e.pos)]
-			elif e.type == pygame.MOUSEBUTTONUP and e.button == 1:
+			elif e.type == pygame.MOUSEBUTTONUP and e.button == 1 and not getattr(e, "touch", False):
 				if self.holding and now - self.down_t < 0.4:
 					acts.append(("double_tap" if len(self.taps) >= 2 else "tap", e.pos))
 					if len(self.taps) >= 2: self.taps.clear()
@@ -430,12 +482,13 @@ def dialog(title="Dialog", text="", buttons=("OK", "Cancel"), default=0, cancel=
 				if r.collidepoint(pos):
 					if act == "tap" and idx != bi: idx = bi; wnd.say(f"{buttons[idx]} button")
 					elif act in ("double_tap", "tap") and idx == bi: return buttons[idx]
-		if wnd.keyPressed("left") or wnd.keyPressed("up") or (wnd.keyPressed("tab") and wnd.keyPressing("lshift")):
+		if wnd.keyPressed("left") or wnd.keyPressed("up") or (wnd.keyPressed("tab") and wnd.keyPressing("lshift")) or (hasattr(wnd, "keySlide") and wnd.keySlide("left", fingers=1)):
 			idx = (idx - 1) % len(buttons); wnd.say(f"{buttons[idx]} button")
-		elif wnd.keyPressed("right") or wnd.keyPressed("down") or wnd.keyPressed("tab"):
+		elif wnd.keyPressed("right") or wnd.keyPressed("down") or wnd.keyPressed("tab") or (hasattr(wnd, "keySlide") and wnd.keySlide("right", fingers=1)):
 			idx = (idx + 1) % len(buttons); wnd.say(f"{buttons[idx]} button")
-		elif wnd.keyPressed("enter") or wnd.keyPressed("space"): return buttons[idx]
-		elif wnd.keyPressed("exit") or wnd.keyPressed("esc"):
+		elif wnd.keyPressed("enter") or wnd.keyPressed("space") or (hasattr(wnd, "tap") and wnd.tap(fingers=1, count=2)): return buttons[idx]
+		elif hasattr(wnd, "tap") and wnd.tap(fingers=1, count=1) == 1: wnd.say(f"{buttons[idx]} button")
+		elif wnd.keyPressed("exit") or wnd.keyPressed("esc") or (hasattr(wnd, "keySlide") and wnd.keySlide("left", fingers=2)):
 			return buttons[cancel] if 0 <= cancel < len(buttons) else None
 
 
@@ -452,10 +505,10 @@ def message(m, callback=None, open=None, move=None, close=None, window=None):
 		if any(a in ("tap", "double_tap") and rects.get(0) and rects[0].collidepoint(p) for a, p in touch.update(evs)):
 			if close: playsingle(close)
 			break
-		if any(wnd.keyPressed(k) for k in ("left", "right", "up", "down")):
+		if any(wnd.keyPressed(k) for k in ("left", "right", "up", "down")) or (hasattr(wnd, "keySlide") and (wnd.keySlide("left", fingers=1) or wnd.keySlide("right", fingers=1))) or (hasattr(wnd, "tap") and wnd.tap(fingers=1, count=1) == 1):
 			if move: playsingle(move)
 			wnd.say(m)
-		if wnd.keyPressed("enter") or wnd.keyPressed("exit") or wnd.keyPressed("esc"):
+		if wnd.keyPressed("enter") or wnd.keyPressed("exit") or wnd.keyPressed("esc") or (hasattr(wnd, "tap") and wnd.tap(fingers=1, count=2)) or (hasattr(wnd, "keySlide") and wnd.keySlide("left", fingers=2)):
 			if close: playsingle(close)
 			break
 
@@ -642,18 +695,129 @@ def _input(title="", text="", callback=None, password=False, get_data=True, new_
 		update_suggestions()
 		return True
 
+	# Universal Keyboard Mode Switcher (Ctrl + Shift + Alt + Backspace)
+	kb_palettes = {k: deepcopy(v) for k, v in VIRTUAL_KEYBOARDS.items()}
+	for ck_name, ck_cats in (config.get("custom_keyboards") or {}).items():
+		if isinstance(ck_cats, dict):
+			kb_palettes[str(ck_name)] = ck_cats
+		elif isinstance(ck_cats, (list, tuple)):
+			kb_palettes[str(ck_name)] = {str(ck_name): list(ck_cats)}
+	kb_modes = list(config.get("keyboard_modes") or ["standard", "numeric", "symbols", "emoji"])
+	for ck_name in (config.get("custom_keyboards") or {}):
+		if str(ck_name) not in kb_modes:
+			kb_modes.append(str(ck_name))
+	if not kb_modes:
+		kb_modes = ["standard"]
+	kb_mode_idx = 0
+	kb_cat_idx = 0
+	kb_item_idx = 0
+	reveal_pw = False
+
+	def _kb_current_data():
+		mode_name = kb_modes[kb_mode_idx]
+		if mode_name == "standard" or mode_name not in kb_palettes:
+			return mode_name, None, []
+		cats = list(kb_palettes[mode_name].keys())
+		if not cats:
+			return mode_name, None, []
+		c_idx = kb_cat_idx % len(cats)
+		cat_name = cats[c_idx]
+		return mode_name, cat_name, kb_palettes[mode_name][cat_name]
+
+	def _kb_announce_item():
+		mode_name, cat_name, items_list = _kb_current_data()
+		if not items_list:
+			return
+		ch = items_list[kb_item_idx % len(items_list)]
+		lbl = _unicode_label(ch)
+		bf.say(f"{ch}, {lbl}" if lbl and lbl != ch else str(ch))
+
+	def _kb_cycle_mode(step=1):
+		nonlocal kb_mode_idx, kb_cat_idx, kb_item_idx
+		kb_mode_idx = (kb_mode_idx + step) % len(kb_modes)
+		kb_cat_idx = 0
+		kb_item_idx = 0
+		mode_name, cat_name, items_list = _kb_current_data()
+		_haptic_preset("click")
+		msg = config.get("keyboard-mode-text", "keyboard mode: %s") % mode_name
+		if cat_name and items_list:
+			ch = items_list[0]
+			lbl = _unicode_label(ch)
+			bf.say(f"{msg}, {cat_name}, {ch}, {lbl}")
+		else:
+			bf.say(msg)
+
 	play("open-sound", None)
 	init_sp = _build_input_announcement(title, text, password, config)
 	if init_sp: bf.say(init_sp)
 
 	while True:
 		bf.frameUpdate()
-		ui_rects = config["draw_callback"](lines, x, y, norm_sel, has_sel(), password, config) if config.get("draw_callback") else _Renderer.draw_input(bf, title, lines, x, y, norm_sel, has_sel(), password, config, suggs, s_idx)
+		eff_password = bool(password) and not reveal_pw
+		ui_rects = config["draw_callback"](lines, x, y, norm_sel, has_sel(), eff_password, config) if config.get("draw_callback") else _Renderer.draw_input(bf, title, lines, x, y, norm_sel, has_sel(), eff_password, config, suggs, s_idx)
 		if callback: callback()
 		ctrl = bf.keyPressing("lcontrol") or bf.keyPressing("rcontrol")
 		shift = bf.keyPressing("lshift") or bf.keyPressing("rshift")
+		alt = bf.keyPressing("lalt") or bf.keyPressing("ralt")
 
-		if bf.keyPressed("backspace"):
+		# Ctrl + Shift + Alt + Backspace -> Cycle universal keyboard modes (standard / numeric / symbols / emoji / custom)
+		if ctrl and shift and alt and bf.keyPressed("backspace"):
+			_kb_cycle_mode(1)
+			continue
+
+		# Ctrl + Shift + P -> Toggle password visibility
+		if ctrl and shift and not alt and bf.keyPressed("p") and password:
+			reveal_pw = not reveal_pw
+			_haptic_preset("tick")
+			bf.say("password visible" if reveal_pw else "password hidden")
+			continue
+
+		# Ctrl + Shift + F -> Announce text style/formatting (NVDA+F style)
+		if ctrl and shift and not alt and bf.keyPressed("f"):
+			st_parts = [
+				f"font {config.get('font') or 'default'}",
+				f"size {config.get('font_size', 18)}",
+				f"keyboard {kb_modes[kb_mode_idx]}",
+			]
+			if config.get("color"): st_parts.append(f"color {config['color']}")
+			if config.get("readonly"): st_parts.append(config.get("readonly-text", "read only"))
+			bf.say(", ".join(st_parts))
+			continue
+
+		# Palette keyboard mode navigation (numeric / symbols / emoji / custom)
+		cur_kb_mode, cur_kb_cat, cur_kb_items = _kb_current_data()
+		if cur_kb_mode != "standard" and cur_kb_items:
+			if bf.keyPressed("esc") or bf.keyPressed("exit"):
+				kb_mode_idx = 0
+				_haptic_preset("tick")
+				bf.say(config.get("keyboard-mode-text", "keyboard mode: %s") % kb_modes[0])
+				continue
+			if bf.keyPressed("tab") or bf.keyPressed("page_down") or bf.keyPressed("page_up"):
+				cats = list(kb_palettes[cur_kb_mode].keys())
+				if len(cats) > 1:
+					step = -1 if (shift or bf.keyPressed("page_up")) else 1
+					kb_cat_idx = (kb_cat_idx + step) % len(cats)
+					kb_item_idx = 0
+					_, new_cat, new_items = _kb_current_data()
+					_haptic_preset("tick")
+					ch0 = new_items[0] if new_items else ""
+					bf.say(f"{new_cat}, {ch0}, {_unicode_label(ch0)}")
+				continue
+			if bf.keyPressing("right", 160):
+				kb_item_idx = (kb_item_idx + 1) % len(cur_kb_items); _haptic_preset("tick"); _kb_announce_item(); continue
+			if bf.keyPressing("left", 160):
+				kb_item_idx = (kb_item_idx - 1) % len(cur_kb_items); _haptic_preset("tick"); _kb_announce_item(); continue
+			if bf.keyPressing("down", 160):
+				kb_item_idx = (kb_item_idx + 6) % len(cur_kb_items); _haptic_preset("tick"); _kb_announce_item(); continue
+			if bf.keyPressing("up", 160):
+				kb_item_idx = (kb_item_idx - 6) % len(cur_kb_items); _haptic_preset("tick"); _kb_announce_item(); continue
+			if bf.keyPressed("enter") or bf.keyPressed("space"):
+				ch_sel = cur_kb_items[kb_item_idx % len(cur_kb_items)]
+				if insert_text(ch_sel):
+					_haptic_preset("click")
+				continue
+
+		if bf.keyPressed("backspace") and not (ctrl and shift and alt):
 			if not has_perm(1): play("cannot delete-sound", "cannot delete-text")
 			elif has_sel(): play("delete-sound", "delete-text", get_sel() if has_perm(2) else config.get("cannot read-text", "star"))
 			elif x > 0: play("delete-sound", "delete-text", lines[y][x - 1] if has_perm(2) else config.get("cannot read-text", "star"))
@@ -692,7 +856,7 @@ def _input(title="", text="", callback=None, password=False, get_data=True, new_
 			if event.type == pygame.TEXTEDITING: editing = event.text
 			elif event.type == pygame.TEXTINPUT and not ctrl: editing = ""; insert_text(event.text)
 			elif event.type == pygame.KEYDOWN:
-				if event.key == pygame.K_BACKSPACE and has_perm(1):
+				if event.key == pygame.K_BACKSPACE and has_perm(1) and not (ctrl and shift and alt):
 					if has_sel(): save_state(); del_sel()
 					elif x > 0:
 						save_state(); nx = x - 1
@@ -769,6 +933,30 @@ def _input(title="", text="", callback=None, password=False, get_data=True, new_
 				if config.get("enter_submit"): config["enter_submit"]()
 				return "\n".join(lines)
 
+		# TalkBack / VoiceOver touch gestures inside vb.input
+		if hasattr(bf, "keySlide"):
+			if bf.keySlide("left", fingers=2):
+				if suggs: suggs.clear(); s_idx = -1; continue
+				play("exit-sound", None); return None
+			if bf.keySlide("right", fingers=2):
+				if config.get("tab exit"):
+					config["tab exit"](1)
+					return "\n".join(lines)
+				elif get_data:
+					play("confirm-sound", None)
+					if config.get("enter_submit"): config["enter_submit"]()
+					return "\n".join(lines)
+			if bf.tap(fingers=2, count=2) and get_data:
+				play("confirm-sound", None)
+				if config.get("enter_submit"): config["enter_submit"]()
+				return "\n".join(lines)
+			if bf.tap(fingers=1, count=2):
+				if suggs and s_idx >= 0: apply_suggestion(s_idx); continue
+				try: pygame.key.start_text_input()
+				except Exception: pass
+			elif bf.tap(fingers=1, count=1) == 1:
+				say_content(lines[y] if not password else "\n".join(lines))
+
 		def move_c(ny, nx, snd="move text-sound"):
 			nonlocal x, y, startx, starty, endx, endy
 			if shift:
@@ -776,7 +964,7 @@ def _input(title="", text="", callback=None, password=False, get_data=True, new_
 				y, x = ny, nx; endy, endx = y, x; play(snd, None); announce_sel()
 			else: clear_sel(True); y, x = ny, nx; play(snd, None)
 
-		if bf.keyPressing("left", 200):
+		if bf.keyPressing("left", 200) or (hasattr(bf, "keySlide") and bf.keySlide("left", fingers=1)):
 			if ctrl:
 				if x > 0:
 					nx = x - 1
@@ -790,7 +978,7 @@ def _input(title="", text="", callback=None, password=False, get_data=True, new_
 			elif y > 0: move_c(y - 1, len(lines[y - 1])); (not shift and bf.say(config.get("new line-text", "line feed")))
 			else: clear_sel(True); play("edge text-sound", None); say_content(lines[y][x] if lines[y] and x < len(lines[y]) else "", True)
 
-		if bf.keyPressing("right", 200):
+		if bf.keyPressing("right", 200) or (hasattr(bf, "keySlide") and bf.keySlide("right", fingers=1)):
 			if ctrl:
 				if x < len(lines[y]):
 					nx = x
@@ -804,12 +992,12 @@ def _input(title="", text="", callback=None, password=False, get_data=True, new_
 			elif y < len(lines) - 1: move_c(y + 1, 0); (not shift and bf.say(config.get("new line-text", "line feed")))
 			else: clear_sel(True); play("edge text-sound", None); say_content(lines[y][x - 1] if lines[y] and x > 0 else "", True)
 
-		if bf.keyPressing("up", 200):
+		if bf.keyPressing("up", 200) or (hasattr(bf, "keySlide") and bf.keySlide("up", fingers=1)):
 			if suggs and s_idx >= 0: s_idx = (s_idx - 1) % len(suggs); bf.say(suggs[s_idx])
 			elif y > 0: move_c(y - 1, min(x, len(lines[y - 1])), "move line-sound"); (not shift and say_content(lines[y]))
 			else: clear_sel(True); play("edge text-sound", None); say_content(lines[y])
 
-		if bf.keyPressing("down", 200):
+		if bf.keyPressing("down", 200) or (hasattr(bf, "keySlide") and bf.keySlide("down", fingers=1)):
 			if suggs and y == len(lines) - 1: s_idx = (s_idx + 1) % len(suggs); bf.say(suggs[s_idx])
 			elif y < len(lines) - 1: move_c(y + 1, min(x, len(lines[y + 1])), "move line-sound"); (not shift and say_content(lines[y]))
 			else: clear_sel(True); play("edge text-sound", None); say_content(lines[y])
@@ -828,8 +1016,19 @@ def input(title="", text="", callback=None, password=False, get_data=True, new_c
 	else: pygame.event.clear([pygame.KEYDOWN, pygame.KEYUP, pygame.TEXTINPUT, pygame.TEXTEDITING])
 	pygame.key.start_text_input()
 	pygame.key.set_text_input_rect(pygame.Rect(0, 0, 320, 32))
+	try:
+		from .pygame_shim import _android_bridge
+		if _android_bridge.is_android_java_available(): _android_bridge.show_keyboard()
+	except Exception:
+		pass
 	try: return _input(title, text, callback, password, get_data, new_config, window)
-	finally: pygame.key.stop_text_input()
+	finally:
+		pygame.key.stop_text_input()
+		try:
+			from .pygame_shim import _android_bridge
+			if _android_bridge.is_android_java_available(): _android_bridge.hide_keyboard()
+		except Exception:
+			pass
 
 
 class form:
@@ -838,25 +1037,40 @@ class form:
 		self.wnd = window or get_window()
 		if self.wnd is None: raise RuntimeError("Create a window before a form")
 		self.config = {**deepcopy(FORM_CONFIG), **deepcopy(config or {})}
-		self.items, self.cursor, self._touch, self._pending_btn = [], 0, _TouchEngine(), None
+		self.items, self.cursor, self._touch, self._pending_btn, self._active_group = [], 0, _TouchEngine(), None, None
 
 	def add(self, name, kind="button", value=None, choices=None, callback=None, config=None, **kwargs):
-		valid = ("button", "check", "input", "list", "radio", "combo", "tree", "dir_tree", "slider", "tab", "context", "progress", "table", "dialog", "heading", "quote", "note", "emphasis", "frame", "live")
+		valid = ("button", "check", "switch", "link", "separator", "input", "list", "radio", "combo", "tree", "dir_tree", "slider", "tab", "context", "progress", "table", "dialog", "heading", "quote", "note", "emphasis", "frame", "live")
 		if kind not in valid: raise ValueError(f"Unknown control: {kind}")
 		if any(it["name"] == name for it in self.items): raise ValueError(f"Duplicate control: {name}")
 
 		cfg = {**deepcopy(self.config), **deepcopy(config or {})}
-		for k in ("readonly", "multiline", "number_only", "password", "max_length", "placeholder", "tab_page", "hint", "label", "color", "bg_color", "border_color", "font", "font_size", "pos", "size", "border", "margin", "padding", "level", "auto_submit", "adjacent_submit", "suggestions", "table_read_header", "table_read_coords", "table_cell_border"):
+		for k in ("readonly", "multiline", "number_only", "password", "max_length", "placeholder", "tab_page", "group", "disabled", "hidden", "required", "validator", "url", "hint", "label", "color", "bg_color", "border_color", "font", "font_size", "pos", "size", "border", "margin", "padding", "level", "auto_submit", "adjacent_submit", "suggestions", "table_read_header", "table_read_coords", "table_cell_border"):
 			if k in kwargs: cfg[k] = kwargs[k]
+		if cfg.get("group") is None and self._active_group is not None:
+			cfg["group"] = self._active_group
 		if not (config and "label" in config) and "label" not in kwargs and not cfg["label"]: cfg["label"] = name
 		if "suggestions" in kwargs: cfg["input"]["suggestions"] = kwargs["suggestions"]
 
 		item = {"name": name, "kind": kind, "value": value, "callback": callback, "config": cfg}
+		if kind == "link":
+			item["url"] = kwargs.get("url") or (str(value) if value else "")
+			if not cfg.get("context"):
+				cfg["context"] = ["Open link", "Copy URL"]
+				def _link_ctx(frm, it, idx, sel):
+					if idx == 0: _open_url(it.get("url"))
+					elif idx == 1:
+						try: _copy(it.get("url", ""))
+						except Exception: pass
+				cfg["context_callback"] = _link_ctx
+		elif kind == "switch":
+			item["value"] = bool(value)
 
 		if kind in ("list", "radio", "combo", "context"):
 			from .menu import menu
 			item["menu"] = menu()
 			item["menu"].init(self.wnd, items=choices or [], config=cfg["menu"])
+			item["menu"].handle_touch = False
 			item["menu"].cursor = max(0, min(int(value or 0), item["menu"].Len() - 1)) if item["menu"].items else 0
 			item["value"] = item["menu"].cursor if item["menu"].items else 0
 			if kind == "combo": item["expanded"] = False
@@ -958,7 +1172,48 @@ class form:
 
 	def _visible_items(self):
 		act = self._active_tab_pages()
-		return self.items if act is None else [it for it in self.items if it["kind"] == "tab" or it["config"].get("tab_page") is None or it["config"].get("tab_page") in act]
+		out = []
+		for it in self.items:
+			if it["config"].get("hidden") or it["kind"] == "separator":
+				continue
+			if act is None or it["kind"] == "tab" or it["config"].get("tab_page") is None or it["config"].get("tab_page") in act:
+				out.append(it)
+		return out
+
+	def begin_group(self, label):
+		"""Start a logical NVDA grouping container; subsequent ``add()`` calls inherit it until ``end_group()``."""
+		self._active_group = str(label)
+		return self
+
+	def end_group(self):
+		self._active_group = None
+		return self
+
+	def validate(self, announce=True):
+		"""Validate all visible controls with ``required=True`` or ``validator=fn``. Returns ``(ok, errors)``."""
+		errors = []
+		for idx, it in enumerate(self.items):
+			cfg = it["config"]
+			if cfg.get("hidden") or cfg.get("disabled"):
+				continue
+			val = it.get("value")
+			lbl = cfg.get("label") or it["name"]
+			if cfg.get("required") and (val is None or str(val).strip() == ""):
+				errors.append((idx, it["name"], f"{lbl}: {cfg.get('required-text', 'required')}"))
+				continue
+			vfn = cfg.get("validator")
+			if callable(vfn):
+				res = vfn(val, it)
+				if res is False:
+					errors.append((idx, it["name"], f"{lbl}: invalid value"))
+				elif isinstance(res, str) and res:
+					errors.append((idx, it["name"], f"{lbl}: {res}"))
+		if errors and announce:
+			first_idx, _, msg = errors[0]
+			self.cursor = first_idx
+			_haptic_preset("error")
+			self.wnd.say(msg)
+		return (len(errors) == 0), errors
 
 	def _build_dir_nodes(self, path, include_files=True, expand_root=False):
 		path = os.path.abspath(path)
@@ -1054,6 +1309,8 @@ class form:
 			vs = str(item["value"] if item["value"] is not None else "")
 			pts.append(((str(cfg["placeholder"]) + ", ") if cfg.get("placeholder") else "") + cfg["blank-text"] if vs == "" else (" ".join([cfg["star-text"]] * len(vs)) if cfg.get("password") else vs))
 		elif k == "check": pts.extend([p for p in (lbl, cfg["check-text"], cfg["checked-text"] if item["value"] else cfg["unchecked-text"]) if p])
+		elif k == "switch": pts.extend([p for p in (lbl, cfg.get("switch-text", "switch"), cfg.get("on-text", "on") if item["value"] else cfg.get("off-text", "off")) if p])
+		elif k == "link": pts.extend([p for p in (lbl, cfg.get("link-text", "link")) if p])
 		elif k == "button": pts.extend([p for p in (lbl, cfg["button-text"]) if p])
 		elif k in ("slider", "progress"):
 			pts.extend([p for p in (lbl, cfg[f"{k}-text"], f"{item['value']}{item.get('unit', '')}") if p])
@@ -1083,6 +1340,8 @@ class form:
 		elif k == "context":
 			pts.extend([p for p in (lbl, cfg["context-text"]) if p])
 
+		if cfg.get("disabled"): pts.append(cfg.get("unavailable-text", "unavailable"))
+		if cfg.get("required"): pts.append(cfg.get("required-text", "required"))
 		if cfg["hint"]: pts.append(cfg["hint"])
 		if cfg["readNP"]:
 			vis = self._visible_items()
@@ -1096,19 +1355,27 @@ class form:
 		vis = self._visible_items()
 		if vis and self.allowed("move"):
 			cur_it = self.items[self.cursor]
+			prev_group = cur_it["config"].get("group")
 			# Auto-collapse combo box when moving focus away
 			if cur_it["kind"] == "combo" and cur_it.get("expanded"): cur_it["expanded"] = False
 			if cur_it["kind"] == "table": self.wnd.say(cur_it["config"]["out-of-table-text"])
 			nxt = vis[(vis.index(cur_it) + step if cur_it in vis else 0) % len(vis)]
+			next_group = nxt["config"].get("group")
 			self.cursor = self.items.index(nxt)
 			self._sound("focus", nxt)
-			if nxt["kind"] == "input": self.enter()
+			_haptic_preset("tick")
+			if prev_group != next_group:
+				if prev_group:
+					self.wnd.say(self.config.get("out-of-group-text", "out of %s") % prev_group)
+				if next_group:
+					self.wnd.say(f"{next_group}, {self.config.get('group-text', 'grouping')}")
+			if nxt["kind"] == "input" and not nxt["config"].get("disabled") and getattr(self.wnd, "platform", "pc") != "mobile": self.enter()
 			else: self.read()
 
 	def mainloop(self):
 		self._sound("open")
 		if self.config["label"] and self.allowed("read"): self.wnd.say(self.config["label"])
-		if self.items and self.items[self.cursor]["kind"] == "input": self.enter()
+		if self.items and self.items[self.cursor]["kind"] == "input" and getattr(self.wnd, "platform", "pc") != "mobile": self.enter()
 		else: self.read()
 
 	def open_context_menu(self, choices=None, item=None):
@@ -1133,6 +1400,10 @@ class form:
 	def enter(self):
 		if not self.items: return None
 		item = self.items[self.cursor]
+		if item["config"].get("disabled"):
+			_haptic_preset("blocked")
+			self.wnd.say(item["config"].get("unavailable-text", "unavailable"))
+			return None
 		if not self.allowed("enter", item): return None
 		k, cfg = item["kind"], item["config"]
 
@@ -1140,7 +1411,23 @@ class form:
 			if not self.allowed("check", item): return None
 			item["value"] = not item["value"]
 			self._sound("check", item)
+			_haptic_preset("click")
 			self.wnd.say(cfg["checked-text"] if item["value"] else cfg["unchecked-text"])
+
+		elif k == "switch":
+			if not self.allowed("check", item): return None
+			item["value"] = not item["value"]
+			self._sound("check", item)
+			_haptic_preset("click")
+			self.wnd.say(cfg.get("on-text", "on") if item["value"] else cfg.get("off-text", "off"))
+
+		elif k == "link":
+			url = item.get("url") or cfg.get("url") or str(item.get("value") or "")
+			self._sound("link", item)
+			_haptic_preset("click")
+			if url: _open_url(url)
+			if item["callback"]: item["callback"](self, item)
+			return item["name"]
 
 		elif k == "input":
 			ro = cfg.get("readonly") or not self.allowed("edit", item)
@@ -1226,7 +1513,7 @@ class form:
 
 	def _update_slider(self, item):
 		if not self.allowed("move", item): return None
-		d = item["step"] if (self.wnd.keyPressing("right", 160) or self.wnd.keyPressing("up", 160)) else (-item["step"] if (self.wnd.keyPressing("left", 160) or self.wnd.keyPressing("down", 160)) else (item["page_step"] if self.wnd.keyPressed("pageup") else (-item["page_step"] if self.wnd.keyPressed("pagedown") else (item["min"] - item["value"] if self.wnd.keyPressed("home") else (item["max"] - item["value"] if self.wnd.keyPressed("end") else 0)))))
+		d = item["step"] if (self.wnd.keyPressing("right", 160) or self.wnd.keyPressing("up", 160) or self.wnd.keySlide("up", fingers=1)) else (-item["step"] if (self.wnd.keyPressing("left", 160) or self.wnd.keyPressing("down", 160) or self.wnd.keySlide("down", fingers=1)) else (item["page_step"] if self.wnd.keyPressed("pageup") else (-item["page_step"] if self.wnd.keyPressed("pagedown") else (item["min"] - item["value"] if self.wnd.keyPressed("home") else (item["max"] - item["value"] if self.wnd.keyPressed("end") else 0)))))
 		if d != 0:
 			nv = max(item["min"], min(item["max"], item["value"] + d))
 			nv = int(nv) if isinstance(item["step"], int) and isinstance(item["min"], int) else round(nv, 4)
@@ -1237,7 +1524,7 @@ class form:
 
 	def _update_tab(self, item):
 		if not item["tabs"] or not self.allowed("move", item): return None
-		st = 1 if (self.wnd.keyPressed("right") or self.wnd.keySlide("right")) else (-1 if (self.wnd.keyPressed("left") or self.wnd.keySlide("left")) else 0)
+		st = 1 if (self.wnd.keyPressed("right") or self.wnd.keySlide("down", fingers=1)) else (-1 if (self.wnd.keyPressed("left") or self.wnd.keySlide("up", fingers=1)) else 0)
 		if st != 0:
 			item["tab_cursor"] = (item["tab_cursor"] + st) % len(item["tabs"])
 			item["value"] = item["tabs"][item["tab_cursor"]]
@@ -1249,10 +1536,10 @@ class form:
 		"""Full NVDA tree navigation: Up/Down, Left/Right, Home/End, * (expand all), Backspace (parent), Type-ahead."""
 		if not item["flat"] or not self.allowed("move", item): return None
 		moved = False
-		up = self.wnd.keyPressing("up", 190) or (hasattr(self.wnd, "keySliding") and self.wnd.keySliding("up"))
-		dn = self.wnd.keyPressing("down", 190) or (hasattr(self.wnd, "keySliding") and self.wnd.keySliding("down"))
-		right = self.wnd.keyPressed("right") or self.wnd.keySlide("right")
-		left = self.wnd.keyPressed("left") or self.wnd.keySlide("left")
+		up = self.wnd.keyPressing("up", 190) or self.wnd.keySlide("up", fingers=1)
+		dn = self.wnd.keyPressing("down", 190) or self.wnd.keySlide("down", fingers=1)
+		right = self.wnd.keyPressed("right")
+		left = self.wnd.keyPressed("left")
 
 		if up and item["tree_cursor"] > 0: item["tree_cursor"] -= 1; moved = True
 		elif dn and item["tree_cursor"] < len(item["flat"]) - 1: item["tree_cursor"] += 1; moved = True
@@ -1307,7 +1594,7 @@ class form:
 			item["value"] = cn.get("path", cn["label"])
 			self._sound("focus", item); self.wnd.say(self._format_tree_entry(item))
 
-		if self.wnd.keyPressed("enter") or self.wnd.keyPressed("space") or self.wnd.tap(): return self.enter()
+		if self.wnd.keyPressed("enter") or self.wnd.keyPressed("space") or self.wnd.tap(fingers=1, count=2): return self.enter()
 		return None
 
 	def _update_table(self, item):
@@ -1318,10 +1605,10 @@ class form:
 		ctrl = self.wnd.keyPressing("lcontrol") or self.wnd.keyPressing("rcontrol")
 		nr, nc = r, c
 
-		if self.wnd.keyPressing("up", 180) or self.wnd.keySlide("up"): nr = max(0, r - 1)
-		elif self.wnd.keyPressing("down", 180) or self.wnd.keySlide("down"): nr = min(max_r, r + 1)
-		elif self.wnd.keyPressing("left", 180) or self.wnd.keySlide("left"): nc = max(0, c - 1)
-		elif self.wnd.keyPressing("right", 180) or self.wnd.keySlide("right"): nc = min(max_c, c + 1)
+		if self.wnd.keyPressing("up", 180) or self.wnd.keySlide("up", fingers=1): nr = max(0, r - 1)
+		elif self.wnd.keyPressing("down", 180) or self.wnd.keySlide("down", fingers=1): nr = min(max_r, r + 1)
+		elif self.wnd.keyPressing("left", 180) or self.wnd.keySlide("left", fingers=2): nc = max(0, c - 1)
+		elif self.wnd.keyPressing("right", 180) or self.wnd.keySlide("right", fingers=2): nc = min(max_c, c + 1)
 		elif self.wnd.keyPressed("home"):
 			if ctrl: nr, nc = 0, 0
 			else: nc = 0
@@ -1337,7 +1624,7 @@ class form:
 		elif any(self.wnd.keyPressed(k) for k in ("up", "down", "left", "right")):
 			self.wnd.say(item["config"]["edge-table-text"])
 
-		if self.wnd.keyPressed("enter") or self.wnd.tap(): return self.enter()
+		if self.wnd.keyPressed("enter") or self.wnd.tap(fingers=1, count=2): return self.enter()
 		return None
 
 	def frameUpdate(self):
@@ -1400,15 +1687,22 @@ class form:
 							return self.enter()
 						return None
 
-		if self.wnd.keyPressed("menu") or (shift and self.wnd.keyPressed("f10")):
+		# Support Windows Application key (K_APPLICATION / scancode 101), K_MENU, Shift+F10, and mobile long-press
+		app_key_pressed = self.wnd.keyPressed("application") or self.wnd.keyPressed("menu") or any(
+			e.type == pygame.KEYDOWN and (e.key == getattr(pygame, "K_APPLICATION", 1073741925) or getattr(e, "scancode", 0) == 101)
+			for e in evs
+		)
+		if app_key_pressed or (shift and self.wnd.keyPressed("f10")) or (hasattr(self.wnd, "long_press") and self.wnd.long_press(fingers=1)) or self.wnd.tap(fingers=2, count=2):
 			self.open_context_menu(); return None
 
-		if ctrl and self.wnd.keyPressed("tab"):
+		if ctrl and (self.wnd.keyPressed("tab") or self.wnd.keyPressed("page_down") or self.wnd.keyPressed("page_up")):
+			step_tab = -1 if (shift or self.wnd.keyPressed("page_up")) else 1
 			for it in self.items:
 				if it["kind"] == "tab" and it["tabs"]:
-					it["tab_cursor"] = (it["tab_cursor"] + (-1 if shift else 1)) % len(it["tabs"])
+					it["tab_cursor"] = (it["tab_cursor"] + step_tab) % len(it["tabs"])
 					it["value"] = it["tabs"][it["tab_cursor"]]
 					self._sound("tab", it)
+					_haptic_preset("click")
 					self.wnd.say(f"{it['value']} {it['config']['tab-text']} {it['config']['selected-text']}")
 					vis = self._visible_items()
 					if self.items[self.cursor] not in vis and vis: self.cursor = self.items.index(vis[0])
@@ -1417,9 +1711,9 @@ class form:
 		# NVDA Quick Navigation Keys (H: Heading, B: Button, E: Edit, C: Combo, T: Table, Q: Quote) when not in combo/tree
 		cur_it = self.items[self.cursor] if self.items else None
 		if self.wnd.keyPressed("tab"): self.move(-1 if shift else 1)
-		elif self.wnd.keySlide("up") and (not cur_it or cur_it["kind"] != "table"): self.move(-1)
-		elif self.wnd.keySlide("down") and (not cur_it or cur_it["kind"] != "table"): self.move(1)
-		elif self.wnd.keyPressed("esc") and self.allowed("cancel"):
+		elif self.wnd.keySlide("left", fingers=1): self.move(-1)
+		elif self.wnd.keySlide("right", fingers=1): self.move(1)
+		elif (self.wnd.keyPressed("esc") or self.wnd.keySlide("left", fingers=2)) and self.allowed("cancel"):
 			if cur_it and cur_it["kind"] == "combo" and cur_it.get("expanded"):
 				cur_it["expanded"] = False; self._sound("collapse", cur_it); self.read(); return None
 			self._sound("cancel"); return -1
@@ -1431,25 +1725,31 @@ class form:
 					alt = self.wnd.keyPressing("lalt") or self.wnd.keyPressing("ralt")
 					if (alt and (self.wnd.keyPressed("down") or self.wnd.keyPressed("up"))) or self.wnd.keyPressed("f4"):
 						return self.enter()
-					st = 1 if (self.wnd.keyPressed("down") or self.wnd.keyPressed("right") or self.wnd.keySlide("right")) else (-1 if (self.wnd.keyPressed("up") or self.wnd.keyPressed("left") or self.wnd.keySlide("left")) else 0)
+					st = 1 if (self.wnd.keyPressed("down") or self.wnd.keyPressed("right") or self.wnd.keySlide("down", fingers=1)) else (-1 if (self.wnd.keyPressed("up") or self.wnd.keyPressed("left") or self.wnd.keySlide("up", fingers=1)) else 0)
 					if st != 0 and cur_it["menu"].items:
 						cur_it["menu"].jumpCursor((cur_it["menu"].cursor + st) % cur_it["menu"].Len())
 						cur_it["value"] = cur_it["menu"].cursor
 						self.wnd.say(cur_it["menu"].getReadStr())
 						if cur_it["callback"]: cur_it["callback"](self, cur_it)
 						return None
-					if self.wnd.keyPressed("enter") or self.wnd.keyPressed("space") or self.wnd.tap():
+					if self.wnd.keyPressed("enter") or self.wnd.keyPressed("space") or self.wnd.tap(fingers=1, count=2):
 						return self.enter()
+					elif self.wnd.tap(fingers=1, count=1) == 1:
+						self.read()
 
 			elif k in ("list", "radio"):
 				if self.allowed("move", cur_it):
 					pms = cur_it["config"]["menu"].get("permissions", ["read", "move", "enter", "cancel", "hotkey"])
 					cur_it["menu"].config["permissions"] = [a for a in ("read", "move", "enter", "cancel", "hotkey") if (-1 in pms or a in pms) and self.allowed("enter" if a == "hotkey" else a, cur_it)]
-					if any(self.wnd.keySlide(d) or self.wnd.keyPressed(d) for d in ("left", "right")):
-						st = 1 if (self.wnd.keySlide("right") or self.wnd.keyPressed("right")) else -1
+					if any(self.wnd.keyPressed(d) for d in ("left", "right")) or self.wnd.keySlide("up", fingers=1) or self.wnd.keySlide("down", fingers=1):
+						st = 1 if (self.wnd.keyPressed("right") or self.wnd.keySlide("down", fingers=1)) else -1
 						cur_it["menu"].jumpCursor(cur_it["menu"].cursor + st)
 						if k == "radio":
 							cur_it["value"] = cur_it["menu"].cursor; self._sound("check", cur_it); self.read(); return None
+						cur_it["value"] = cur_it["menu"].cursor if cur_it["menu"].items else None
+						return None
+					if self.wnd.tap(fingers=1, count=2): return self.enter()
+					if self.wnd.tap(fingers=1, count=1) == 1: self.read(); return None
 					res = cur_it["menu"].frameUpdate()
 					if k == "radio" and cur_it["value"] != cur_it["menu"].cursor:
 						cur_it["value"] = cur_it["menu"].cursor; self._sound("check", cur_it); self.read()
@@ -1460,8 +1760,10 @@ class form:
 			elif k == "table": return self._update_table(cur_it)
 			elif k == "slider": return self._update_slider(cur_it)
 			elif k == "tab": return self._update_tab(cur_it)
-			elif self.wnd.keyPressed("enter") or self.wnd.keyPressed("space") or self.wnd.tap():
+			elif self.wnd.keyPressed("enter") or self.wnd.keyPressed("space") or self.wnd.tap(fingers=1, count=2):
 				return self.enter()
+			elif self.wnd.tap(fingers=1, count=1) == 1:
+				self.read()
 
 		return None
 
@@ -1588,3 +1890,103 @@ def prompt_chat(title="Message", placeholder="Type a message...", send_label="Se
 	f.add("msg", "input", value="", placeholder=placeholder, suggestions=suggestions or [], adjacent_submit=True)
 	f.add("send", "button", label=send_label)
 	return f.get("msg") if f.open() == "send" else None
+
+
+def info_box(title="Information", text="", ok_text="OK", window=None):
+	"""Accessible information dialog with subtle haptic feedback."""
+	_haptic_preset("click")
+	return dialog(title=title, text=text, buttons=(ok_text,), default=0, cancel=0, window=window)
+
+
+def warning_box(title="Warning", text="", ok_text="OK", window=None):
+	"""Accessible warning dialog with warning haptic feedback."""
+	_haptic_preset("warning")
+	return dialog(title=title, text=text, buttons=(ok_text,), default=0, cancel=0, window=window)
+
+
+def success_box(title="Success", text="", ok_text="OK", window=None):
+	"""Accessible success dialog with success haptic feedback."""
+	_haptic_preset("success")
+	return dialog(title=title, text=text, buttons=(ok_text,), default=0, cancel=0, window=window)
+
+
+def error_box(title="Error", text="", details=None, ok_text="OK", copy_text="Copy Details", window=None):
+	"""Accessible error dialog with optional Copy Details button for tracebacks/error logs."""
+	_haptic_preset("error")
+	if details:
+		res = dialog(title=title, text=text, buttons=(ok_text, copy_text), default=0, cancel=0, window=window)
+		if res == copy_text:
+			try: _copy(str(details))
+			except Exception: pass
+			wnd = window or get_window()
+			if wnd: wnd.say("copied")
+		return res
+	return dialog(title=title, text=text, buttons=(ok_text,), default=0, cancel=0, window=window)
+
+
+def choice_box(title="Select", text="", choices=(), ok_text="OK", cancel_text="Cancel", window=None):
+	"""Quick single-choice accessible selection box returning selected item string or None."""
+	f = form(window=window, config={"label": title})
+	if text:
+		f.add("_desc", "note", value=text, label=title)
+	f.add("choice", "list", choices=list(choices))
+	f.add("ok", "button", label=ok_text)
+	f.add("cancel", "button", label=cancel_text)
+	res = f.open()
+	if res == "ok":
+		idx = f.get("choice")
+		if isinstance(idx, int) and 0 <= idx < len(choices):
+			return choices[idx]
+	return None
+
+
+def progress_box(title="Working", text="", step_fn=None, cancelable=True, announce_step=10, cancel_text="Cancel", window=None):
+	"""Accessible modal progress dialog.
+
+	Pass ``step_fn(progress_state)`` which runs each frame and returns:
+	- a float/int ``0..100`` to update progress, or
+	- ``True`` / ``>= 100`` when finished, or
+	- ``None`` to keep current progress.
+	Returns ``True`` if completed, ``False`` if cancelled by the user.
+	"""
+	wnd = window or get_window()
+	if wnd is None: raise RuntimeError("Create a window before progress_box")
+	pct = 0
+	last_spoken = -announce_step
+	state = {"percent": 0, "text": text, "cancelled": False}
+	wnd.say(f"{title}. {text}. 0%")
+	touch = _TouchEngine()
+	buttons = (cancel_text,) if cancelable else ()
+
+	while True:
+		wnd.frameUpdate()
+		msg = f"{state['text']} ({int(pct)}%)" if state["text"] else f"{int(pct)}%"
+		rects = _Renderer.draw_message(wnd, msg, title=title, buttons=buttons or ("...",), btn_idx=0)
+		evs = wnd.events if hasattr(wnd, "events") else pygame.event.get()
+
+		if cancelable:
+			clicked_cancel = any(a in ("tap", "double_tap") and rects.get(0) and rects[0].collidepoint(p) for a, p in touch.update(evs))
+			if clicked_cancel or wnd.keyPressed("esc") or wnd.keyPressed("exit"):
+				state["cancelled"] = True
+				_haptic_preset("blocked")
+				wnd.say(cancel_text)
+				return False
+
+		if callable(step_fn):
+			out = step_fn(state)
+			if out is True:
+				pct = 100
+			elif isinstance(out, (int, float)):
+				pct = max(0, min(100, int(out)))
+			else:
+				pct = max(0, min(100, int(state.get("percent", pct))))
+			state["percent"] = pct
+
+		if announce_step > 0 and (pct - last_spoken >= announce_step or pct >= 100):
+			last_spoken = pct
+			wnd.say(f"{int(pct)}%")
+
+		if pct >= 100:
+			_haptic_preset("success")
+			return True
+		wnd.wait(10)

@@ -1,0 +1,66 @@
+========================================================================
+MODULE: pyaudiogaming.window
+window — Game Window, Event Loop & Touch/Key Input
+========================================================================
+
+SUMMARY:
+Core application window managing the SDL2/pygame loop, keyboard edge/hold detection, mobile touch gestures (tap/swipe), screen-reader speech forwarding, and SPAK loading.
+
+
+[CLASS WindowBase]
+----------------------------------------
+* WindowBase.__init__(platform=None) -> any [constructor]
+* WindowBase.init(x, y, ttl, vv=0, show_vv=False, author='') -> any [method]
+* WindowBase.touchPos() -> any [method]
+  Trả về tọa độ chuẩn hóa (0.0 -> 1.0) của ngón tay đang chạm hoặc chuột.
+* WindowBase.in_zone(zone, pos=None) -> any [method]
+  Kiểm tra điểm chạm hiện tại (hoặc pos truyền vào) có nằm trong vùng zone không.
+* WindowBase.frameUpdate() -> any [method]
+* WindowBase.clear_input() -> any [method]
+  Discard stale text/key/touch input while preserving quit and focus events.
+* WindowBase.keyPressed(name) -> any [method]
+* WindowBase.keyReleased(name) -> any [method]
+* WindowBase.keyPressing(name, t=0) -> any [method]
+* WindowBase.mousePressed(button=1) -> any [method]
+* WindowBase.mouseReleased(button=1) -> any [method]
+* WindowBase.mousePressing(button=1) -> any [method]
+* WindowBase.tap(fingers=None, count=1, zone=None) -> any [method]
+  Kiểm tra cử chỉ chạm màn hình: - Mặc định tap() trả về số lần chạm (tương thích 100% với code cũ). - Có thể lọc theo số ngón (fingers=2), số lần chạm liên tiếp (count=2 cho double-tap), và vùng màn hình (zone="right").
+* WindowBase.double_tap(fingers=1, zone=None) -> any [method]
+  Kiểm tra chạm đúp (chuẩn TalkBack/VoiceOver để kích hoạt).
+* WindowBase.long_press(fingers=1, zone=None) -> any [method]
+  Kiểm tra nhấn giữ tại chỗ trên màn hình (không trượt).
+* WindowBase.keySlide(direction, fingers=None, zone=None) -> any [method]
+  Kiểm tra vuốt nhấc tay theo hướng, số ngón tay (fingers) và khu vực (zone).
+* WindowBase.swipe(direction, fingers=None, zone=None) -> any [method]
+* WindowBase.keySliding(direction, t=0, fingers=None, zone=None) -> any [method]
+  Kiểm tra vuốt giữ theo hướng, có hẹn giờ mỗi bước t (ms), lọc theo số ngón (fingers) và khu vực (zone).
+* WindowBase.swiping(direction, t=0, fingers=None, zone=None) -> any [method]
+* WindowBase.sym(target, action='tap', fingers=1, count=1, pos=(0.5, 0.5), value=0.2) -> any [method]
+  Giả lập phím bấm, chạm nhiều lần (count), chạm/vuốt nhiều ngón (fingers), và chọn vị trí/khu vực trên màn hình (pos có thể là tuple (x, y) hoặc tên zone như "left", "top-right").
+* WindowBase.touchCount() -> any [method]
+* WindowBase.get_focused_window() -> any [method]
+* WindowBase.set_global_sound(value) -> any [method]
+* WindowBase.get_global_sound() -> any [method]
+* WindowBase.wait(msec) -> any [method]
+* WindowBase.say(text, i=True, split=False) -> any [method]
+* WindowBase.saync(text) -> any [method]
+* WindowBase.say3d(text, lx, ly, lz, sx, sy, sz, i=True, **kwargs) -> any [method]
+* WindowBase.input(title, message, password=False, dir=False, file=False) -> any [method]
+* WindowBase.message(m, callback=None, open=None, move=None, close=None) -> any [method]
+* WindowBase.message_gui(title, message, type=None) -> any [method]
+* WindowBase.load_sound(name, h='both') -> any [method]
+* WindowBase.sound_cast(name, data, h='both') -> any [method]
+* WindowBase.make_spak(source, output_path=None, password='', **kwargs) -> any [method]
+* WindowBase.load_spak(spak_path, password='', mode='lazy', target='both', **kwargs) -> any [method]
+* WindowBase.beep(frequency, duration) -> any [method]
+* WindowBase.beep_progress_bar(progress, duration=120) -> any [method]
+
+[CLASS WindowPC]
+----------------------------------------
+
+[CLASS WindowMobile]
+----------------------------------------
+
+[CLASS Window]
+----------------------------------------

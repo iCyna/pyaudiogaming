@@ -1,0 +1,801 @@
+{
+  "module": "window",
+  "classes": [
+    {
+      "name": "WindowBase",
+      "doc": "",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "platform=None",
+          "params": [
+            {
+              "name": "platform",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "init",
+          "kind": "method",
+          "signature": "x, y, ttl, vv=0, show_vv=False, author=''",
+          "params": [
+            {
+              "name": "x",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "y",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "ttl",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "vv",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "show_vv",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "author",
+              "type": "any",
+              "default": "''"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "touchPos",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": "Trả về tọa độ chuẩn hóa (0.0 -> 1.0) của ngón tay đang chạm hoặc chuột."
+        },
+        {
+          "name": "in_zone",
+          "kind": "method",
+          "signature": "zone, pos=None",
+          "params": [
+            {
+              "name": "zone",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "pos",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": "Kiểm tra điểm chạm hiện tại (hoặc pos truyền vào) có nằm trong vùng zone không."
+        },
+        {
+          "name": "frameUpdate",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "clear_input",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": "Discard stale text/key/touch input while preserving quit and focus events."
+        },
+        {
+          "name": "keyPressed",
+          "kind": "method",
+          "signature": "name",
+          "params": [
+            {
+              "name": "name",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "keyReleased",
+          "kind": "method",
+          "signature": "name",
+          "params": [
+            {
+              "name": "name",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "keyPressing",
+          "kind": "method",
+          "signature": "name, t=0",
+          "params": [
+            {
+              "name": "name",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "t",
+              "type": "any",
+              "default": "0"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "mousePressed",
+          "kind": "method",
+          "signature": "button=1",
+          "params": [
+            {
+              "name": "button",
+              "type": "any",
+              "default": "1"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "mouseReleased",
+          "kind": "method",
+          "signature": "button=1",
+          "params": [
+            {
+              "name": "button",
+              "type": "any",
+              "default": "1"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "mousePressing",
+          "kind": "method",
+          "signature": "button=1",
+          "params": [
+            {
+              "name": "button",
+              "type": "any",
+              "default": "1"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "tap",
+          "kind": "method",
+          "signature": "fingers=None, count=1, zone=None",
+          "params": [
+            {
+              "name": "fingers",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "count",
+              "type": "any",
+              "default": "1"
+            },
+            {
+              "name": "zone",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": "Kiểm tra cử chỉ chạm màn hình: - Mặc định tap() trả về số lần chạm (tương thích 100% với code cũ). - Có thể lọc theo số ngón (fingers=2), số lần chạm liên tiếp (count=2 cho double-tap), và vùng màn hình (zone=\"right\")."
+        },
+        {
+          "name": "double_tap",
+          "kind": "method",
+          "signature": "fingers=1, zone=None",
+          "params": [
+            {
+              "name": "fingers",
+              "type": "any",
+              "default": "1"
+            },
+            {
+              "name": "zone",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": "Kiểm tra chạm đúp (chuẩn TalkBack/VoiceOver để kích hoạt)."
+        },
+        {
+          "name": "long_press",
+          "kind": "method",
+          "signature": "fingers=1, zone=None",
+          "params": [
+            {
+              "name": "fingers",
+              "type": "any",
+              "default": "1"
+            },
+            {
+              "name": "zone",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": "Kiểm tra nhấn giữ tại chỗ trên màn hình (không trượt)."
+        },
+        {
+          "name": "keySlide",
+          "kind": "method",
+          "signature": "direction, fingers=None, zone=None",
+          "params": [
+            {
+              "name": "direction",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "fingers",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "zone",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": "Kiểm tra vuốt nhấc tay theo hướng, số ngón tay (fingers) và khu vực (zone)."
+        },
+        {
+          "name": "swipe",
+          "kind": "method",
+          "signature": "direction, fingers=None, zone=None",
+          "params": [
+            {
+              "name": "direction",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "fingers",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "zone",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "keySliding",
+          "kind": "method",
+          "signature": "direction, t=0, fingers=None, zone=None",
+          "params": [
+            {
+              "name": "direction",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "t",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "fingers",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "zone",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": "Kiểm tra vuốt giữ theo hướng, có hẹn giờ mỗi bước t (ms), lọc theo số ngón (fingers) và khu vực (zone)."
+        },
+        {
+          "name": "swiping",
+          "kind": "method",
+          "signature": "direction, t=0, fingers=None, zone=None",
+          "params": [
+            {
+              "name": "direction",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "t",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "fingers",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "zone",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "sym",
+          "kind": "method",
+          "signature": "target, action='tap', fingers=1, count=1, pos=(0.5, 0.5), value=0.2",
+          "params": [
+            {
+              "name": "target",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "action",
+              "type": "any",
+              "default": "'tap'"
+            },
+            {
+              "name": "fingers",
+              "type": "any",
+              "default": "1"
+            },
+            {
+              "name": "count",
+              "type": "any",
+              "default": "1"
+            },
+            {
+              "name": "pos",
+              "type": "any",
+              "default": "(0.5, 0.5)"
+            },
+            {
+              "name": "value",
+              "type": "any",
+              "default": "0.2"
+            }
+          ],
+          "returns": "any",
+          "doc": "Giả lập phím bấm, chạm nhiều lần (count), chạm/vuốt nhiều ngón (fingers), và chọn vị trí/khu vực trên màn hình (pos có thể là tuple (x, y) hoặc tên zone như \"left\", \"top-right\")."
+        },
+        {
+          "name": "touchCount",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_focused_window",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_global_sound",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_global_sound",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "wait",
+          "kind": "method",
+          "signature": "msec",
+          "params": [
+            {
+              "name": "msec",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "say",
+          "kind": "method",
+          "signature": "text, i=True, split=False",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "i",
+              "type": "any",
+              "default": "True"
+            },
+            {
+              "name": "split",
+              "type": "any",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "saync",
+          "kind": "method",
+          "signature": "text",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "say3d",
+          "kind": "method",
+          "signature": "text, lx, ly, lz, sx, sy, sz, i=True, **kwargs",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "lx",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "ly",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "lz",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "sx",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "sy",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "sz",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "i",
+              "type": "any",
+              "default": "True"
+            },
+            {
+              "name": "**kwargs",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "input",
+          "kind": "method",
+          "signature": "title, message, password=False, dir=False, file=False",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "message",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "password",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "dir",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "file",
+              "type": "any",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "message",
+          "kind": "method",
+          "signature": "m, callback=None, open=None, move=None, close=None",
+          "params": [
+            {
+              "name": "m",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "callback",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "open",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "move",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "close",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "message_gui",
+          "kind": "method",
+          "signature": "title, message, type=None",
+          "params": [
+            {
+              "name": "title",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "message",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "type",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "load_sound",
+          "kind": "method",
+          "signature": "name, h='both'",
+          "params": [
+            {
+              "name": "name",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "h",
+              "type": "any",
+              "default": "'both'"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "sound_cast",
+          "kind": "method",
+          "signature": "name, data, h='both'",
+          "params": [
+            {
+              "name": "name",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "data",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "h",
+              "type": "any",
+              "default": "'both'"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "make_spak",
+          "kind": "method",
+          "signature": "source, output_path=None, password='', **kwargs",
+          "params": [
+            {
+              "name": "source",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "output_path",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "password",
+              "type": "any",
+              "default": "''"
+            },
+            {
+              "name": "**kwargs",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "load_spak",
+          "kind": "method",
+          "signature": "spak_path, password='', mode='lazy', target='both', **kwargs",
+          "params": [
+            {
+              "name": "spak_path",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "password",
+              "type": "any",
+              "default": "''"
+            },
+            {
+              "name": "mode",
+              "type": "any",
+              "default": "'lazy'"
+            },
+            {
+              "name": "target",
+              "type": "any",
+              "default": "'both'"
+            },
+            {
+              "name": "**kwargs",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "beep",
+          "kind": "method",
+          "signature": "frequency, duration",
+          "params": [
+            {
+              "name": "frequency",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "duration",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "beep_progress_bar",
+          "kind": "method",
+          "signature": "progress, duration=120",
+          "params": [
+            {
+              "name": "progress",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "duration",
+              "type": "any",
+              "default": "120"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "WindowPC",
+      "doc": "",
+      "methods": []
+    },
+    {
+      "name": "WindowMobile",
+      "doc": "",
+      "methods": []
+    },
+    {
+      "name": "Window",
+      "doc": "",
+      "methods": []
+    }
+  ],
+  "functions": [],
+  "title": "window — Game Window, Event Loop & Touch/Key Input",
+  "summary": "Core application window managing the SDL2/pygame loop, keyboard edge/hold detection, mobile touch gestures (tap/swipe), screen-reader speech forwarding, and SPAK loading."
+}

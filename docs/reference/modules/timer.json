@@ -1,0 +1,1166 @@
+{
+  "module": "timer",
+  "classes": [
+    {
+      "name": "Timer",
+      "doc": "High-precision game timer supporting pause/resume, time scaling, countdowns, fixed-interval ticks, forcing/advancing, serialization, and context-manager profiling.",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "duration: float=0, paused: bool=False, scale: float=1.0, auto_start: bool=True",
+          "params": [
+            {
+              "name": "duration",
+              "type": "float",
+              "default": "0"
+            },
+            {
+              "name": "paused",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "scale",
+              "type": "float",
+              "default": "1.0"
+            },
+            {
+              "name": "auto_start",
+              "type": "bool",
+              "default": "True"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "elapsed",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "int",
+          "doc": "Elapsed time in integer milliseconds (backwards-compatible)."
+        },
+        {
+          "name": "elapsed_float",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "float",
+          "doc": "Elapsed time in floating-point milliseconds."
+        },
+        {
+          "name": "elapsed_us",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "int",
+          "doc": "Elapsed time in integer microseconds."
+        },
+        {
+          "name": "elapsed_seconds",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "float",
+          "doc": "Elapsed time in seconds (float)."
+        },
+        {
+          "name": "paused",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "bool",
+          "doc": ""
+        },
+        {
+          "name": "running",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "bool",
+          "doc": ""
+        },
+        {
+          "name": "scale",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "float",
+          "doc": "Time dilation factor (1.0 = normal, 0.5 = slow-mo, 2.0 = 2x speed)."
+        },
+        {
+          "name": "duration",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "float",
+          "doc": "Configured countdown duration in milliseconds (0 if none)."
+        },
+        {
+          "name": "remaining",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "int",
+          "doc": "Remaining milliseconds until ``duration`` expires (clamped to >= 0)."
+        },
+        {
+          "name": "remaining_float",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "float",
+          "doc": ""
+        },
+        {
+          "name": "remaining_seconds",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "float",
+          "doc": ""
+        },
+        {
+          "name": "progress",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "float",
+          "doc": "Completion ratio from 0.0 to 1.0 when ``duration > 0``."
+        },
+        {
+          "name": "expired",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "bool",
+          "doc": "True when ``duration > 0`` and elapsed >= duration."
+        },
+        {
+          "name": "restart",
+          "kind": "method",
+          "signature": "duration: float=None, paused: bool=False",
+          "params": [
+            {
+              "name": "duration",
+              "type": "float",
+              "default": "None"
+            },
+            {
+              "name": "paused",
+              "type": "bool",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": "Reset elapsed time to 0 and start (unless ``paused=True``)."
+        },
+        {
+          "name": "start",
+          "kind": "method",
+          "signature": "duration: float=None",
+          "params": [
+            {
+              "name": "duration",
+              "type": "float",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": "Start or resume the timer. Optionally set a new duration and reset."
+        },
+        {
+          "name": "pause",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": "Freeze the timer at its current elapsed value."
+        },
+        {
+          "name": "resume",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": "Resume a paused timer from where it left off."
+        },
+        {
+          "name": "toggle_pause",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "bool",
+          "doc": "Toggle paused state and return the new ``paused`` boolean."
+        },
+        {
+          "name": "stop",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": "Stop and reset elapsed time to 0."
+        },
+        {
+          "name": "force",
+          "kind": "method",
+          "signature": "ms: float",
+          "params": [
+            {
+              "name": "ms",
+              "type": "float",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": "Force the timer's elapsed time to a specific millisecond value (like BGT ``timer.force``)."
+        },
+        {
+          "name": "advance",
+          "kind": "method",
+          "signature": "delta_ms: float",
+          "params": [
+            {
+              "name": "delta_ms",
+              "type": "float",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": "Add ``delta_ms`` milliseconds to the current elapsed time."
+        },
+        {
+          "name": "rewind",
+          "kind": "method",
+          "signature": "delta_ms: float, clamp_zero: bool=True",
+          "params": [
+            {
+              "name": "delta_ms",
+              "type": "float",
+              "default": "required"
+            },
+            {
+              "name": "clamp_zero",
+              "type": "bool",
+              "default": "True"
+            }
+          ],
+          "returns": "any",
+          "doc": "Subtract ``delta_ms`` milliseconds from the current elapsed time."
+        },
+        {
+          "name": "ready",
+          "kind": "method",
+          "signature": "cooldown_ms: float=None, auto_restart: bool=False",
+          "params": [
+            {
+              "name": "cooldown_ms",
+              "type": "float",
+              "default": "None"
+            },
+            {
+              "name": "auto_restart",
+              "type": "bool",
+              "default": "False"
+            }
+          ],
+          "returns": "bool",
+          "doc": "Check whether ``cooldown_ms`` (or ``self.duration``) has elapsed."
+        },
+        {
+          "name": "consume",
+          "kind": "method",
+          "signature": "interval_ms: float=None",
+          "params": [
+            {
+              "name": "interval_ms",
+              "type": "float",
+              "default": "None"
+            }
+          ],
+          "returns": "bool",
+          "doc": "Drift-free periodic trigger: if ``elapsed >= interval``, subtracts one interval (preserving sub-millisecond remainder) and returns ``True``."
+        },
+        {
+          "name": "consume_all",
+          "kind": "method",
+          "signature": "interval_ms: float=None, max_ticks: int=None",
+          "params": [
+            {
+              "name": "interval_ms",
+              "type": "float",
+              "default": "None"
+            },
+            {
+              "name": "max_ticks",
+              "type": "int",
+              "default": "None"
+            }
+          ],
+          "returns": "int",
+          "doc": "Consume all completed intervals and return how many occurred (drift-free)."
+        },
+        {
+          "name": "format",
+          "kind": "method",
+          "signature": "style: str='clock', remaining: bool=False",
+          "params": [
+            {
+              "name": "style",
+              "type": "str",
+              "default": "'clock'"
+            },
+            {
+              "name": "remaining",
+              "type": "bool",
+              "default": "False"
+            }
+          ],
+          "returns": "str",
+          "doc": "Format either elapsed or remaining time using ``format_duration``."
+        },
+        {
+          "name": "to_dict",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "dict",
+          "doc": ""
+        },
+        {
+          "name": "from_dict",
+          "kind": "method",
+          "signature": "data",
+          "params": [
+            {
+              "name": "data",
+              "type": "dict",
+              "default": "required"
+            }
+          ],
+          "returns": "'Timer'",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "Stopwatch",
+      "doc": "Timer with lap recording for profiling and split timing.",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "auto_start: bool=True",
+          "params": [
+            {
+              "name": "auto_start",
+              "type": "bool",
+              "default": "True"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "restart",
+          "kind": "method",
+          "signature": "duration: float=None, paused: bool=False",
+          "params": [
+            {
+              "name": "duration",
+              "type": "float",
+              "default": "None"
+            },
+            {
+              "name": "paused",
+              "type": "bool",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "lap",
+          "kind": "method",
+          "signature": "label: str=''",
+          "params": [
+            {
+              "name": "label",
+              "type": "str",
+              "default": "''"
+            }
+          ],
+          "returns": "dict",
+          "doc": "Record a lap split and return ``{\"index\", \"label\", \"split_ms\", \"total_ms\"}``."
+        },
+        {
+          "name": "laps",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "list",
+          "doc": ""
+        },
+        {
+          "name": "last_lap",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "summary",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "str",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "CooldownManager",
+      "doc": "Manage named cooldowns (skills, attacks, actions, anti-spam) in one place.",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "scale: float=1.0",
+          "params": [
+            {
+              "name": "scale",
+              "type": "float",
+              "default": "1.0"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "start",
+          "kind": "method",
+          "signature": "name: str, duration_ms: float",
+          "params": [
+            {
+              "name": "name",
+              "type": "str",
+              "default": "required"
+            },
+            {
+              "name": "duration_ms",
+              "type": "float",
+              "default": "required"
+            }
+          ],
+          "returns": "Timer",
+          "doc": ""
+        },
+        {
+          "name": "is_ready",
+          "kind": "method",
+          "signature": "name: str",
+          "params": [
+            {
+              "name": "name",
+              "type": "str",
+              "default": "required"
+            }
+          ],
+          "returns": "bool",
+          "doc": ""
+        },
+        {
+          "name": "use",
+          "kind": "method",
+          "signature": "name: str, duration_ms: float",
+          "params": [
+            {
+              "name": "name",
+              "type": "str",
+              "default": "required"
+            },
+            {
+              "name": "duration_ms",
+              "type": "float",
+              "default": "required"
+            }
+          ],
+          "returns": "bool",
+          "doc": "If ``name`` is ready, start its cooldown and return ``True``; otherwise ``False``."
+        },
+        {
+          "name": "remaining",
+          "kind": "method",
+          "signature": "name: str",
+          "params": [
+            {
+              "name": "name",
+              "type": "str",
+              "default": "required"
+            }
+          ],
+          "returns": "int",
+          "doc": ""
+        },
+        {
+          "name": "remaining_seconds",
+          "kind": "method",
+          "signature": "name: str",
+          "params": [
+            {
+              "name": "name",
+              "type": "str",
+              "default": "required"
+            }
+          ],
+          "returns": "float",
+          "doc": ""
+        },
+        {
+          "name": "progress",
+          "kind": "method",
+          "signature": "name: str",
+          "params": [
+            {
+              "name": "name",
+              "type": "str",
+              "default": "required"
+            }
+          ],
+          "returns": "float",
+          "doc": ""
+        },
+        {
+          "name": "reduce",
+          "kind": "method",
+          "signature": "name: str, delta_ms: float",
+          "params": [
+            {
+              "name": "name",
+              "type": "str",
+              "default": "required"
+            },
+            {
+              "name": "delta_ms",
+              "type": "float",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "reduce_all",
+          "kind": "method",
+          "signature": "delta_ms: float",
+          "params": [
+            {
+              "name": "delta_ms",
+              "type": "float",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "reset",
+          "kind": "method",
+          "signature": "name: str",
+          "params": [
+            {
+              "name": "name",
+              "type": "str",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "clear",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "pause_all",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "resume_all",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_scale",
+          "kind": "method",
+          "signature": "scale: float",
+          "params": [
+            {
+              "name": "scale",
+              "type": "float",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "active",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "list",
+          "doc": "Return names of cooldowns that have not expired yet."
+        },
+        {
+          "name": "prune",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": "Remove expired cooldown entries to keep memory clean."
+        },
+        {
+          "name": "to_dict",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "dict",
+          "doc": ""
+        },
+        {
+          "name": "from_dict",
+          "kind": "method",
+          "signature": "data",
+          "params": [
+            {
+              "name": "data",
+              "type": "dict",
+              "default": "required"
+            }
+          ],
+          "returns": "'CooldownManager'",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "ScheduledTask",
+      "doc": "Handle representing a task scheduled in ``TimerScheduler``.",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "task_id, callback, args, kwargs, delay_ms, interval_ms=0.0, count=1, due_ms=0.0, tag=None",
+          "params": [
+            {
+              "name": "task_id",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "callback",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "args",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "kwargs",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "delay_ms",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "interval_ms",
+              "type": "any",
+              "default": "0.0"
+            },
+            {
+              "name": "count",
+              "type": "any",
+              "default": "1"
+            },
+            {
+              "name": "due_ms",
+              "type": "any",
+              "default": "0.0"
+            },
+            {
+              "name": "tag",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "cancel",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "TimerScheduler",
+      "doc": "Non-blocking, min-heap event scheduler designed for game loops.",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "scale: float=1.0, on_error=None",
+          "params": [
+            {
+              "name": "scale",
+              "type": "float",
+              "default": "1.0"
+            },
+            {
+              "name": "on_error",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "now_ms",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "float",
+          "doc": ""
+        },
+        {
+          "name": "scale",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "float",
+          "doc": ""
+        },
+        {
+          "name": "paused",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "bool",
+          "doc": ""
+        },
+        {
+          "name": "pause_all",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "resume_all",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "after",
+          "kind": "method",
+          "signature": "delay_ms: float, callback, *args, tag=None, **kwargs",
+          "params": [
+            {
+              "name": "delay_ms",
+              "type": "float",
+              "default": "required"
+            },
+            {
+              "name": "callback",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "*args",
+              "type": "tuple",
+              "default": "optional"
+            },
+            {
+              "name": "tag",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "**kwargs",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "int",
+          "doc": "Schedule ``callback(*args, **kwargs)`` once after ``delay_ms`` milliseconds."
+        },
+        {
+          "name": "every",
+          "kind": "method",
+          "signature": "interval_ms: float, callback, *args, count: int=None, start_immediately: bool=False, tag=None, **kwargs",
+          "params": [
+            {
+              "name": "interval_ms",
+              "type": "float",
+              "default": "required"
+            },
+            {
+              "name": "callback",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "*args",
+              "type": "tuple",
+              "default": "optional"
+            },
+            {
+              "name": "count",
+              "type": "int",
+              "default": "None"
+            },
+            {
+              "name": "start_immediately",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "tag",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "**kwargs",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "int",
+          "doc": "Schedule ``callback`` repeatedly every ``interval_ms`` (optionally ``count`` times)."
+        },
+        {
+          "name": "cancel",
+          "kind": "method",
+          "signature": "task_id: int",
+          "params": [
+            {
+              "name": "task_id",
+              "type": "int",
+              "default": "required"
+            }
+          ],
+          "returns": "bool",
+          "doc": ""
+        },
+        {
+          "name": "cancel_by_tag",
+          "kind": "method",
+          "signature": "tag",
+          "params": [
+            {
+              "name": "tag",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "int",
+          "doc": ""
+        },
+        {
+          "name": "pause_task",
+          "kind": "method",
+          "signature": "task_id: int",
+          "params": [
+            {
+              "name": "task_id",
+              "type": "int",
+              "default": "required"
+            }
+          ],
+          "returns": "bool",
+          "doc": ""
+        },
+        {
+          "name": "resume_task",
+          "kind": "method",
+          "signature": "task_id: int",
+          "params": [
+            {
+              "name": "task_id",
+              "type": "int",
+              "default": "required"
+            }
+          ],
+          "returns": "bool",
+          "doc": ""
+        },
+        {
+          "name": "clear",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "pending_count",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "int",
+          "doc": ""
+        },
+        {
+          "name": "next_due_ms",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": "Milliseconds until next active task fires, or ``None`` if queue is empty."
+        },
+        {
+          "name": "update",
+          "kind": "method",
+          "signature": "max_callbacks: int=64",
+          "params": [
+            {
+              "name": "max_callbacks",
+              "type": "int",
+              "default": "64"
+            }
+          ],
+          "returns": "int",
+          "doc": "Run all due callbacks. Returns the number of callbacks executed."
+        }
+      ]
+    },
+    {
+      "name": "FrameClock",
+      "doc": "Game-loop clock providing delta time, smoothed FPS, frame limiting, and fixed timesteps.",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "target_fps: float=0.0, max_dt_ms: float=100.0",
+          "params": [
+            {
+              "name": "target_fps",
+              "type": "float",
+              "default": "0.0"
+            },
+            {
+              "name": "max_dt_ms",
+              "type": "float",
+              "default": "100.0"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "tick",
+          "kind": "method",
+          "signature": "target_fps: float=None",
+          "params": [
+            {
+              "name": "target_fps",
+              "type": "float",
+              "default": "None"
+            }
+          ],
+          "returns": "float",
+          "doc": "Advance one frame, sleep if ``target_fps > 0``, and return delta time in **seconds**."
+        },
+        {
+          "name": "fixed_steps",
+          "kind": "method",
+          "signature": "step_ms: float=16.6666667, max_steps: int=5",
+          "params": [
+            {
+              "name": "step_ms",
+              "type": "float",
+              "default": "16.6666667"
+            },
+            {
+              "name": "max_steps",
+              "type": "int",
+              "default": "5"
+            }
+          ],
+          "returns": "any",
+          "doc": "Yield fixed-timestep ``dt`` (seconds) to keep physics/movement deterministic."
+        },
+        {
+          "name": "dt",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "float",
+          "doc": "Last frame delta time in seconds."
+        },
+        {
+          "name": "dt_ms",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "float",
+          "doc": "Last frame delta time in milliseconds."
+        },
+        {
+          "name": "fps",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "float",
+          "doc": "Exponentially smoothed FPS."
+        },
+        {
+          "name": "frame_count",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "int",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "RateLimiter",
+      "doc": "Token-bucket rate limiter for network packets, chat anti-spam, or TTS throttling.",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "max_calls: int, per_ms: float",
+          "params": [
+            {
+              "name": "max_calls",
+              "type": "int",
+              "default": "required"
+            },
+            {
+              "name": "per_ms",
+              "type": "float",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "allow",
+          "kind": "method",
+          "signature": "cost: float=1.0",
+          "params": [
+            {
+              "name": "cost",
+              "type": "float",
+              "default": "1.0"
+            }
+          ],
+          "returns": "bool",
+          "doc": "Return ``True`` and consume ``cost`` tokens if allowed, else ``False``."
+        },
+        {
+          "name": "retry_after_ms",
+          "kind": "method",
+          "signature": "cost: float=1.0",
+          "params": [
+            {
+              "name": "cost",
+              "type": "float",
+              "default": "1.0"
+            }
+          ],
+          "returns": "float",
+          "doc": "Milliseconds until ``cost`` tokens will be available."
+        },
+        {
+          "name": "reset",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "name": "get_ticks",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "int",
+      "doc": "Return monotonic milliseconds since module import (high-resolution, never jumps backwards)."
+    },
+    {
+      "name": "get_ticks_us",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "int",
+      "doc": "Return monotonic microseconds since module import."
+    },
+    {
+      "name": "get_ticks_sec",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "float",
+      "doc": "Return monotonic seconds (float) since module import."
+    },
+    {
+      "name": "format_duration",
+      "kind": "function",
+      "signature": "ms: float, style: str='clock'",
+      "params": [
+        {
+          "name": "ms",
+          "type": "float",
+          "default": "required"
+        },
+        {
+          "name": "style",
+          "type": "str",
+          "default": "'clock'"
+        }
+      ],
+      "returns": "str",
+      "doc": "Format milliseconds into a human-readable string."
+    }
+  ],
+  "title": "timer — Single-Threaded High-Precision Timers, Cooldowns & Scheduler",
+  "summary": "Zero-thread, nanosecond-precision monotonic timing suite: Timer (pause/scale/countdown/drift-free), CooldownManager, TimerScheduler (min-heap), FrameClock (FPS/dt/fixed_steps), Stopwatch, and RateLimiter."
+}

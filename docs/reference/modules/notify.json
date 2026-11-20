@@ -1,0 +1,139 @@
+{
+  "module": "notify",
+  "classes": [],
+  "functions": [
+    {
+      "name": "request_permission",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "bool",
+      "doc": "Request runtime notification permission on Android 13+ (API 33+). No-op on other OSes."
+    },
+    {
+      "name": "open_fullscreen_intent_settings",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "bool",
+      "doc": "Open Android 14+ 'Manage Full-Screen Intent' system settings page for this app."
+    },
+    {
+      "name": "wake_screen",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "bool",
+      "doc": "Wake up a sleeping display on Windows or Android."
+    },
+    {
+      "name": "bring_window_to_front",
+      "kind": "function",
+      "signature": "hwnd=None, topmost: bool=True",
+      "params": [
+        {
+          "name": "hwnd",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "topmost",
+          "type": "bool",
+          "default": "True"
+        }
+      ],
+      "returns": "bool",
+      "doc": "Restore and bring the current application window to the foreground (Windows)."
+    },
+    {
+      "name": "send",
+      "kind": "function",
+      "signature": "title: str, message: str, urgency: str='normal', channel_id: str='pyag_default', app_name: str='PyAudioGaming', notification_id: int=1001",
+      "params": [
+        {
+          "name": "title",
+          "type": "str",
+          "default": "required"
+        },
+        {
+          "name": "message",
+          "type": "str",
+          "default": "required"
+        },
+        {
+          "name": "urgency",
+          "type": "str",
+          "default": "'normal'"
+        },
+        {
+          "name": "channel_id",
+          "type": "str",
+          "default": "'pyag_default'"
+        },
+        {
+          "name": "app_name",
+          "type": "str",
+          "default": "'PyAudioGaming'"
+        },
+        {
+          "name": "notification_id",
+          "type": "int",
+          "default": "1001"
+        }
+      ],
+      "returns": "bool",
+      "doc": "Send a native OS notification on Windows, Android, Linux, macOS, or iOS."
+    },
+    {
+      "name": "wake_and_show",
+      "kind": "function",
+      "signature": "title: str, message: str, category: str='call', channel_id: str='pyag_fullscreen', app_name: str='PyAudioGaming', hwnd=None, vibrate: bool=True, notification_id: int=2001",
+      "params": [
+        {
+          "name": "title",
+          "type": "str",
+          "default": "required"
+        },
+        {
+          "name": "message",
+          "type": "str",
+          "default": "required"
+        },
+        {
+          "name": "category",
+          "type": "str",
+          "default": "'call'"
+        },
+        {
+          "name": "channel_id",
+          "type": "str",
+          "default": "'pyag_fullscreen'"
+        },
+        {
+          "name": "app_name",
+          "type": "str",
+          "default": "'PyAudioGaming'"
+        },
+        {
+          "name": "hwnd",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "vibrate",
+          "type": "bool",
+          "default": "True"
+        },
+        {
+          "name": "notification_id",
+          "type": "int",
+          "default": "2001"
+        }
+      ],
+      "returns": "bool",
+      "doc": "Wake a locked/sleeping screen and display a full-screen call/alarm alert."
+    }
+  ],
+  "title": "notify — System Notifications & Lock-Screen Full-Screen Call/Alarm Wake",
+  "summary": "Send native OS notifications (Windows Toast, Android NotificationManager, macOS, Linux) and wake locked/sleeping screens with Full-Screen Intent (Android) or Win32 display wake & foreground bring-to-front (Windows)."
+}

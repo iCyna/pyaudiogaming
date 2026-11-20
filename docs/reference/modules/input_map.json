@@ -1,0 +1,356 @@
+{
+  "module": "input_map",
+  "classes": [
+    {
+      "name": "InputMap",
+      "doc": "Maps named game actions to keyboard, touch gesture, mouse, and gamepad bindings.",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "bindings=None, deadzone: float=0.35",
+          "params": [
+            {
+              "name": "bindings",
+              "type": "dict",
+              "default": "None"
+            },
+            {
+              "name": "deadzone",
+              "type": "float",
+              "default": "0.35"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "bind",
+          "kind": "method",
+          "signature": "action: str, *bindings: str",
+          "params": [
+            {
+              "name": "action",
+              "type": "str",
+              "default": "required"
+            },
+            {
+              "name": "*bindings",
+              "type": "str",
+              "default": "optional"
+            }
+          ],
+          "returns": "any",
+          "doc": "Add one or more bindings to ``action``."
+        },
+        {
+          "name": "unbind",
+          "kind": "method",
+          "signature": "action: str, binding: str=None",
+          "params": [
+            {
+              "name": "action",
+              "type": "str",
+              "default": "required"
+            },
+            {
+              "name": "binding",
+              "type": "str",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": "Remove a specific binding from ``action``, or all bindings if ``binding is None``."
+        },
+        {
+          "name": "rebind",
+          "kind": "method",
+          "signature": "action: str, old_binding: str, new_binding: str",
+          "params": [
+            {
+              "name": "action",
+              "type": "str",
+              "default": "required"
+            },
+            {
+              "name": "old_binding",
+              "type": "str",
+              "default": "required"
+            },
+            {
+              "name": "new_binding",
+              "type": "str",
+              "default": "required"
+            }
+          ],
+          "returns": "bool",
+          "doc": "Replace ``old_binding`` with ``new_binding`` for ``action``."
+        },
+        {
+          "name": "set_bindings",
+          "kind": "method",
+          "signature": "action: str, bindings: list",
+          "params": [
+            {
+              "name": "action",
+              "type": "str",
+              "default": "required"
+            },
+            {
+              "name": "bindings",
+              "type": "list",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_bindings",
+          "kind": "method",
+          "signature": "action: str",
+          "params": [
+            {
+              "name": "action",
+              "type": "str",
+              "default": "required"
+            }
+          ],
+          "returns": "list",
+          "doc": ""
+        },
+        {
+          "name": "actions",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "list",
+          "doc": ""
+        },
+        {
+          "name": "clear",
+          "kind": "method",
+          "signature": "action: str=None",
+          "params": [
+            {
+              "name": "action",
+              "type": "str",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "reset_defaults",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "pressed",
+          "kind": "method",
+          "signature": "action: str, wnd",
+          "params": [
+            {
+              "name": "action",
+              "type": "str",
+              "default": "required"
+            },
+            {
+              "name": "wnd",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "bool",
+          "doc": "Return True on the frame any binding of ``action`` is newly triggered."
+        },
+        {
+          "name": "pressing",
+          "kind": "method",
+          "signature": "action: str, wnd, repeat_ms: int=0",
+          "params": [
+            {
+              "name": "action",
+              "type": "str",
+              "default": "required"
+            },
+            {
+              "name": "wnd",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "repeat_ms",
+              "type": "int",
+              "default": "0"
+            }
+          ],
+          "returns": "bool",
+          "doc": "Return True while any binding of ``action`` is held (with optional ``repeat_ms`` throttle)."
+        },
+        {
+          "name": "released",
+          "kind": "method",
+          "signature": "action: str, wnd",
+          "params": [
+            {
+              "name": "action",
+              "type": "str",
+              "default": "required"
+            },
+            {
+              "name": "wnd",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "bool",
+          "doc": "Return True on the frame a binding of ``action`` is released."
+        },
+        {
+          "name": "any_pressed",
+          "kind": "method",
+          "signature": "actions, wnd",
+          "params": [
+            {
+              "name": "actions",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "wnd",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": "Return the first action name in ``actions`` that was pressed this frame, else ``None``."
+        },
+        {
+          "name": "axis",
+          "kind": "method",
+          "signature": "neg_action: str, pos_action: str, wnd",
+          "params": [
+            {
+              "name": "neg_action",
+              "type": "str",
+              "default": "required"
+            },
+            {
+              "name": "pos_action",
+              "type": "str",
+              "default": "required"
+            },
+            {
+              "name": "wnd",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "float",
+          "doc": "Return an axis value in ``[-1.0, 1.0]`` combining keyboard & gamepad sticks."
+        },
+        {
+          "name": "capture_next_binding",
+          "kind": "method",
+          "signature": "wnd, cancel_key: str='escape'",
+          "params": [
+            {
+              "name": "wnd",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "cancel_key",
+              "type": "str",
+              "default": "'escape'"
+            }
+          ],
+          "returns": "any",
+          "doc": "Poll once for a newly pressed key/combo or gamepad button; returns binding string or ``None``."
+        },
+        {
+          "name": "describe",
+          "kind": "method",
+          "signature": "action: str, separator: str=', '",
+          "params": [
+            {
+              "name": "action",
+              "type": "str",
+              "default": "required"
+            },
+            {
+              "name": "separator",
+              "type": "str",
+              "default": "', '"
+            }
+          ],
+          "returns": "str",
+          "doc": "Return a human-readable / TTS-friendly description of an action's bindings."
+        },
+        {
+          "name": "to_dict",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "dict",
+          "doc": ""
+        },
+        {
+          "name": "from_dict",
+          "kind": "method",
+          "signature": "data, deadzone: float=0.35",
+          "params": [
+            {
+              "name": "data",
+              "type": "dict",
+              "default": "required"
+            },
+            {
+              "name": "deadzone",
+              "type": "float",
+              "default": "0.35"
+            }
+          ],
+          "returns": "'InputMap'",
+          "doc": ""
+        },
+        {
+          "name": "save",
+          "kind": "method",
+          "signature": "filepath",
+          "params": [
+            {
+              "name": "filepath",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "Path",
+          "doc": ""
+        },
+        {
+          "name": "load",
+          "kind": "method",
+          "signature": "filepath",
+          "params": [
+            {
+              "name": "filepath",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "bool",
+          "doc": ""
+        }
+      ]
+    }
+  ],
+  "functions": [],
+  "title": "input_map — Unified Keyboard, Touch, Mouse & Gamepad Action Mapping",
+  "summary": "Map named actions to keyboard keys/chords, mobile touch taps/swipes, mouse buttons, and gamepad buttons/sticks, with interactive rebinding, TTS descriptions, and JSON persistence."
+}

@@ -1,0 +1,506 @@
+[
+  {
+    "module": "window",
+    "symbol": "Window.init",
+    "parameters": "x, y, ttl, vv=0, show_vv=False, author=''",
+    "types": "int, int, str, int, bool, str",
+    "returns": "None",
+    "description": "Initialize the game window, title, and keyboard/mouse/touch input handlers.",
+    "example": "wnd = Window(); wnd.init(800, 600, 'My Audio Game')"
+  },
+  {
+    "module": "window",
+    "symbol": "Window.frameUpdate",
+    "parameters": "",
+    "types": "None",
+    "returns": "None",
+    "description": "Process one frame of input events (keyboard, mouse, touch) and keep the loop responsive.",
+    "example": "while True: wnd.frameUpdate()"
+  },
+  {
+    "module": "window",
+    "symbol": "Window.keyPressed",
+    "parameters": "key",
+    "types": "str | int",
+    "returns": "bool",
+    "description": "Return True on the exact frame a key is newly pressed.",
+    "example": "if wnd.keyPressed('space'): player.jump()"
+  },
+  {
+    "module": "window",
+    "symbol": "Window.keyPressing",
+    "parameters": "key, t=0",
+    "types": "str | int, int (ms)",
+    "returns": "bool",
+    "description": "Return True while a key is held down, optionally throttling repeats every t milliseconds.",
+    "example": "if wnd.keyPressing('right', 150): player.step_right()"
+  },
+  {
+    "module": "window",
+    "symbol": "Window.tap",
+    "parameters": "fingers=1, count=1, zone=None",
+    "types": "int, int, str | None",
+    "returns": "bool | int",
+    "description": "Detect single or multi-finger taps on mobile touchscreens, optionally filtered by screen zone.",
+    "example": "if wnd.tap(fingers=1, count=2, zone='left-play'): player.jump()"
+  },
+  {
+    "module": "window",
+    "symbol": "Window.swipe / keySlide",
+    "parameters": "direction, fingers=1, zone=None",
+    "types": "str, int, str | None",
+    "returns": "bool",
+    "description": "Detect directional touch swipes ('left', 'right', 'up', 'down') on mobile devices.",
+    "example": "if wnd.swipe('right', fingers=1): menu_next()"
+  },
+  {
+    "module": "window",
+    "symbol": "Window.say",
+    "parameters": "text, i=True, split=False",
+    "types": "str | list, bool, bool",
+    "returns": "None",
+    "description": "Speak text via active Screen Reader or TTS (i=True interrupts current speech).",
+    "example": "wnd.say('Welcome to the game!', i=True)"
+  },
+  {
+    "module": "window",
+    "symbol": "Window.wait",
+    "parameters": "ms",
+    "types": "int",
+    "returns": "None",
+    "description": "Pause safely for ms milliseconds.",
+    "example": "wnd.wait(100)"
+  },
+  {
+    "module": "speech",
+    "symbol": "Speech.say",
+    "parameters": "text, i=True, split=False",
+    "types": "str | list, bool, bool",
+    "returns": "None",
+    "description": "Output speech via NVDA, JAWS, SAPI5, VoiceOver, or TalkBack and append to speech_history.",
+    "example": "wnd.speech.say(['HP: 100', 'MP: 50'], split=True)"
+  },
+  {
+    "module": "speech",
+    "symbol": "Speech.saync",
+    "parameters": "string, i=True",
+    "types": "str, bool",
+    "returns": "None",
+    "description": "Speak text without adding it to speech_history.",
+    "example": "wnd.speech.saync('Typing...', i=True)"
+  },
+  {
+    "module": "speech",
+    "symbol": "Speech.say3d",
+    "parameters": "text, lx, ly, lz, sx, sy, sz, i=True",
+    "types": "str, float x6, bool",
+    "returns": "None",
+    "description": "Speak TTS positioned in 3D space between listener (l) and source (s).",
+    "example": "wnd.speech.say3d('Over here!', 0, 0, 0, 8, 2, 0)"
+  },
+  {
+    "module": "speech",
+    "symbol": "Speech.set_speech_rate / pitch / volume",
+    "parameters": "value",
+    "types": "int",
+    "returns": "bool",
+    "description": "Adjust TTS speaking rate, pitch, or volume.",
+    "example": "wnd.speech.set_speech_rate(60)"
+  },
+  {
+    "module": "sound_pool",
+    "symbol": "output / OutputManager",
+    "parameters": "device=-1, frequency=44100, period=10, bbuffer=500",
+    "types": "int, int, int, int",
+    "returns": "OutputManager",
+    "description": "Initialize the BASS audio output device (-1 selects the default OS device).",
+    "example": "audio = output(device=-1, frequency=44100)"
+  },
+  {
+    "module": "sound_pool",
+    "symbol": "sound.stream",
+    "parameters": "filename, mono=False, decode=False, draw=False",
+    "types": "str, bool, bool, bool",
+    "returns": "bool",
+    "description": "Load an audio stream from disk, SPAK archive, or create a live push stream (draw=True).",
+    "example": "bgm = sound(); bgm.stream('res/sounds/theme.ogg')"
+  },
+  {
+    "module": "sound_pool",
+    "symbol": "sound.play / play_looped / pause / stop",
+    "parameters": "",
+    "types": "None",
+    "returns": "bool",
+    "description": "Start, loop continuously, pause, or stop playback.",
+    "example": "bgm.volume = 60; bgm.play_looped()"
+  },
+  {
+    "module": "sound_pool",
+    "symbol": "sound.fadeout / fadein",
+    "parameters": "duration_ms, value=...",
+    "types": "int, float",
+    "returns": "None",
+    "description": "Smoothly fade volume down or up over duration_ms milliseconds.",
+    "example": "bgm.fadeout(900)"
+  },
+  {
+    "module": "sound_pool",
+    "symbol": "sound.attach_hrtf_dsp",
+    "parameters": "priority=0",
+    "types": "int",
+    "returns": "bool",
+    "description": "Attach real-time binaural 3D HRTF (Steam Audio / Phonon) DSP to this channel.",
+    "example": "s = sound(); s.stream('step.ogg', mono=True); s.attach_hrtf_dsp()"
+  },
+  {
+    "module": "sound_pool",
+    "symbol": "record",
+    "parameters": "filename='', mono=True, freq=44100, draw=False",
+    "types": "str, bool, int, bool",
+    "returns": "record",
+    "description": "Record live microphone audio to disk or push PCM buffers for real-time voice chat.",
+    "example": "rec = record(mono=True, freq=44100)"
+  },
+  {
+    "module": "menu",
+    "symbol": "menu.initialize",
+    "parameters": "wnd, ttl='no title', items=None, cursorSound=None, enterSound=None, cancelSound=None, openSound=None, keyRead=False, readNP=False, config=None",
+    "types": "Window, str, list, str x4, bool, bool, dict",
+    "returns": "None",
+    "description": "Initialize a non-blocking accessible menu with '&K' hotkeys, audio cues, and TalkBack support.",
+    "example": "m = menu(); m.init(wnd, ttl='Main Menu', items=['Start&S', 'Exit&E'], keyRead=True)"
+  },
+  {
+    "module": "menu",
+    "symbol": "menu.append / modify / remove",
+    "parameters": "item / index, text",
+    "types": "str / int, str",
+    "returns": "None",
+    "description": "Dynamically add, edit, or delete menu entries.",
+    "example": "m.append('Settings&O'); m.modify(0, 'Continue&C')"
+  },
+  {
+    "module": "menu",
+    "symbol": "menu.open / frameUpdate",
+    "parameters": "",
+    "types": "None",
+    "returns": "int | None",
+    "description": "Open the menu and poll each frame; returns item index, -1 on cancel, or None while browsing.",
+    "example": "m.open(); res = m.frameUpdate()"
+  },
+  {
+    "module": "vb",
+    "symbol": "vb.input",
+    "parameters": "title='', text='', callback=None, password=False, get_data=True, new_config=None, window=None",
+    "types": "str, str, callable, bool, bool, dict, Window",
+    "returns": "str | None",
+    "description": "Full-featured accessible text input with Undo/Redo, selection, autocomplete, and Ctrl+Shift+Alt+Backspace keyboard mode switcher (standard/numeric/symbols/emoji/custom).",
+    "example": "name = vb.input('Enter Username', placeholder='Type here...')"
+  },
+  {
+    "module": "vb",
+    "symbol": "vb.form",
+    "parameters": "window=None, config=None",
+    "types": "Window, dict",
+    "returns": "form",
+    "description": "Accessible NVDA/TalkBack form supporting 23 rich control types.",
+    "example": "f = vb.form(window=wnd, config={'label': 'Settings'})"
+  },
+  {
+    "module": "vb",
+    "symbol": "form.add",
+    "parameters": "name, kind='button', value=None, choices=None, callback=None, config=None, **kwargs",
+    "types": "str, str, any, list, callable, dict",
+    "returns": "dict",
+    "description": "Add a control: button, check, switch, link, separator, input, list, radio, combo, tree, dir_tree, slider, tab, progress, table, heading, quote, note, emphasis, frame, live.",
+    "example": "f.add('site', 'link', url='https://example.com', label='Website')"
+  },
+  {
+    "module": "vb",
+    "symbol": "form.begin_group / end_group",
+    "parameters": "label",
+    "types": "str",
+    "returns": "form",
+    "description": "Group controls with NVDA-style enter/leave grouping announcements.",
+    "example": "f.begin_group('Audio'); f.add('vol', 'slider', value=80); f.end_group()"
+  },
+  {
+    "module": "vb",
+    "symbol": "form.validate",
+    "parameters": "announce=True",
+    "types": "bool",
+    "returns": "(bool, list)",
+    "description": "Validate all required=True and validator=fn controls; jumps focus to the first invalid field.",
+    "example": "ok, errors = f.validate(announce=True)"
+  },
+  {
+    "module": "vb",
+    "symbol": "vb.info_box / warning_box / success_box",
+    "parameters": "title, text, ok_text='OK', window=None",
+    "types": "str, str, str, Window",
+    "returns": "str",
+    "description": "Show a modal info, warning, or success dialog with haptic feedback.",
+    "example": "vb.info_box('Saved', 'Configuration saved successfully.')"
+  },
+  {
+    "module": "vb",
+    "symbol": "vb.error_box",
+    "parameters": "title, text, details=None, ok_text='OK', copy_text='Copy Details', window=None",
+    "types": "str, str, str | None, str, str, Window",
+    "returns": "str",
+    "description": "Show an error dialog with an optional 'Copy Details' button for stack traces.",
+    "example": "vb.error_box('Error', 'Connection failed.', details=traceback.format_exc())"
+  },
+  {
+    "module": "vb",
+    "symbol": "vb.progress_box",
+    "parameters": "title, text, step_fn=None, cancelable=True, announce_step=10, window=None",
+    "types": "str, str, callable, bool, int, Window",
+    "returns": "bool",
+    "description": "Modal progress dialog announcing percentage milestones and supporting Esc cancellation.",
+    "example": "done = vb.progress_box('Downloading', 'Fetching assets...', step_fn=my_step)"
+  },
+  {
+    "module": "vb",
+    "symbol": "vb.choice_box / confirm / dialog",
+    "parameters": "title, text, choices / buttons, window=None",
+    "types": "str, str, list / tuple, Window",
+    "returns": "str | bool | None",
+    "description": "Quick single-choice picker, Yes/No confirmation, or custom multi-button modal dialog.",
+    "example": "if vb.confirm('Quit', 'Exit now?'): sys.exit()"
+  },
+  {
+    "module": "gui",
+    "symbol": "gui.Window",
+    "parameters": "title='PyAudioGaming App', size=(500, 400), backend='auto', window=None",
+    "types": "str, tuple, str, Window",
+    "returns": "Wx|Qt|Tk|AudioWindow",
+    "description": "Cross-platform GUI factory automatically choosing wx (Windows), qt (Linux/macOS), tk (stdlib), or audio (Android/iOS/Web).",
+    "example": "w = gui.Window('Preferences', (520, 420), backend='auto')"
+  },
+  {
+    "module": "gui",
+    "symbol": "Window.row / group / page",
+    "parameters": "label / title (used with 'with')",
+    "types": "str",
+    "returns": "ContextManager",
+    "description": "Create horizontal rows, titled group boxes, or tabbed pages identically across all 4 backends.",
+    "example": "with w.row(): w.button('Save', on_save); w.button('Close', lambda _: w.close())"
+  },
+  {
+    "module": "gui",
+    "symbol": "Window.button / input / checkbox / switch / slider / spin / combo / listbox / radio / progress / table / link",
+    "parameters": "label, ...",
+    "types": "str, ...",
+    "returns": "Widget",
+    "description": "Unified widget creation API across wx, PySide6/PyQt6, Tkinter, and AudioWindow.",
+    "example": "w.slider('Volume', 0, 100, 80); w.table('Scores', ['User', 'Pts'], [['Ana', 50]])"
+  },
+  {
+    "module": "gui",
+    "symbol": "Window.get / set / values / enable / show / focus",
+    "parameters": "label, value / bool",
+    "types": "str, any",
+    "returns": "any",
+    "description": "Read/write values, toggle visibility/enabled state, or move focus uniformly.",
+    "example": "vol = w.get('Volume'); w.set('Volume', 50); w.focus('Volume')"
+  },
+  {
+    "module": "gui",
+    "symbol": "Window.alert / confirm / prompt / open_file / save_file / open_folder",
+    "parameters": "title, text, ...",
+    "types": "str, ...",
+    "returns": "any",
+    "description": "Standard system dialogs across all 4 backends.",
+    "example": "path = w.open_file('Select Audio File')"
+  },
+  {
+    "module": "gui",
+    "symbol": "Window.build",
+    "parameters": "schema",
+    "types": "list[dict]",
+    "returns": "Window",
+    "description": "Declaratively build an entire GUI from a compact list of dictionaries.",
+    "example": "w.build([{'type': 'input', 'label': 'Host', 'value': '127.0.0.1'}])"
+  },
+  {
+    "module": "timer",
+    "symbol": "Timer",
+    "parameters": "duration=0, paused=False, scale=1.0, auto_start=True",
+    "types": "float, bool, float, bool",
+    "returns": "Timer",
+    "description": "Monotonic nanosecond-precision timer (no pygame.init required) with pause, time-scale, countdown, and serialization.",
+    "example": "t = Timer(duration=3000); print(t.elapsed, t.remaining, t.progress)"
+  },
+  {
+    "module": "timer",
+    "symbol": "Timer.ready / consume / consume_all",
+    "parameters": "ms, auto_restart=False",
+    "types": "float, bool",
+    "returns": "bool | int",
+    "description": "One-line cooldown check or drift-free fixed-interval tick consumption.",
+    "example": "if t.ready(500, auto_restart=True): shoot()"
+  },
+  {
+    "module": "timer",
+    "symbol": "CooldownManager",
+    "parameters": "scale=1.0",
+    "types": "float",
+    "returns": "CooldownManager",
+    "description": "Manage named cooldowns in one place: use(), is_ready(), remaining(), reduce(), pause_all().",
+    "example": "cd = CooldownManager(); if cd.use('dash', 2000): player.dash()"
+  },
+  {
+    "module": "timer",
+    "symbol": "TimerScheduler",
+    "parameters": "scale=1.0, on_error=None",
+    "types": "float, callable",
+    "returns": "TimerScheduler",
+    "description": "Single-threaded min-heap callback scheduler: after(), every(), cancel(), cancel_by_tag(), update().",
+    "example": "sched = TimerScheduler(); sched.after(1500, on_expire); sched.update()"
+  },
+  {
+    "module": "timer",
+    "symbol": "FrameClock",
+    "parameters": "target_fps=0.0, max_dt_ms=100.0",
+    "types": "float, float",
+    "returns": "FrameClock",
+    "description": "Game-loop delta time (dt), smoothed FPS, frame limiter, and fixed_steps() physics accumulator.",
+    "example": "clk = FrameClock(target_fps=60); dt = clk.tick()"
+  },
+  {
+    "module": "timer",
+    "symbol": "Stopwatch / RateLimiter",
+    "parameters": "max_calls, per_ms",
+    "types": "int, float",
+    "returns": "Object",
+    "description": "Split lap profiling (Stopwatch) and token-bucket anti-spam throttling (RateLimiter).",
+    "example": "rl = RateLimiter(max_calls=5, per_ms=1000); if rl.allow(): send_chat()"
+  },
+  {
+    "module": "haptics",
+    "symbol": "haptics.vibrate",
+    "parameters": "duration_ms=40, strength=0.6, low_freq=None, high_freq=None, device=0",
+    "types": "int, float, float, float, int",
+    "returns": "bool",
+    "description": "Trigger a vibration pulse on Android Vibrator, iOS UIImpact, Windows XInput, or SDL2 Joystick.",
+    "example": "haptics.vibrate(duration_ms=80, strength=0.75)"
+  },
+  {
+    "module": "haptics",
+    "symbol": "haptics.preset",
+    "parameters": "name, repeat=1, device=0",
+    "types": "str, int, int",
+    "returns": "bool",
+    "description": "Play a built-in preset: tick, click, select, double_tap, success, warning, error, blocked, footstep, hit_light, hit_heavy, explosion, heartbeat.",
+    "example": "haptics.preset('hit_heavy')"
+  },
+  {
+    "module": "haptics",
+    "symbol": "haptics.pattern / update / stop",
+    "parameters": "steps, repeat=1, device=0",
+    "types": "list[(ms, float)], int, int",
+    "returns": "bool",
+    "description": "Play non-blocking multi-pulse haptic patterns; call haptics.update() each frame.",
+    "example": "haptics.pattern([(40, 0.8), (60, 0.0), (100, 1.0)]); haptics.update()"
+  },
+  {
+    "module": "storage",
+    "symbol": "Storage",
+    "parameters": "app_name, portable=False, portable_dir='res'",
+    "types": "str, bool, str",
+    "returns": "Storage",
+    "description": "Cross-platform persistent storage (filesDir on Android/iOS, AppData/XDG/portable on Desktop) with atomic writes and .bak auto-recovery.",
+    "example": "st = Storage('my_game', portable=True); st.save_json('data/save.json', {'lv': 5})"
+  },
+  {
+    "module": "storage",
+    "symbol": "ConfigStore",
+    "parameters": "app_name, filename='data/config.json', defaults=None, fmt='json', password=None, portable=False, version=1",
+    "types": "str, str, dict, str, str, bool, int",
+    "returns": "ConfigStore",
+    "description": "Dict-like persistent configuration with schema defaults, JSON/Pickle/AES support, and migrate_fn.",
+    "example": "cfg = ConfigStore('my_game', defaults={'vol': 90}); cfg.load(); cfg['vol'] = 70; cfg.save()"
+  },
+  {
+    "module": "worker",
+    "symbol": "TaskPool",
+    "parameters": "mode='auto', max_workers=None",
+    "types": "str, int | None",
+    "returns": "TaskPool",
+    "description": "Cross-platform background runner (process on Desktop with freeze_support, thread on Mobile, inline on Web).",
+    "example": "pool = TaskPool(mode='auto'); pool.submit(heavy_fn, 100, on_done=print); pool.poll()"
+  },
+  {
+    "module": "worker",
+    "symbol": "SharedState",
+    "parameters": "mode='auto', initial=None",
+    "types": "str, dict",
+    "returns": "SharedState",
+    "description": "Simple dict-like shared state safe across process, thread, and inline workers.",
+    "example": "state = SharedState(initial={'progress': 0}); state['progress'] = 50"
+  },
+  {
+    "module": "input_map",
+    "symbol": "InputMap",
+    "parameters": "bindings=None, deadzone=0.35",
+    "types": "dict, float",
+    "returns": "InputMap",
+    "description": "Unify keyboard keys/chords, mobile touch gestures, mouse buttons, and gamepad inputs under named actions.",
+    "example": "imap = InputMap({'jump': ['space', 'tap:1:2', 'pad:a']}); if imap.pressed('jump', wnd): jump()"
+  },
+  {
+    "module": "input_map",
+    "symbol": "InputMap.axis / capture_next_binding / describe / save / load",
+    "parameters": "args",
+    "types": "various",
+    "returns": "float | str | bool",
+    "description": "Read analog/digital axes [-1..1], capture rebind input, generate TTS-friendly descriptions, and save/load JSON.",
+    "example": "dx = imap.axis('left', 'right', wnd); wnd.say(imap.describe('jump'))"
+  },
+  {
+    "module": "file",
+    "symbol": "File",
+    "parameters": "password, encode=False, aes=False",
+    "types": "str, bool, bool",
+    "returns": "File",
+    "description": "Read/write JSON, Pickle, or TXT files with optional Fernet + AES-CBC encryption.",
+    "example": "f = File('secret', encode=True, aes=True); f.save({'a': 1}, 'out.dat', mode='wb+', type='json')"
+  },
+  {
+    "module": "utils",
+    "symbol": "make_spak / load_spak",
+    "parameters": "source, output_path, password='', mode='lazy'",
+    "types": "str | dict, str, str, str",
+    "returns": "dict",
+    "description": "Pack and load encrypted binary .spak sound archives with O(1) lazy streaming.",
+    "example": "load_spak('res/sounds.zb', password='pw', mode='lazy', target='both')"
+  },
+  {
+    "module": "utils",
+    "symbol": "clamp / lerp / remap / distance_3d / clock_direction / db_to_linear",
+    "parameters": "numbers",
+    "types": "float",
+    "returns": "float | int",
+    "description": "Game math, 3D distance, 1-12 clock-face bearing, and audio decibel conversion helpers.",
+    "example": "hour = utils.clock_direction(dx=5, dy=1)  # 3 o'clock"
+  },
+  {
+    "module": "utils",
+    "symbol": "copy_text / paste_text / open_url / fuzzy_match / deep_merge / file_hash",
+    "parameters": "args",
+    "types": "str / dict",
+    "returns": "any",
+    "description": "Zero-dependency cross-platform clipboard, browser launcher, accent-insensitive fuzzy search, and SHA-256 hashing.",
+    "example": "utils.copy_text('Copied!'); matches = utils.fuzzy_match('aud', ['Audio', 'Video'])"
+  },
+  {
+    "module": "compile",
+    "symbol": "compile.work / compile.build",
+    "parameters": "config_file / PROJECT, mode, platforms, arch, data",
+    "types": "str / ...",
+    "returns": "bool",
+    "description": "Unified builder for Windows (PyInstaller/Nuitka/BeeWare), Linux, macOS, Android (APK), iOS, and Web.",
+    "example": "python -m pyaudiogaming.compile build.txt"
+  }
+]

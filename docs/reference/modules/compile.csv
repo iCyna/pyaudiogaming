@@ -1,0 +1,19 @@
+﻿Module,Owner,Kind,Symbol,Parameters,Returns,Description
+compile,module,function,prepare_android,"project, name, data=(), arch=None, extra_reqs=()",any,
+compile,module,function,build_android,"project, name, data=(), arch=None, args=(), prepare_only=False, rename_file=None, out_dir=None",any,
+compile,module,function,prepare_beeware,"project, name, target_os, data=(), arch=None, extra_reqs=()",any,"Chuẩn bị workspace Briefcase hoàn chỉnh cho iOS, macOS, Linux, Windows hoặc Web."
+compile,module,function,build_beeware,"project, name, target_os, data=(), arch=None, args=(), prepare_only=False, rename_file=None, out_dir=None",any,"Build ứng dụng qua BeeWare (Briefcase) cho iOS, macOS, Linux, Windows hoặc Web."
+compile,module,function,parse_val,val,any,
+compile,module,function,get_target_lib_info,"os_name, arch_override=None",any,
+compile,module,function,copy_platform_libs,"src_root, dst_root, target_os, arch_override=None",any,
+compile,module,function,dopackage,"PROJECT, PROJECT_FULL_NAME, target_os='windows'",any,
+compile,module,function,quote_arg,path_str,any,
+compile,module,function,find_local_gcc_or_clang,is_cpp=False,any,
+compile,module,function,find_vs_vcvars,arch=None,any,
+compile,module,function,resolve_gcc_binary,"host_os, target_os, arch=None, is_cpp=False",any,
+compile,module,function,build_command,"tool, PROJECT, PROJECT_FULL_NAME, rename_file, args_compile, zstandard, target_os, arch=None",any,
+compile,module,function,run_build_step,"cmd_or_list, project_name",any,
+compile,module,function,build,"PROJECT=None, PROJECT_FULL_NAME=None, args_compile=[], data=[], rename_file=None, packet=False, zstandard=True, mode='pyinstaller', platforms=None, arch=None",any,
+compile,module,function,create_template,"filename='build.txt', legacy=False",any,
+compile,module,function,interactive_make,,any,
+compile,module,function,work,config_file,any,

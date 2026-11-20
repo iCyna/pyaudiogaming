@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>storage — Cross-Platform Persistent Storage &amp; ConfigStore — PyAudioGaming</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header role="banner">
+    <h1>storage — Cross-Platform Persistent Storage &amp; ConfigStore — PyAudioGaming</h1>
+    <nav aria-label="Documentation Navigation">
+    <a href="../index.html" class="">Home</a>
+    <a href="../01_getting_started.html" class="">01. Getting Started</a>
+    <a href="../02_window_input_menu.html" class="">02. Input &amp; Menu</a>
+    <a href="../03_audio_3d_fx.html" class="">03. 3D Audio</a>
+    <a href="../04_speech_vb_gui.html" class="">04. Speech, VB &amp; GUI</a>
+    <a href="../05_timer_worker_storage_haptics.html" class="">05. Advanced Systems</a>
+    <a href="../06_building_cross_platform.html" class="">06. Building</a>
+    <a href="../api_reference.html" class="">Module Reference</a>
+    </nav>
+  </header>
+  <main id="main-content" role="main">
+<p><a href="../api_reference.html">&larr; Back to All Modules</a></p>
+<div class="callout"><strong>Summary:</strong> Guaranteed-writable persistent storage solving mobile APK asset overwrites: uses filesDir ($HOME) on Android/iOS, AppData/XDG/portable on Desktop, with atomic writes (.tmp + fsync + os.replace) and automatic .bak recovery.</div>
+<h2>Usage Guide &amp; Examples</h2>
+
+<h3>How to Use</h3>
+<ul>
+  <li>Use <code>ConfigStore</code> for settings (dict-like access, schema defaults, JSON/Pickle/AES encryption, and version migration).</li>
+  <li>Use <code>Storage</code> directly for arbitrary save files, account files, logs, or encrypted payloads.</li>
+</ul>
+<pre><code>from pyaudiogaming.storage import ConfigStore, Storage
+
+cfg = ConfigStore("my_game", filename="data/options.json", defaults={"vol": 90.0}, portable=True)
+cfg.load()
+cfg["vol"] = 75.0
+cfg.save()
+
+st = Storage("my_game", portable=True)
+st.save_encrypted("data/account.dat", {"user": "alice"}, password="secret")</code></pre>
+
+<h2>Parameter &amp; API Tables</h2>
+<label for="mod-search">Filter symbols in this module:</label>
+<input id="mod-search" type="search" placeholder="Type method or parameter name..." oninput="filterMod(this.value)">
+<h3>Module-Level Functions</h3>
+<table class="api-tbl" id="tbl_storage_funcs">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">function</span><code>get_platform_data_dir(app_name: str, portable: bool=False, portable_dir: str=&#x27;res&#x27;)</code></td><td><code>app_name</code> (str, default: <code>required</code>)<br><code>portable</code> (bool, default: <code>False</code>)<br><code>portable_dir</code> (str, default: <code>&#x27;res&#x27;</code>)</td><td><code>Path</code></td><td>Return a guaranteed-writable persistent directory for ``app_name`` on any OS.</td></tr>
+    <tr><td><span class="badge">function</span><code>atomic_write_bytes(path, data: bytes, backup: bool=True)</code></td><td><code>path</code> (any, default: <code>required</code>)<br><code>data</code> (bytes, default: <code>required</code>)<br><code>backup</code> (bool, default: <code>True</code>)</td><td><code>any</code></td><td>Write bytes atomically via ``.tmp`` + ``fsync`` + ``os.replace``.</td></tr>
+    <tr><td><span class="badge">function</span><code>atomic_write_text(path, text: str, encoding: str=&#x27;utf-8&#x27;, backup: bool=True)</code></td><td><code>path</code> (any, default: <code>required</code>)<br><code>text</code> (str, default: <code>required</code>)<br><code>encoding</code> (str, default: <code>&#x27;utf-8&#x27;</code>)<br><code>backup</code> (bool, default: <code>True</code>)</td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>Storage</code></h3>
+<p>Cross-platform user data storage manager (JSON, Pickle, text, binary, AES-encrypted).</p>
+<table class="api-tbl" id="tbl_storage_Storage">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__(app_name: str, portable: bool=False, portable_dir: str=&#x27;res&#x27;)</code></td><td><code>app_name</code> (str, default: <code>required</code>)<br><code>portable</code> (bool, default: <code>False</code>)<br><code>portable_dir</code> (str, default: <code>&#x27;res&#x27;</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>path(*parts, ensure_parent: bool=True, ensure_dir: bool=False)</code></td><td><code>*parts</code> (tuple, default: <code>optional</code>)<br><code>ensure_parent</code> (bool, default: <code>True</code>)<br><code>ensure_dir</code> (bool, default: <code>False</code>)</td><td><code>Path</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>exists(*parts)</code></td><td><code>*parts</code> (tuple, default: <code>optional</code>)</td><td><code>bool</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>delete(*parts)</code></td><td><code>*parts</code> (tuple, default: <code>optional</code>)</td><td><code>bool</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>list_files(*parts, suffix: str=None)</code></td><td><code>*parts</code> (tuple, default: <code>optional</code>)<br><code>suffix</code> (str, default: <code>None</code>)</td><td><code>list</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>save_bytes(rel_path, data: bytes, backup: bool=True)</code></td><td><code>rel_path</code> (any, default: <code>required</code>)<br><code>data</code> (bytes, default: <code>required</code>)<br><code>backup</code> (bool, default: <code>True</code>)</td><td><code>Path</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>load_bytes(rel_path, default=None)</code></td><td><code>rel_path</code> (any, default: <code>required</code>)<br><code>default</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>save_text(rel_path, text: str, encoding: str=&#x27;utf-8&#x27;, backup: bool=True)</code></td><td><code>rel_path</code> (any, default: <code>required</code>)<br><code>text</code> (str, default: <code>required</code>)<br><code>encoding</code> (str, default: <code>&#x27;utf-8&#x27;</code>)<br><code>backup</code> (bool, default: <code>True</code>)</td><td><code>Path</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>load_text(rel_path, default=&#x27;&#x27;, encoding: str=&#x27;utf-8&#x27;)</code></td><td><code>rel_path</code> (any, default: <code>required</code>)<br><code>default</code> (any, default: <code>&#x27;&#x27;</code>)<br><code>encoding</code> (str, default: <code>&#x27;utf-8&#x27;</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>save_json(rel_path, obj, indent: int=2, backup: bool=True)</code></td><td><code>rel_path</code> (any, default: <code>required</code>)<br><code>obj</code> (any, default: <code>required</code>)<br><code>indent</code> (int, default: <code>2</code>)<br><code>backup</code> (bool, default: <code>True</code>)</td><td><code>Path</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>load_json(rel_path, default=None)</code></td><td><code>rel_path</code> (any, default: <code>required</code>)<br><code>default</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>save_pickle(rel_path, obj, backup: bool=True)</code></td><td><code>rel_path</code> (any, default: <code>required</code>)<br><code>obj</code> (any, default: <code>required</code>)<br><code>backup</code> (bool, default: <code>True</code>)</td><td><code>Path</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>load_pickle(rel_path, default=None)</code></td><td><code>rel_path</code> (any, default: <code>required</code>)<br><code>default</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>save_encrypted(rel_path, obj, password: str, fmt: str=&#x27;json&#x27;, aes: bool=True, backup: bool=True)</code></td><td><code>rel_path</code> (any, default: <code>required</code>)<br><code>obj</code> (any, default: <code>required</code>)<br><code>password</code> (str, default: <code>required</code>)<br><code>fmt</code> (str, default: <code>&#x27;json&#x27;</code>)<br><code>aes</code> (bool, default: <code>True</code>)<br><code>backup</code> (bool, default: <code>True</code>)</td><td><code>Path</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>load_encrypted(rel_path, password: str, fmt: str=&#x27;json&#x27;, aes: bool=True, default=None)</code></td><td><code>rel_path</code> (any, default: <code>required</code>)<br><code>password</code> (str, default: <code>required</code>)<br><code>fmt</code> (str, default: <code>&#x27;json&#x27;</code>)<br><code>aes</code> (bool, default: <code>True</code>)<br><code>default</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>ConfigStore</code></h3>
+<p>Dict-like persistent configuration store with defaults, auto-recovery &amp; versioning.</p>
+<table class="api-tbl" id="tbl_storage_ConfigStore">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__(app_name: str, filename: str=&#x27;data/config.json&#x27;, defaults=None, fmt: str=&#x27;json&#x27;, password: str=None, portable: bool=False, portable_dir: str=&#x27;res&#x27;, version: int=1, auto_save: bool=False)</code></td><td><code>app_name</code> (str, default: <code>required</code>)<br><code>filename</code> (str, default: <code>&#x27;data/config.json&#x27;</code>)<br><code>defaults</code> (dict, default: <code>None</code>)<br><code>fmt</code> (str, default: <code>&#x27;json&#x27;</code>)<br><code>password</code> (str, default: <code>None</code>)<br><code>portable</code> (bool, default: <code>False</code>)<br><code>portable_dir</code> (str, default: <code>&#x27;res&#x27;</code>)<br><code>version</code> (int, default: <code>1</code>)<br><code>auto_save</code> (bool, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>load(migrate_fn=None)</code></td><td><code>migrate_fn</code> (any, default: <code>None</code>)</td><td><code>dict</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>save()</code></td><td><em>None</em></td><td><code>Path</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>save_if_dirty()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>reset_to_defaults(save_now: bool=False)</code></td><td><code>save_now</code> (bool, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get(key, default=None)</code></td><td><code>key</code> (any, default: <code>required</code>)<br><code>default</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set(key, value)</code></td><td><code>key</code> (any, default: <code>required</code>)<br><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>update(mapping)</code></td><td><code>mapping</code> (dict, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>to_dict()</code></td><td><em>None</em></td><td><code>dict</code></td><td>—</td></tr>
+    <tr><td><span class="badge">property</span><code>dirty()</code></td><td><em>None</em></td><td><code>bool</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<script>
+function filterMod(q) {
+  q = (q || '').toLowerCase();
+  var rows = document.querySelectorAll('.api-tbl tbody tr');
+  for (var i = 0; i < rows.length; i++) {
+    rows[i].style.display = rows[i].innerText.toLowerCase().indexOf(q) !== -1 ? '' : 'none';
+  }
+}
+</script>
+  </main>
+  <footer role="contentinfo">
+    PyAudioGaming Official Documentation &mdash; Cross-Platform Audio Gaming for Windows, Linux, macOS, Android, iOS &amp; Web.
+  </footer>
+</body>
+</html>

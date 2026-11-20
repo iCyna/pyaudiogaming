@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>input_map — Unified Keyboard, Touch, Mouse &amp; Gamepad Action Mapping — PyAudioGaming</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header role="banner">
+    <h1>input_map — Unified Keyboard, Touch, Mouse &amp; Gamepad Action Mapping — PyAudioGaming</h1>
+    <nav aria-label="Documentation Navigation">
+    <a href="../index.html" class="">Home</a>
+    <a href="../01_getting_started.html" class="">01. Getting Started</a>
+    <a href="../02_window_input_menu.html" class="">02. Input &amp; Menu</a>
+    <a href="../03_audio_3d_fx.html" class="">03. 3D Audio</a>
+    <a href="../04_speech_vb_gui.html" class="">04. Speech, VB &amp; GUI</a>
+    <a href="../05_timer_worker_storage_haptics.html" class="">05. Advanced Systems</a>
+    <a href="../06_building_cross_platform.html" class="">06. Building</a>
+    <a href="../api_reference.html" class="">Module Reference</a>
+    </nav>
+  </header>
+  <main id="main-content" role="main">
+<p><a href="../api_reference.html">&larr; Back to All Modules</a></p>
+<div class="callout"><strong>Summary:</strong> Map named actions to keyboard keys/chords, mobile touch taps/swipes, mouse buttons, and gamepad buttons/sticks, with interactive rebinding, TTS descriptions, and JSON persistence.</div>
+<h2>Usage Guide &amp; Examples</h2>
+
+<h3>How to Use</h3>
+<pre><code>from pyaudiogaming.input_map import InputMap
+
+imap = InputMap({
+    "jump":       ["space", "tap:1:2:left-play", "pad:a"],
+    "save":       ["ctrl+s", "pad:start"],
+    "move_left":  ["left", "swipe:left", "pad:lx-"],
+    "move_right": ["right", "swipe:right", "pad:lx+"],
+})
+
+if imap.pressed("jump", wnd):
+    player.jump()
+dx = imap.axis("move_left", "move_right", wnd)
+imap.save("keymap.json")</code></pre>
+
+<h2>Parameter &amp; API Tables</h2>
+<label for="mod-search">Filter symbols in this module:</label>
+<input id="mod-search" type="search" placeholder="Type method or parameter name..." oninput="filterMod(this.value)">
+<h3>Class <code>InputMap</code></h3>
+<p>Maps named game actions to keyboard, touch gesture, mouse, and gamepad bindings.</p>
+<table class="api-tbl" id="tbl_input_map_InputMap">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__(bindings=None, deadzone: float=0.35)</code></td><td><code>bindings</code> (dict, default: <code>None</code>)<br><code>deadzone</code> (float, default: <code>0.35</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>bind(action: str, *bindings: str)</code></td><td><code>action</code> (str, default: <code>required</code>)<br><code>*bindings</code> (str, default: <code>optional</code>)</td><td><code>any</code></td><td>Add one or more bindings to ``action``.</td></tr>
+    <tr><td><span class="badge">method</span><code>unbind(action: str, binding: str=None)</code></td><td><code>action</code> (str, default: <code>required</code>)<br><code>binding</code> (str, default: <code>None</code>)</td><td><code>any</code></td><td>Remove a specific binding from ``action``, or all bindings if ``binding is None``.</td></tr>
+    <tr><td><span class="badge">method</span><code>rebind(action: str, old_binding: str, new_binding: str)</code></td><td><code>action</code> (str, default: <code>required</code>)<br><code>old_binding</code> (str, default: <code>required</code>)<br><code>new_binding</code> (str, default: <code>required</code>)</td><td><code>bool</code></td><td>Replace ``old_binding`` with ``new_binding`` for ``action``.</td></tr>
+    <tr><td><span class="badge">method</span><code>set_bindings(action: str, bindings: list)</code></td><td><code>action</code> (str, default: <code>required</code>)<br><code>bindings</code> (list, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_bindings(action: str)</code></td><td><code>action</code> (str, default: <code>required</code>)</td><td><code>list</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>actions()</code></td><td><em>None</em></td><td><code>list</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>clear(action: str=None)</code></td><td><code>action</code> (str, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>reset_defaults()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>pressed(action: str, wnd)</code></td><td><code>action</code> (str, default: <code>required</code>)<br><code>wnd</code> (any, default: <code>required</code>)</td><td><code>bool</code></td><td>Return True on the frame any binding of ``action`` is newly triggered.</td></tr>
+    <tr><td><span class="badge">method</span><code>pressing(action: str, wnd, repeat_ms: int=0)</code></td><td><code>action</code> (str, default: <code>required</code>)<br><code>wnd</code> (any, default: <code>required</code>)<br><code>repeat_ms</code> (int, default: <code>0</code>)</td><td><code>bool</code></td><td>Return True while any binding of ``action`` is held (with optional ``repeat_ms`` throttle).</td></tr>
+    <tr><td><span class="badge">method</span><code>released(action: str, wnd)</code></td><td><code>action</code> (str, default: <code>required</code>)<br><code>wnd</code> (any, default: <code>required</code>)</td><td><code>bool</code></td><td>Return True on the frame a binding of ``action`` is released.</td></tr>
+    <tr><td><span class="badge">method</span><code>any_pressed(actions, wnd)</code></td><td><code>actions</code> (any, default: <code>required</code>)<br><code>wnd</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>Return the first action name in ``actions`` that was pressed this frame, else ``None``.</td></tr>
+    <tr><td><span class="badge">method</span><code>axis(neg_action: str, pos_action: str, wnd)</code></td><td><code>neg_action</code> (str, default: <code>required</code>)<br><code>pos_action</code> (str, default: <code>required</code>)<br><code>wnd</code> (any, default: <code>required</code>)</td><td><code>float</code></td><td>Return an axis value in ``[-1.0, 1.0]`` combining keyboard &amp; gamepad sticks.</td></tr>
+    <tr><td><span class="badge">method</span><code>capture_next_binding(wnd, cancel_key: str=&#x27;escape&#x27;)</code></td><td><code>wnd</code> (any, default: <code>required</code>)<br><code>cancel_key</code> (str, default: <code>&#x27;escape&#x27;</code>)</td><td><code>any</code></td><td>Poll once for a newly pressed key/combo or gamepad button; returns binding string or ``None``.</td></tr>
+    <tr><td><span class="badge">method</span><code>describe(action: str, separator: str=&#x27;, &#x27;)</code></td><td><code>action</code> (str, default: <code>required</code>)<br><code>separator</code> (str, default: <code>&#x27;, &#x27;</code>)</td><td><code>str</code></td><td>Return a human-readable / TTS-friendly description of an action&#x27;s bindings.</td></tr>
+    <tr><td><span class="badge">method</span><code>to_dict()</code></td><td><em>None</em></td><td><code>dict</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>from_dict(data, deadzone: float=0.35)</code></td><td><code>data</code> (dict, default: <code>required</code>)<br><code>deadzone</code> (float, default: <code>0.35</code>)</td><td><code>&#x27;InputMap&#x27;</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>save(filepath)</code></td><td><code>filepath</code> (any, default: <code>required</code>)</td><td><code>Path</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>load(filepath)</code></td><td><code>filepath</code> (any, default: <code>required</code>)</td><td><code>bool</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<script>
+function filterMod(q) {
+  q = (q || '').toLowerCase();
+  var rows = document.querySelectorAll('.api-tbl tbody tr');
+  for (var i = 0; i < rows.length; i++) {
+    rows[i].style.display = rows[i].innerText.toLowerCase().indexOf(q) !== -1 ? '' : 'none';
+  }
+}
+</script>
+  </main>
+  <footer role="contentinfo">
+    PyAudioGaming Official Documentation &mdash; Cross-Platform Audio Gaming for Windows, Linux, macOS, Android, iOS &amp; Web.
+  </footer>
+</body>
+</html>

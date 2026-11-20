@@ -1,0 +1,24 @@
+========================================================================
+MODULE: pyaudiogaming.system
+system — Platform, Architecture & Native Library Loader
+========================================================================
+
+SUMMARY:
+Detects OS (Windows/Linux/macOS/Android/iOS), CPU architecture (x64/x86/arm64-v8a/aarch64/armhf), frozen bundle paths, and loads platform-specific native libraries (.dll/.so/.dylib).
+
+[MODULE FUNCTIONS]
+----------------------------------------
+* is_frozen() -> any
+* embedded_data_path() -> any
+* abspath(path) -> any
+* match(*args, abspath=True) -> any
+* module_path() -> any
+* get_functype() -> any
+* get_path(name) -> any
+* get_platform() -> any
+* get_android_activity() -> any
+  Return ``(activity, bridge_name)`` on Android (Chaquopy or pyjnius), else ``(None, None)``.
+* get_arch() -> dict
+* get_arch_dir() -> any
+* get_ext() -> any
+* load_dll(name, ot='all', WinDLL=False) -> any

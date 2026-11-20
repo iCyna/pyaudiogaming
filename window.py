@@ -17,7 +17,15 @@ ZONES = {
     "top-right": (0.5, 0.0, 1.0, 0.5),
     "bottom-left": (0.0, 0.5, 0.5, 1.0),
     "bottom-right": (0.5, 0.5, 1.0, 1.0),
+    # 3-zone gameplay layout (top 20% system/info bar, bottom 80% split left/right)
+    "top-bar": (0.0, 0.0, 1.0, 0.20),
+    "top-left-bar": (0.0, 0.0, 0.5, 0.20),
+    "top-right-bar": (0.5, 0.0, 1.0, 0.20),
+    "left-play": (0.0, 0.20, 0.5, 1.0),
+    "right-play": (0.5, 0.20, 1.0, 1.0),
 }
+SWIPE_THRESHOLD = 0.07
+LONG_PRESS_MS = 450
 
 
 class WindowBase:
@@ -37,6 +45,7 @@ class WindowBase:
         self._slide_events, self._sliding_events = [], []
         self._taps, self.pinch, self.turn = 0, 0.0, 0.0
         self._tap_events = []
+        self._long_press_events = []
         self._tap_batch_fingers = 0
         self._tap_batch_pos = (0.5, 0.5)
         self._tap_streak = 0
@@ -97,6 +106,7 @@ class WindowBase:
         self.completed_slides.clear(); self.active_slidings.clear()
         self._slide_events.clear(); self._sliding_events.clear()
         self._tap_events.clear()
+        self._long_press_events.clear()
         self.wheel, self._taps, self.pinch, self.turn = (0, 0), 0, 0.0, 0.0
         self.events = pygame.event.get()
         pending = deque(self.events)
@@ -132,7 +142,7 @@ class WindowBase:
             elif event.type == pygame.MOUSEWHEEL:
                 self.wheel = (self.wheel[0] + event.x, self.wheel[1] + event.y)
             elif event.type == pygame.FINGERDOWN:
-                self.touches[event.finger_id] = {"start": (event.x, event.y), "current": (event.x, event.y), "timer": Timer()}
+                self.touches[event.finger_id] = {"start": (event.x, event.y), "current": (event.x, event.y), "timer": Timer(), "moved": False, "long_fired": False}
                 self._gesture_max_fingers = max(self._gesture_max_fingers, len(self.touches))
             elif event.type in (pygame.FINGERMOTION, pygame.FINGERUP):
                 touch = self.touches.get(event.finger_id)
@@ -140,14 +150,15 @@ class WindowBase:
                     touch["current"] = (event.x, event.y)
                     dx, dy = event.x - touch["start"][0], event.y - touch["start"][1]
                     direction = ("right" if dx > 0 else "left") if abs(dx) > abs(dy) else ("down" if dy > 0 else "up")
-                    if max(abs(dx), abs(dy)) > 0.05:
+                    if max(abs(dx), abs(dy)) > SWIPE_THRESHOLD:
+                        touch["moved"] = True
                         if event.type == pygame.FINGERUP:
                             self.completed_slides.append(direction)
                             info = frame_released_slides.setdefault(direction, {"count": 0, "start": touch["start"]})
                             info["count"] += 1
                         else:
                             self.active_slidings.append(direction)
-                    elif event.type == pygame.FINGERUP and touch["timer"].elapsed < 500:
+                    elif event.type == pygame.FINGERUP and not touch["moved"] and not touch["long_fired"] and touch["timer"].elapsed < LONG_PRESS_MS:
                         self._tap_batch_fingers += 1
                         self._tap_batch_pos = touch["start"]
                     if event.type == pygame.FINGERUP:
@@ -181,16 +192,23 @@ class WindowBase:
         if not self.touches:
             self._gesture_max_fingers = 0
 
-        # Duy trì trạng thái vuốt giữ (swiping / keySliding) giữa các frame và đếm số ngón đang giữ
+        # Duy trì trạng thái vuốt giữ (swiping / keySliding) và phát hiện nhấn giữ tại chỗ (long_press)
         held_dirs = {}
         for touch in self.touches.values():
             dx, dy = (touch["current"][i] - touch["start"][i] for i in (0, 1))
-            if max(abs(dx), abs(dy)) > 0.05:
+            if max(abs(dx), abs(dy)) > SWIPE_THRESHOLD:
+                touch["moved"] = True
                 direction = ("right" if dx > 0 else "left") if abs(dx) > abs(dy) else ("down" if dy > 0 else "up")
                 if direction not in self.active_slidings:
                     self.active_slidings.append(direction)
                 info = held_dirs.setdefault(direction, {"count": 0, "start": touch["start"]})
                 info["count"] += 1
+            elif not touch["moved"] and not touch["long_fired"] and touch["timer"].elapsed >= LONG_PRESS_MS:
+                touch["long_fired"] = True
+                self._long_press_events.append({
+                    "fingers": max(len(self.touches), self._gesture_max_fingers),
+                    "pos": touch["start"]
+                })
         for direction, info in held_dirs.items():
             self._sliding_events.append({"dir": direction, "fingers": max(len(self.touches), self._gesture_max_fingers), "start": info["start"]})
 
@@ -201,17 +219,20 @@ class WindowBase:
             if isinstance(k, str) and k.startswith("swipe_") and k not in active_keys:
                 self._repeat.pop(k, None)
 
-        if self.keyPressed("ctrl"):
+        if self.keyPressed("ctrl") or (self.tap(fingers=2, count=1) == 1):
             self.speech.speech.silence()
         if self.keyPressed("alt+f4") and self.exit_callback: self.exit_callback()
         if self.frame_callback: self.frame_callback()
 
     def clear_input(self):
-        """Discard stale text/key input while preserving quit and focus events."""
+        """Discard stale text/key/touch input while preserving quit and focus events."""
         pygame.event.clear([pygame.KEYDOWN, pygame.KEYUP, pygame.TEXTINPUT, pygame.TEXTEDITING])
         self.keys.clear()
         self.previousKeys.clear()
         self._pressed.clear(); self._released.clear(); self._repeat.clear()
+        self._tap_events.clear(); self._slide_events.clear(); self._sliding_events.clear(); self._long_press_events.clear()
+        self.completed_slides.clear(); self.active_slidings.clear()
+        self._taps = 0
         self.mods = 0
         self.events = []
 
@@ -269,6 +290,17 @@ class WindowBase:
             if (fingers is None or ev["fingers"] == fingers) and ev["count"] >= count and self._match_zone(ev["pos"], zone):
                 return ev["count"]
         return 0
+
+    def double_tap(self, fingers=1, zone=None):
+        """Kiểm tra chạm đúp (chuẩn TalkBack/VoiceOver để kích hoạt)."""
+        return bool(self.tap(fingers=fingers, count=2, zone=zone))
+
+    def long_press(self, fingers=1, zone=None):
+        """Kiểm tra nhấn giữ tại chỗ trên màn hình (không trượt)."""
+        return any(
+            (fingers is None or ev["fingers"] == fingers) and self._match_zone(ev["pos"], zone)
+            for ev in self._long_press_events
+        )
 
     def keySlide(self, direction, fingers=None, zone=None):
         """Kiểm tra vuốt nhấc tay theo hướng, số ngón tay (fingers) và khu vực (zone)."""

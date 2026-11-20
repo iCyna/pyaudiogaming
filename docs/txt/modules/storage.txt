@@ -1,0 +1,48 @@
+========================================================================
+MODULE: pyaudiogaming.storage
+storage — Cross-Platform Persistent Storage & ConfigStore
+========================================================================
+
+SUMMARY:
+Guaranteed-writable persistent storage solving mobile APK asset overwrites: uses filesDir ($HOME) on Android/iOS, AppData/XDG/portable on Desktop, with atomic writes (.tmp + fsync + os.replace) and automatic .bak recovery.
+
+[MODULE FUNCTIONS]
+----------------------------------------
+* get_platform_data_dir(app_name: str, portable: bool=False, portable_dir: str='res') -> Path
+  Return a guaranteed-writable persistent directory for ``app_name`` on any OS.
+* atomic_write_bytes(path, data: bytes, backup: bool=True) -> any
+  Write bytes atomically via ``.tmp`` + ``fsync`` + ``os.replace``.
+* atomic_write_text(path, text: str, encoding: str='utf-8', backup: bool=True) -> any
+
+[CLASS Storage]
+----------------------------------------
+Cross-platform user data storage manager (JSON, Pickle, text, binary, AES-encrypted).
+* Storage.__init__(app_name: str, portable: bool=False, portable_dir: str='res') -> any [constructor]
+* Storage.path(*parts, ensure_parent: bool=True, ensure_dir: bool=False) -> Path [method]
+* Storage.exists(*parts) -> bool [method]
+* Storage.delete(*parts) -> bool [method]
+* Storage.list_files(*parts, suffix: str=None) -> list [method]
+* Storage.save_bytes(rel_path, data: bytes, backup: bool=True) -> Path [method]
+* Storage.load_bytes(rel_path, default=None) -> any [method]
+* Storage.save_text(rel_path, text: str, encoding: str='utf-8', backup: bool=True) -> Path [method]
+* Storage.load_text(rel_path, default='', encoding: str='utf-8') -> any [method]
+* Storage.save_json(rel_path, obj, indent: int=2, backup: bool=True) -> Path [method]
+* Storage.load_json(rel_path, default=None) -> any [method]
+* Storage.save_pickle(rel_path, obj, backup: bool=True) -> Path [method]
+* Storage.load_pickle(rel_path, default=None) -> any [method]
+* Storage.save_encrypted(rel_path, obj, password: str, fmt: str='json', aes: bool=True, backup: bool=True) -> Path [method]
+* Storage.load_encrypted(rel_path, password: str, fmt: str='json', aes: bool=True, default=None) -> any [method]
+
+[CLASS ConfigStore]
+----------------------------------------
+Dict-like persistent configuration store with defaults, auto-recovery & versioning.
+* ConfigStore.__init__(app_name: str, filename: str='data/config.json', defaults=None, fmt: str='json', password: str=None, portable: bool=False, portable_dir: str='res', version: int=1, auto_save: bool=False) -> any [constructor]
+* ConfigStore.load(migrate_fn=None) -> dict [method]
+* ConfigStore.save() -> Path [method]
+* ConfigStore.save_if_dirty() -> any [method]
+* ConfigStore.reset_to_defaults(save_now: bool=False) -> any [method]
+* ConfigStore.get(key, default=None) -> any [method]
+* ConfigStore.set(key, value) -> any [method]
+* ConfigStore.update(mapping) -> any [method]
+* ConfigStore.to_dict() -> dict [method]
+* ConfigStore.dirty() -> bool [property]

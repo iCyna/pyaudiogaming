@@ -1,0 +1,31 @@
+﻿Module,Owner,Kind,Symbol,Parameters,Returns,Description
+menu,menu,constructor,menu.__init__,,any,
+menu,menu,method,menu.initialize,"wnd, ttl='no title', items=None, cursorSound=None, enterSound=None, cancelSound=None, openSound=None, keyRead=False, readNP=False, config=None",any,
+menu,menu,method,menu.allowed,name,any,
+menu,menu,method,menu.parseShortcut,elem,any,"Accept &x, &{ctrl+x}, a tab suffix, or a label/hotkey dict."
+menu,menu,method,menu.append,elem,any,Adds a menu item.
+menu,menu,method,menu.insert,"index, elem",any,Inserts an item at the specified position.
+menu,menu,method,menu.remove,index,any,Deletes the item at the specified index.
+menu,menu,method,menu.modify,"index, new_elem",any,Modifies an existing menu item.
+menu,menu,method,menu.open,,any,Starts the menu.
+menu,menu,method,menu.jumpCursor,"c, wrap=None",any,"Jumps to a specific cursor position, handling sounds, edge hits, and wrap-arounds."
+menu,menu,method,menu.moveTo,c,any,Alias for jumpCursor to maintain backward compatibility.
+menu,menu,method,menu.frameUpdate,,any,The frame updating function for this menu. Call your window's frameUpdate prior to this.
+menu,menu,method,menu.processShortcut,"code, shortcut=None",any,Search for shortcut matches dynamically in self.items (avoids maintaining a 2nd list).
+menu,menu,method,menu.cancel,,any,
+menu,menu,method,menu.enter,,any,
+menu,menu,method,menu.getCursorPos,,any,
+menu,menu,method,menu.getString,"index=None, hotkey=False",any,
+menu,menu,method,menu.getReadStr,,any,
+menu,menu,method,menu.hotkey,line,any,
+menu,menu,method,menu.Len,,any,
+menu,menu,method,menu.exit,,any,
+menu,menu,method,menu.isLast,index,any,
+menu,menu,method,menu.getTitle,,any,
+menu,menu,method,menu.setTitle,newTitle,any,
+menu,menu,method,menu.getOpenSound,,any,
+menu,menu,method,menu.setOpenSound,newSound,any,
+menu,menu,method,menu.getCancelSound,,any,
+menu,menu,method,menu.setCancelSound,newSound,any,
+menu,menu,method,menu.getEnterSound,,any,
+menu,menu,method,menu.setEnterSound,newSound,any,
