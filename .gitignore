@@ -1,6 +1,7 @@
 __pycache__/
 *.py[cod]
 desktop.ini
-include/*
+include/*.zip
+include/android
 basses
 un4seen.py

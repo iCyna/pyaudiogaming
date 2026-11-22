@@ -13,7 +13,8 @@ def is_frozen():
 def embedded_data_path():
 	if is_frozen() and get_platform()["os"] not in ("android", "ios") and sys.executable:
 		return os.path.dirname(sys.executable)
-	return os.path.dirname(__file__)
+	f = globals().get("__file__")
+	return os.path.dirname(f) if f else os.getcwd()
 
 def abspath(path):
 	return os.path.abspath(path)
@@ -25,21 +26,33 @@ def match(*args, abspath=True):
 	return path
 
 def module_path():
-	return os.path.dirname(__file__)
+	f = globals().get("__file__")
+	return os.path.dirname(f) if f else os.getcwd()
 
 def get_functype():
 	return ctypes.CFUNCTYPE
 
 def get_path(name):
 	ext = get_ext()
-	if not name.endswith(ext):
-		name = name + ext
+	os_name = get_platform()["os"].lower()
+	candidates = _candidate_filenames(name, os_name, ext)
+	env_native = os.environ.get("PYAG_NATIVE_LIB_DIR")
+	if env_native and os.path.isdir(env_native):
+		for fname in candidates:
+			p = os.path.join(env_native, fname)
+			if os.path.exists(p):
+				return p
 	arch_dir = get_arch_dir()
 	if arch_dir:
-		p = os.path.join(embedded_data_path(), "lib", arch_dir, name)
+		for fname in candidates:
+			p = os.path.join(embedded_data_path(), "lib", arch_dir, fname)
+			if os.path.exists(p):
+				return p
+	for fname in candidates:
+		p = os.path.join(embedded_data_path(), "lib", fname)
 		if os.path.exists(p):
 			return p
-	return os.path.join(embedded_data_path(), "lib", name)
+	return os.path.join(embedded_data_path(), "lib", candidates[0])
 
 def get_platform():
 	system = platform.system().lower()
@@ -118,6 +131,8 @@ def get_arch_dir():
 		arch_dir = "x64" if bit == 64 else "x86"
 	elif os_name == "macos":
 		arch_dir = "mac"
+	elif os_name == "ios":
+		arch_dir = "iosimulator" if info.get("is_emulator") else "ios"
 	elif os_name == "android":
 		if "aarch64" in machine or "arm64" in machine or "v8a" in machine:
 			arch_dir = "arm64-v8a"
@@ -177,14 +192,26 @@ def load_dll(name, ot="all", WinDLL=False):
 			except Exception as e:
 				last_err = e
 
-		# 2. Fallback: Tìm trong thư mục lib đi kèm gói pyaudiogaming
-		search_roots = [module_path(), embedded_data_path(), os.getcwd()]
+		# 2. Fallback: Tìm trong PYAG_NATIVE_LIB_DIR và thư mục lib/Frameworks đi kèm gói
+		search_roots = []
+		env_native = os.environ.get("PYAG_NATIVE_LIB_DIR")
+		if env_native and os.path.isdir(env_native):
+			for fname in filenames:
+				p = os.path.join(env_native, fname)
+				if os.path.exists(p):
+					try:
+						return ctypes.CDLL(p, mode=rtld_mode)
+					except Exception as e:
+						last_err = e
+		search_roots.extend([module_path(), embedded_data_path(), os.getcwd()])
 		for root in search_roots:
 			for fname in filenames:
 				candidates_paths = []
 				if arch_dir:
 					candidates_paths.append(os.path.join(root, "lib", arch_dir, fname))
 				candidates_paths.append(os.path.join(root, "lib", fname))
+				if os_name == "ios":
+					candidates_paths.append(os.path.join(root, "Frameworks", fname))
 				for p in candidates_paths:
 					if os.path.exists(p):
 						try:
@@ -196,7 +223,10 @@ def load_dll(name, ot="all", WinDLL=False):
 
 	# ===== WINDOWS / LINUX / MACOS =====
 	paths = []
+	env_native = os.environ.get("PYAG_NATIVE_LIB_DIR")
 	for fname in filenames:
+		if env_native:
+			paths.append(os.path.join(env_native, fname))
 		if arch_dir:
 			paths.append(os.path.join(module_path(), "lib", arch_dir, fname))
 			paths.append(os.path.join(embedded_data_path(), "lib", arch_dir, fname))

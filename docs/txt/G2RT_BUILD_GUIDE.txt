@@ -1,0 +1,90 @@
+================================================================================
+PYAUDIOGAMING - HUONG DAN BUILD DA NEN TANG VOI G2RT (compile.py)
+Copyright (c) 2025-2026 ihcyna (Labubu) <phucnggo29@gmail.com>. All rights reserved.
+================================================================================
+
+1. GIOI THIEU
+-------------
+Che do `mode = g2rt` cho phep dong goi game PyAudioGaming ra 5 he dieu hanh
+(Windows, Android, iOS, Linux, macOS) voi 9 kien truc chip truc tiep ngay
+tren Windows trong vai giay, khong can cai Gradle, Android SDK/NDK hay Xcode.
+
+Goi runtime duoc tich hop san tai:
+  pyaudiogaming/include/g2rt_toolkit.g2rt
+
+Thu vien am thanh (BASS, Steam Audio, Tags...) duoc tu dong ghep dung theo
+tung he dieu hanh va chip tu thu muc `pyaudiogaming/lib/` trong luc build.
+
+
+2. CAU HINH `build.txt` MAU
+---------------------------
+project = main
+project_full_name = MyAudioGame
+rename_file = game
+data = [res, maps]
+mode = g2rt
+platforms = [windows, android, linux, macos, ios]
+arch = null
+error_mode = 1
+use_g2rt_tk = true
+args_compile = [--package-id=com.mygame.app]
+
+
+3. LENH BUILD NHANH
+-------------------
+Tao file cau hinh mau:
+  python -m pyaudiogaming.compile create build.txt
+
+Mo trinh huong dan tuong tac (Wizard):
+  python -m pyaudiogaming.compile make
+
+Chay build tu file cau hinh:
+  python -m pyaudiogaming.compile build.txt
+
+
+4. DANH SACH NEN TANG & KIEN TRUC CHIP HO TRO
+---------------------------------------------
+- windows : x64 (mac dinh), x86           -> File .exe + runtime
+- android : arm64 (arm64-v8a), x86_64     -> File .apk da ky san, cai truc tiep
+- linux   : x64 (mac dinh), arm64         -> File .tar.gz kem run.sh (+x)
+            (aarch64), armhf (armv7)
+- macos   : arm64 (Apple Silicon),        -> File .zip chua .app bundle
+            x64 (Intel)
+- ios     : arm64 (iPhone/iPad),          -> File .ipa chua ky (cai bang
+            simulator                        Sideloadly/AltStore hoac ky Apple)
+
+Co the build nhieu chip cung luc, vi du:
+  platforms = macos
+  arch = [arm64, x64]
+
+
+5. CAC TUY CHON QUAN TRONG
+--------------------------
+- use_g2rt_tk = true (mac dinh):
+    Dung bo G2RT toolkit nhanh, offline cho Android/iOS/Linux/macOS.
+    Dat `use_g2rt_tk = false` (hoac `0`) de tu dong quay ve luong build cu
+    (Briefcase / Gradle / BeeWare).
+
+- error_mode:
+    0 = Ghi loi ra file log (pyag_error.log) va dong app.
+    1 = Hien hop thoai bao loi native (mac dinh; Android hien AlertDialog
+        co nut Copy & Close).
+    2 = An loi va dong app im lang.
+
+- Cac co trong `args_compile`:
+    --package-id=com.ten.game   : Dat Package ID (Android) / Bundle ID (Apple).
+    --keystore=path/to/key.pem  : Dung khoa ky rieng (PEM) cho APK Android.
+    --no-default-reqs           : Bo qua tu dong kem cac goi phu thuoc mac dinh.
+    <ten_goi_pip>               : Vi du `requests` -> tu dong tai goi phu hop
+                                  cho OS & chip dich va luu cache cho lan sau.
+
+
+6. CACHE & TOI UU HIEU NANG
+---------------------------
+Toan bo cache runtime, thu vien phu thuoc va du lieu game chua thay doi duoc
+luu tai:
+  Windows: %LOCALAPPDATA%\PyAudioGaming\
+  Linux/macOS: ~/.cache/pyaudiogaming/
+
+Lan build dau tien se khoi tao cache; cac lan build tiep theo chi mat vai giay.
+================================================================================
