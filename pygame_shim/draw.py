@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
-"""pygame.draw shim backed by Android Canvas + Paint."""
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# pygame.draw shim backed by native Canvas and Paint.
+# Supports Android and iOS.
+
 from .rect import Rect
-from .surface import to_android_color
+from .surface import to_android_color, to_jfloat
 from . import _android_bridge
 
 _Paint = None
@@ -25,7 +28,7 @@ def _make_paint(color, width=0):
     p.setColor(to_android_color(color))
     if width and width > 0:
         p.setStyle(_PaintStyle.STROKE)
-        p.setStrokeWidth(float(width))
+        p.setStrokeWidth(to_jfloat(width))
     else:
         p.setStyle(_PaintStyle.FILL)
     return p
@@ -38,10 +41,10 @@ def rect(surface, color, rect_arg, width=0, border_radius=0,
     canvas = getattr(surface, "_canvas", None)
     if canvas is not None and _Paint is not None:
         p = _make_paint(color, width)
-        rf = _RectF(float(r.x), float(r.y), float(r.right), float(r.bottom))
+        rf = _RectF(to_jfloat(r.x), to_jfloat(r.y), to_jfloat(r.right), to_jfloat(r.bottom))
         br = max(0, int(border_radius))
         if br > 0:
-            canvas.drawRoundRect(rf, float(br), float(br), p)
+            canvas.drawRoundRect(rf, to_jfloat(br), to_jfloat(br), p)
         else:
             canvas.drawRect(rf, p)
     return r
@@ -53,7 +56,7 @@ def line(surface, color, start_pos, end_pos, width=1):
     canvas = getattr(surface, "_canvas", None)
     if canvas is not None and _Paint is not None:
         p = _make_paint(color, max(1, int(width)))
-        canvas.drawLine(x1, y1, x2, y2, p)
+        canvas.drawLine(to_jfloat(x1), to_jfloat(y1), to_jfloat(x2), to_jfloat(y2), p)
     lx, rx = int(min(x1, x2)), int(max(x1, x2))
     ty, by = int(min(y1, y2)), int(max(y1, y2))
     return Rect(lx, ty, max(1, rx - lx), max(1, by - ty))
@@ -67,9 +70,9 @@ def lines(surface, color, closed, points, width=1):
     if canvas is not None and _Paint is not None and _Path is not None:
         p = _make_paint(color, max(1, int(width)))
         path = _Path()
-        path.moveTo(float(pts[0][0]), float(pts[0][1]))
+        path.moveTo(to_jfloat(pts[0][0]), to_jfloat(pts[0][1]))
         for pt in pts[1:]:
-            path.lineTo(float(pt[0]), float(pt[1]))
+            path.lineTo(to_jfloat(pt[0]), to_jfloat(pt[1]))
         if closed:
             path.close()
         canvas.drawPath(path, p)
@@ -84,6 +87,6 @@ def circle(surface, color, center, radius, width=0):
     canvas = getattr(surface, "_canvas", None)
     if canvas is not None and _Paint is not None:
         p = _make_paint(color, width)
-        canvas.drawCircle(cx, cy, rad, p)
+        canvas.drawCircle(to_jfloat(cx), to_jfloat(cy), to_jfloat(rad), p)
     ir = int(rad)
     return Rect(int(cx) - ir, int(cy) - ir, max(1, ir * 2), max(1, ir * 2))

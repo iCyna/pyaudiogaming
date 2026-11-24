@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>g2access — Compact High-Performance Screen Reader &amp; BASS-Routed TTS Engine — PyAudioGaming</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header role="banner">
+    <h1>g2access — Compact High-Performance Screen Reader &amp; BASS-Routed TTS Engine — PyAudioGaming</h1>
+    <nav aria-label="Documentation Navigation">
+    <a href="../index.html" class="">Home</a>
+    <a href="../01_getting_started.html" class="">01. Getting Started</a>
+    <a href="../02_window_input_menu.html" class="">02. Input &amp; Menu</a>
+    <a href="../03_audio_3d_fx.html" class="">03. 3D Audio</a>
+    <a href="../04_speech_vb_gui.html" class="">04. Speech, VB &amp; GUI</a>
+    <a href="../05_timer_worker_storage_haptics.html" class="">05. Advanced Systems</a>
+    <a href="../06_building_cross_platform.html" class="">06. Building</a>
+    <a href="../api_reference.html" class="">Module Reference</a>
+    </nav>
+  </header>
+  <main id="main-content" role="main">
+<p><a href="../api_reference.html">&larr; Back to All Modules</a></p>
+<div class="callout"><strong>Summary:</strong> Zero-bloat accessibility &amp; TTS router with shared AudioPipeline (BASS PCM, LRU cache, 3D/HRTF/FX) and dedicated OS drivers: windows.py, android.py, ios.py, macos.py, linux.py.</div>
+<h2>Usage Guide &amp; Examples</h2>
+
+<h3>How to Use</h3>
+<ul>
+  <li>Use <code>Router()</code> (alias <code>Auto()</code>) directly or through <code>pyaudiogaming.speech.Speech()</code>.</li>
+  <li>Automatically lazy-loads only the current OS drivers (<code>NVDA</code>, <code>ZDSR</code>, <code>JAWS</code>, <code>SystemAccess</code>, <code>Dolphin</code>, <code>PCTalker</code>, <code>SAPI5</code> on Windows; <code>TalkBack/Jieshuo</code> + <code>AndroidTTS</code> on Android; <code>VoiceOver</code> + <code>AVSpeech</code> / <code>say</code> on iOS/macOS; <code>SpeechDispatcher</code> + <code>eSpeak</code> on Linux).</li>
+  <li>All PCM-capable TTS engines share <code>AudioPipeline</code> for instant LRU-cached playback with full BASS <code>volume</code>, <code>pan</code>, <code>mono</code>, <code>hrtf</code>, <code>fx</code>, and <code>speak3d(...)</code>.</li>
+</ul>
+<pre><code>from pyaudiogaming.g2access import Router
+
+r = Router()
+print("Available:", r.get_outputs(), "Active:", r.get_active_output())
+r.output("Hello from G2Access!", interrupt=True)
+r.speak3d("Behind you!", 0, 0, 0, 0, -5, 0)</code></pre>
+
+<h2>Parameter &amp; API Tables</h2>
+<label for="mod-search">Filter symbols in this module:</label>
+<input id="mod-search" type="search" placeholder="Type method or parameter name..." oninput="filterMod(this.value)">
+<h3>Module-Level Functions</h3>
+<table class="api-tbl" id="tbl_g2access_funcs">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">function</span><code>create_providers()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>load_native_lib(name32, name64=None)</code></td><td><code>name32</code> (any, default: <code>required</code>)<br><code>name64</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>Load a native screen-reader shared library by architecture without console spam.</td></tr>
+    <tr><td><span class="badge">function</span><code>pcm_to_wav(pcm_bytes, sample_rate=22050, channels=1, bits=16)</code></td><td><code>pcm_bytes</code> (any, default: <code>required</code>)<br><code>sample_rate</code> (any, default: <code>22050</code>)<br><code>channels</code> (any, default: <code>1</code>)<br><code>bits</code> (any, default: <code>16</code>)</td><td><code>any</code></td><td>Wrap raw PCM bytes with a standard 44-byte RIFF/WAVE header.</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>AndroidScreenReader</code></h3>
+<table class="api-tbl" id="tbl_g2access_AndroidScreenReader">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">method</span><code>is_active()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>speak(text, interrupt=False)</code></td><td><code>text</code> (any, default: <code>required</code>)<br><code>interrupt</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>AndroidTTS</code></h3>
+<table class="api-tbl" id="tbl_g2access_AndroidTTS">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>is_active()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>speak(text, interrupt=False)</code></td><td><code>text</code> (any, default: <code>required</code>)<br><code>interrupt</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>speak3d(text, lx, ly, lz, sx, sy, sz, interrupt=False, **kwargs)</code></td><td><code>text</code> (any, default: <code>required</code>)<br><code>lx</code> (any, default: <code>required</code>)<br><code>ly</code> (any, default: <code>required</code>)<br><code>lz</code> (any, default: <code>required</code>)<br><code>sx</code> (any, default: <code>required</code>)<br><code>sy</code> (any, default: <code>required</code>)<br><code>sz</code> (any, default: <code>required</code>)<br><code>interrupt</code> (any, default: <code>False</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>silence()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_sound()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>list_engines()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_engine()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_engine(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>list_voice_languages()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_voice_language()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_voice_language(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>list_voices()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_voice()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_voice(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_use_system_default()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_use_system_default(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_rate()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_rate(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_pitch()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_pitch(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_volume()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_volume(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_pan()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_pan(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_sound_pitch()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_sound_pitch(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_output_device()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_output_device(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_mono()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_mono(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_hrtf()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_hrtf(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_fx()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_fx(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_zone_fx_provider(provider)</code></td><td><code>provider</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_auto_pause()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_auto_pause(enabled)</code></td><td><code>enabled</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>AudioPipeline</code></h3>
+<p>Shared zero-duplication BASS PCM playback, LRU cache, and 3D/HRTF/FX engine.</p>
+<table class="api-tbl" id="tbl_g2access_AudioPipeline">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__(synth_fn, cache_max=64)</code></td><td><code>synth_fn</code> (any, default: <code>required</code>)<br><code>cache_max</code> (any, default: <code>64</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>clear_cache()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>enqueue(text, cache_key, interrupt=True, spatial=None)</code></td><td><code>text</code> (any, default: <code>required</code>)<br><code>cache_key</code> (any, default: <code>required</code>)<br><code>interrupt</code> (any, default: <code>True</code>)<br><code>spatial</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>stop()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_sound()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>Provider</code></h3>
+<p>Minimal capability-driven base class for all g2access speech/braille drivers.</p>
+<table class="api-tbl" id="tbl_g2access_Provider">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">method</span><code>is_active()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>speak(text, interrupt=False)</code></td><td><code>text</code> (any, default: <code>required</code>)<br><code>interrupt</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>braille(text)</code></td><td><code>text</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>silence()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>speak3d(text, lx, ly, lz, sx, sy, sz, interrupt=False, **kwargs)</code></td><td><code>text</code> (any, default: <code>required</code>)<br><code>lx</code> (any, default: <code>required</code>)<br><code>ly</code> (any, default: <code>required</code>)<br><code>lz</code> (any, default: <code>required</code>)<br><code>sx</code> (any, default: <code>required</code>)<br><code>sy</code> (any, default: <code>required</code>)<br><code>sz</code> (any, default: <code>required</code>)<br><code>interrupt</code> (any, default: <code>False</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_capabilities()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_sound()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>list_voices()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>list_engines()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>list_voice_languages()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_rate()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_rate(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_pitch()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_pitch(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_volume()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_volume(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_voice()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_voice(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_pan()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_pan(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_sound_pitch()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_sound_pitch(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_output_device()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_output_device(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_mono()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_mono(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_hrtf()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_hrtf(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_fx()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_fx(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_zone_fx_provider(provider)</code></td><td><code>provider</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_auto_pause()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_auto_pause(enabled)</code></td><td><code>enabled</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_engine()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_engine(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_voice_language()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_voice_language(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_use_system_default()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_use_system_default(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>IOSVoiceOver</code></h3>
+<table class="api-tbl" id="tbl_g2access_IOSVoiceOver">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">method</span><code>is_active()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>speak(text, interrupt=False)</code></td><td><code>text</code> (any, default: <code>required</code>)<br><code>interrupt</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>IOSSpeech</code></h3>
+<table class="api-tbl" id="tbl_g2access_IOSSpeech">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>is_active()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>speak(text, interrupt=False)</code></td><td><code>text</code> (any, default: <code>required</code>)<br><code>interrupt</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>silence()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_rate()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_rate(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_pitch()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_pitch(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_volume()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_volume(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>SpeechDispatcherProvider</code></h3>
+<table class="api-tbl" id="tbl_g2access_SpeechDispatcherProvider">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>is_active()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>speak(text, interrupt=False)</code></td><td><code>text</code> (any, default: <code>required</code>)<br><code>interrupt</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>silence()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>ESpeakProvider</code></h3>
+<table class="api-tbl" id="tbl_g2access_ESpeakProvider">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>is_active()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>speak(text, interrupt=False)</code></td><td><code>text</code> (any, default: <code>required</code>)<br><code>interrupt</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>speak3d(text, lx, ly, lz, sx, sy, sz, interrupt=False, **kwargs)</code></td><td><code>text</code> (any, default: <code>required</code>)<br><code>lx</code> (any, default: <code>required</code>)<br><code>ly</code> (any, default: <code>required</code>)<br><code>lz</code> (any, default: <code>required</code>)<br><code>sx</code> (any, default: <code>required</code>)<br><code>sy</code> (any, default: <code>required</code>)<br><code>sz</code> (any, default: <code>required</code>)<br><code>interrupt</code> (any, default: <code>False</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>silence()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_sound()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>list_voices()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_voice()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_voice(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_rate()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_rate(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_pitch()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_pitch(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_volume()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_volume(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_pan()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_pan(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_sound_pitch()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_sound_pitch(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_output_device()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_output_device(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_mono()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_mono(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_hrtf()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_hrtf(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_fx()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_fx(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_zone_fx_provider(provider)</code></td><td><code>provider</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_auto_pause()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_auto_pause(enabled)</code></td><td><code>enabled</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>MacOSSpeech</code></h3>
+<table class="api-tbl" id="tbl_g2access_MacOSSpeech">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>is_active()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>speak(text, interrupt=False)</code></td><td><code>text</code> (any, default: <code>required</code>)<br><code>interrupt</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>speak3d(text, lx, ly, lz, sx, sy, sz, interrupt=False, **kwargs)</code></td><td><code>text</code> (any, default: <code>required</code>)<br><code>lx</code> (any, default: <code>required</code>)<br><code>ly</code> (any, default: <code>required</code>)<br><code>lz</code> (any, default: <code>required</code>)<br><code>sx</code> (any, default: <code>required</code>)<br><code>sy</code> (any, default: <code>required</code>)<br><code>sz</code> (any, default: <code>required</code>)<br><code>interrupt</code> (any, default: <code>False</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>silence()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_sound()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>list_voices()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_voice()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_voice(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_rate()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_rate(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_pitch()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_pitch(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_volume()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_volume(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_pan()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_pan(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_sound_pitch()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_sound_pitch(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_output_device()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_output_device(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_mono()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_mono(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_hrtf()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_hrtf(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_fx()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_fx(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_zone_fx_provider(provider)</code></td><td><code>provider</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_auto_pause()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_auto_pause(enabled)</code></td><td><code>enabled</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>Router</code></h3>
+<p>Lightweight speech/braille router selecting the best active driver per OS.</p>
+<table class="api-tbl" id="tbl_g2access_Router">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>output(text, interrupt=False)</code></td><td><code>text</code> (any, default: <code>required</code>)<br><code>interrupt</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>speak(text, interrupt=False)</code></td><td><code>text</code> (any, default: <code>required</code>)<br><code>interrupt</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>braille(text)</code></td><td><code>text</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>silence()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>speak3d(text, lx, ly, lz, sx, sy, sz, interrupt=False, **kwargs)</code></td><td><code>text</code> (any, default: <code>required</code>)<br><code>lx</code> (any, default: <code>required</code>)<br><code>ly</code> (any, default: <code>required</code>)<br><code>lz</code> (any, default: <code>required</code>)<br><code>sx</code> (any, default: <code>required</code>)<br><code>sy</code> (any, default: <code>required</code>)<br><code>sz</code> (any, default: <code>required</code>)<br><code>interrupt</code> (any, default: <code>False</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_outputs(active_only=False)</code></td><td><code>active_only</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_output()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_active_output()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_output(name=None)</code></td><td><code>name</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_capabilities()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>list_fx()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_sound()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_volume()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_volume(v)</code></td><td><code>v</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_pitch()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_pitch(v)</code></td><td><code>v</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_rate()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_rate(v)</code></td><td><code>v</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_voice()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_voice(v)</code></td><td><code>v</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_pan()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_pan(v)</code></td><td><code>v</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_sound_pitch()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_sound_pitch(v)</code></td><td><code>v</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_output_device()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_output_device(v)</code></td><td><code>v</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_mono()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_mono(v)</code></td><td><code>v</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_hrtf()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_hrtf(v)</code></td><td><code>v</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_fx()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_fx(v)</code></td><td><code>v</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_zone_fx_provider(provider)</code></td><td><code>provider</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_auto_pause()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_auto_pause(v)</code></td><td><code>v</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>list_voices()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>list_engines()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_engine()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_engine(v)</code></td><td><code>v</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>list_voice_languages()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_voice_language()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_voice_language(v)</code></td><td><code>v</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_use_system_default()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_use_system_default(v)</code></td><td><code>v</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>NVDAProvider</code></h3>
+<table class="api-tbl" id="tbl_g2access_NVDAProvider">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>is_active()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>speak(text, interrupt=False)</code></td><td><code>text</code> (any, default: <code>required</code>)<br><code>interrupt</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>braille(text)</code></td><td><code>text</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>silence()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>ZDSRProvider</code></h3>
+<table class="api-tbl" id="tbl_g2access_ZDSRProvider">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>is_active()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>speak(text, interrupt=False)</code></td><td><code>text</code> (any, default: <code>required</code>)<br><code>interrupt</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>silence()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>JAWSProvider</code></h3>
+<table class="api-tbl" id="tbl_g2access_JAWSProvider">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>is_active()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>speak(text, interrupt=False)</code></td><td><code>text</code> (any, default: <code>required</code>)<br><code>interrupt</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>braille(text)</code></td><td><code>text</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>silence()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>SystemAccessProvider</code></h3>
+<table class="api-tbl" id="tbl_g2access_SystemAccessProvider">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>is_active()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>speak(text, interrupt=False)</code></td><td><code>text</code> (any, default: <code>required</code>)<br><code>interrupt</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>braille(text)</code></td><td><code>text</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>silence()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>DolphinProvider</code></h3>
+<table class="api-tbl" id="tbl_g2access_DolphinProvider">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>is_active()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>speak(text, interrupt=False)</code></td><td><code>text</code> (any, default: <code>required</code>)<br><code>interrupt</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>silence()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>PCTalkerProvider</code></h3>
+<table class="api-tbl" id="tbl_g2access_PCTalkerProvider">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>is_active()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>speak(text, interrupt=False)</code></td><td><code>text</code> (any, default: <code>required</code>)<br><code>interrupt</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>silence()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>SAPI5Provider</code></h3>
+<table class="api-tbl" id="tbl_g2access_SAPI5Provider">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>is_active()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>speak(text, interrupt=False)</code></td><td><code>text</code> (any, default: <code>required</code>)<br><code>interrupt</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>speak3d(text, lx, ly, lz, sx, sy, sz, interrupt=False, **kwargs)</code></td><td><code>text</code> (any, default: <code>required</code>)<br><code>lx</code> (any, default: <code>required</code>)<br><code>ly</code> (any, default: <code>required</code>)<br><code>lz</code> (any, default: <code>required</code>)<br><code>sx</code> (any, default: <code>required</code>)<br><code>sy</code> (any, default: <code>required</code>)<br><code>sz</code> (any, default: <code>required</code>)<br><code>interrupt</code> (any, default: <code>False</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>silence()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_sound()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>list_voices()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_voice()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_voice(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_rate()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_rate(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_pitch()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_pitch(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_volume()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_volume(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_pan()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_pan(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_sound_pitch()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_sound_pitch(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_output_device()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_output_device(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_mono()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_mono(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_hrtf()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_hrtf(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_fx()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_fx(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_zone_fx_provider(provider)</code></td><td><code>provider</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_auto_pause()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_auto_pause(enabled)</code></td><td><code>enabled</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<script>
+function filterMod(q) {
+  q = (q || '').toLowerCase();
+  var rows = document.querySelectorAll('.api-tbl tbody tr');
+  for (var i = 0; i < rows.length; i++) {
+    rows[i].style.display = rows[i].innerText.toLowerCase().indexOf(q) !== -1 ? '' : 'none';
+  }
+}
+</script>
+  </main>
+  <footer role="contentinfo">
+    PyAudioGaming Official Documentation &mdash; Cross-Platform Audio Gaming for Windows, Linux, macOS, Android, iOS &amp; Web.
+  </footer>
+</body>
+</html>

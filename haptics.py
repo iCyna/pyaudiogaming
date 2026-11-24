@@ -1,15 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Cross-platform haptics & rumble feedback for PyAudioGaming.
-
-Supports:
-- Android: ``android.os.Vibrator`` / ``VibratorManager`` + ``VibrationEffect`` (via Chaquopy or pyjnius)
-- iOS: ``UIImpactFeedbackGenerator`` / ``UINotificationFeedbackGenerator`` (via rubicon-objc if installed)
-- Windows Gamepad: Native XInput (``xinput1_4.dll`` / ``xinput1_3.dll`` / ``xinput9_1_0.dll``) via ``ctypes``
-- Desktop Gamepad (Windows/Linux/macOS): ``pygame.joystick.Joystick.rumble`` (SDL2)
-- Fallback: Safe silent no-op when no haptic hardware is available.
-
-All pattern playback is 100% single-threaded (call ``haptics.update()`` in your game loop).
-"""
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# Haptic vibration and gamepad rumble feedback controller.
+# Supports Windows, Linux, macOS, Android, and iOS.
 
 import ctypes
 import os

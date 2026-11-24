@@ -1,0 +1,56 @@
+========================================================================
+MODULE: pyaudiogaming.sound_modules.control
+sound_modules.control — Core BASS Lifecycle, Codec Plugins & Zero-Copy Cache
+========================================================================
+
+SUMMARY:
+Low-level BASS initialization, on-demand codec plugin loader (FLAC, Opus, AAC, ALAC, WMA, MPC, MIDI), mmap/RAM preloading, HSAMPLE caching, and SPAK memory buffer registry.
+
+[MODULE FUNCTIONS]
+----------------------------------------
+* parse_flags(base_flags=0, **kwargs) -> any
+* bass_call(func, *args, check_error=False, default=0) -> any
+* encode_path(path) -> any
+* register_hstream(channel) -> any
+* unregister_hstream(e) -> any
+* make_wav_header(total_len, freq, bits, chans, fmt=3) -> any
+* get_sound_preload(filename, allow_creating=False) -> any
+* sound_preload_perform(channel, filename) -> any
+* preload_encoded(filename, use_mmap=True) -> any
+* preload(filename) -> any
+* trigger_preload_async(filename) -> any
+* sound_preload_release(pre) -> any
+* sound_preloads_clean(force=False) -> any
+* extract_raw_bytes(data) -> any
+* save_mem_buffer(key, data_bytes, target='both', aliases=None) -> any
+* register_spak_lazy(primary_key, aliases, loader_fn, target='both', archive_obj=None) -> any
+* resolve_memory_source(src) -> any
+* get_cached_sample(filename, flags=0, max_chans=64, chan_flags=None) -> any
+* release_sample(handle) -> any
+* load_sound_file(filename, key=None, target='hstream') -> any
+* get_mem_buffer(key) -> any
+* free_mem_buffer(key) -> any
+* clear_all_buffers() -> any
+* load_codec_plugins(names=None) -> any
+  Auto-load available BASS codec/format plugins (FLAC, Opus, AAC, ALAC, WMA, MPC, MIDI, SSL).
+* init_sound(dev=-1, freq=44100, period=10, bbuffer=500, flags=0, clsid=None) -> any
+* shutdown_sound() -> any
+
+[CLASS HStreamEntry]
+----------------------------------------
+* HStreamEntry.__init__(ch, p=None) -> any [constructor]
+
+[CLASS SoundPreload]
+----------------------------------------
+* SoundPreload.__init__(fn, data=None, c_buf=None, ptr=None, size=0, fobj=None) -> any [constructor]
+* SoundPreload.close() -> any [method]
+
+[CLASS MixerNode]
+----------------------------------------
+* MixerNode.__init__(parent=None, for_single_sound=False, for_decode=False, floatingpoint=True, freq=44100, chans=2) -> any [constructor]
+* MixerNode.add_mixer(m) -> any [method]
+* MixerNode.remove_mixer(m, internal=False) -> any [method]
+* MixerNode.add_channel(raw_ch, paused=False, flags=0) -> any [method]
+* MixerNode.remove_channel(raw_ch) -> any [method]
+* MixerNode.set_mixer(m=None) -> any [method]
+* MixerNode.free() -> any [method]

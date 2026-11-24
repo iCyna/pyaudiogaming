@@ -1,0 +1,5 @@
+﻿Module,Owner,Kind,Symbol,Parameters,Returns,Description
+key,module,function,token,"min=4, max=12",any,
+key,module,function,code,name,any,
+key,module,function,chord,name,any,
+key,module,function,match,"mod, mask",any,

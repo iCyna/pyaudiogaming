@@ -1,4 +1,9 @@
 ﻿Module,Owner,Kind,Symbol,Parameters,Returns,Description
+vb,module,function,register_keyboard_layout,"lang_code, rows, label=None",any,Register or override a language keyboard layout (4 rows of key tokens).
+vb,module,function,register_composer,"lang_code, composer_fn",any,"Register an optional input composer fn(prefix, ch) -> (new_prefix, composed_bool) for any language."
+vb,module,function,compose_unicode_nfc,"prefix, ch",any,Universal Unicode NFC combining-mark composer (works for all scripts with zero language bias).
+vb,module,function,detect_os_keyboard_languages,,any,Auto-detect enabled keyboard languages from OS (Android / iOS / Windows / locale).
+vb,module,function,navigate_text,"lines, x, y, direction, granularity='character'",any,Move cursor by direction (-1/+1) at granularity (character/word/line/sentence/paragraph).
 vb,module,function,dialog,"title='Dialog', text='', buttons=('OK', 'Cancel'), default=0, cancel=1, callback=None, window=None",any,Interactive modal dialog with multi-button navigation and touch support.
 vb,module,function,message,"m, callback=None, open=None, move=None, close=None, window=None",any,
 vb,module,function,get_conput,"name, key, fallback=None",any,
@@ -14,6 +19,21 @@ vb,module,function,success_box,"title='Success', text='', ok_text='OK', window=N
 vb,module,function,error_box,"title='Error', text='', details=None, ok_text='OK', copy_text='Copy Details', window=None",any,Accessible error dialog with optional Copy Details button for tracebacks/error logs.
 vb,module,function,choice_box,"title='Select', text='', choices=(), ok_text='OK', cancel_text='Cancel', window=None",any,Quick single-choice accessible selection box returning selected item string or None.
 vb,module,function,progress_box,"title='Working', text='', step_fn=None, cancelable=True, announce_step=10, cancel_text='Cancel', window=None",any,Accessible modal progress dialog.
+vb,ClipboardHistory,constructor,ClipboardHistory.__init__,max_items=15,any,
+vb,ClipboardHistory,method,ClipboardHistory.push,text,any,
+vb,ClipboardHistory,method,ClipboardHistory.list_items,,any,
+vb,VirtualKeyboard,constructor,VirtualKeyboard.__init__,"number_only=False, single_tap_type=True, langs=None, composers=None, top_ratio=0.42",any,
+vb,VirtualKeyboard,property,VirtualKeyboard.current_lang,,any,
+vb,VirtualKeyboard,method,VirtualKeyboard.current_rows,,any,
+vb,VirtualKeyboard,method,VirtualKeyboard.display_label,tok,any,
+vb,VirtualKeyboard,method,VirtualKeyboard.spoken_label,tok,any,
+vb,VirtualKeyboard,method,VirtualKeyboard.key_at,"nx, ny",any,
+vb,VirtualKeyboard,method,VirtualKeyboard.cycle_shift,,any,
+vb,VirtualKeyboard,method,VirtualKeyboard.cycle_lang,,any,
+vb,VirtualKeyboard,method,VirtualKeyboard.compose_char,"prefix, ch",any,
+vb,VirtualKeyboard,method,VirtualKeyboard.activate_key,tok,any,
+vb,VirtualKeyboard,method,VirtualKeyboard.flush_pending,say_fn=None,any,Commit pending 1-tap focus after double-tap timeout (TalkBack TouchExplorer model).
+vb,VirtualKeyboard,method,VirtualKeyboard.handle_touch,"ev_type, finger_id, nx, ny, say_fn=None, fdown=1792, fup=1793, fmotion=1794",any,
 vb,form,constructor,form.__init__,"window=None, config=None",any,
 vb,form,method,form.add,"name, kind='button', value=None, choices=None, callback=None, config=None, **kwargs",any,
 vb,form,method,form.notify_live,"name_or_text, new_value=None, interrupt=True",any,Dynamic live region announcement (NVDA aria-live style).

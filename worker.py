@@ -1,17 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Cross-platform background task & shared-state runner for PyAudioGaming.
-
-Automatically adapts to every platform with one unified API:
-- Windows / Linux / macOS: supports ``process`` (true multi-core CPU parallelism),
-  ``thread`` (zero-overhead I/O & C-extension parallelism), and ``inline``.
-- Android / iOS: automatically falls back from ``process`` to ``thread`` because
-  mobile sandboxes restrict ``multiprocessing`` / ``sem_open``.
-- Web (Pyodide / Emscripten): automatically falls back to ``inline`` so apps never
-  crash with ``NotImplementedError``.
-
-Callbacks (``on_done``, ``on_error``) are always delivered safely on the **main game
-thread** when you call ``pool.poll()`` inside your game loop.
-"""
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# Background task runner supporting process, thread, and inline execution.
+# Supports Windows, Linux, macOS, Android, and iOS.
 
 from concurrent.futures import Future, ProcessPoolExecutor, ThreadPoolExecutor
 import multiprocessing

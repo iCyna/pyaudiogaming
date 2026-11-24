@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>sound_modules.control — Core BASS Lifecycle, Codec Plugins &amp; Zero-Copy Cache — PyAudioGaming</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header role="banner">
+    <h1>sound_modules.control — Core BASS Lifecycle, Codec Plugins &amp; Zero-Copy Cache — PyAudioGaming</h1>
+    <nav aria-label="Documentation Navigation">
+    <a href="../index.html" class="">Home</a>
+    <a href="../01_getting_started.html" class="">01. Getting Started</a>
+    <a href="../02_window_input_menu.html" class="">02. Input &amp; Menu</a>
+    <a href="../03_audio_3d_fx.html" class="">03. 3D Audio</a>
+    <a href="../04_speech_vb_gui.html" class="">04. Speech, VB &amp; GUI</a>
+    <a href="../05_timer_worker_storage_haptics.html" class="">05. Advanced Systems</a>
+    <a href="../06_building_cross_platform.html" class="">06. Building</a>
+    <a href="../api_reference.html" class="">Module Reference</a>
+    </nav>
+  </header>
+  <main id="main-content" role="main">
+<p><a href="../api_reference.html">&larr; Back to All Modules</a></p>
+<div class="callout"><strong>Summary:</strong> Low-level BASS initialization, on-demand codec plugin loader (FLAC, Opus, AAC, ALAC, WMA, MPC, MIDI), mmap/RAM preloading, HSAMPLE caching, and SPAK memory buffer registry.</div>
+<h2>Usage Guide &amp; Examples</h2>
+
+<h3>How to Use</h3>
+<p>Most apps use <code>sound_pool.output()</code>, which calls <code>control.init_sound()</code> automatically. Use <code>control</code> directly for custom memory buffers, explicit codec loading, or cache cleanup.</p>
+<pre><code>from pyaudiogaming.sound_modules import control
+
+control.init_sound(dev=-1, freq=44100)
+control.load_codec_plugins()
+control.load_sound_file("res/sounds/click.ogg", key="ui_click", target="both")</code></pre>
+
+<h2>Parameter &amp; API Tables</h2>
+<label for="mod-search">Filter symbols in this module:</label>
+<input id="mod-search" type="search" placeholder="Type method or parameter name..." oninput="filterMod(this.value)">
+<h3>Module-Level Functions</h3>
+<table class="api-tbl" id="tbl_sound_modules.control_funcs">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">function</span><code>parse_flags(base_flags=0, **kwargs)</code></td><td><code>base_flags</code> (any, default: <code>0</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>bass_call(func, *args, check_error=False, default=0)</code></td><td><code>func</code> (any, default: <code>required</code>)<br><code>*args</code> (tuple, default: <code>optional</code>)<br><code>check_error</code> (any, default: <code>False</code>)<br><code>default</code> (any, default: <code>0</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>encode_path(path)</code></td><td><code>path</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>register_hstream(channel)</code></td><td><code>channel</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>unregister_hstream(e)</code></td><td><code>e</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>make_wav_header(total_len, freq, bits, chans, fmt=3)</code></td><td><code>total_len</code> (any, default: <code>required</code>)<br><code>freq</code> (any, default: <code>required</code>)<br><code>bits</code> (any, default: <code>required</code>)<br><code>chans</code> (any, default: <code>required</code>)<br><code>fmt</code> (any, default: <code>3</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>get_sound_preload(filename, allow_creating=False)</code></td><td><code>filename</code> (any, default: <code>required</code>)<br><code>allow_creating</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>sound_preload_perform(channel, filename)</code></td><td><code>channel</code> (any, default: <code>required</code>)<br><code>filename</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>preload_encoded(filename, use_mmap=True)</code></td><td><code>filename</code> (any, default: <code>required</code>)<br><code>use_mmap</code> (any, default: <code>True</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>preload(filename)</code></td><td><code>filename</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>trigger_preload_async(filename)</code></td><td><code>filename</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>sound_preload_release(pre)</code></td><td><code>pre</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>sound_preloads_clean(force=False)</code></td><td><code>force</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>extract_raw_bytes(data)</code></td><td><code>data</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>save_mem_buffer(key, data_bytes, target=&#x27;both&#x27;, aliases=None)</code></td><td><code>key</code> (any, default: <code>required</code>)<br><code>data_bytes</code> (any, default: <code>required</code>)<br><code>target</code> (any, default: <code>&#x27;both&#x27;</code>)<br><code>aliases</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>register_spak_lazy(primary_key, aliases, loader_fn, target=&#x27;both&#x27;, archive_obj=None)</code></td><td><code>primary_key</code> (any, default: <code>required</code>)<br><code>aliases</code> (any, default: <code>required</code>)<br><code>loader_fn</code> (any, default: <code>required</code>)<br><code>target</code> (any, default: <code>&#x27;both&#x27;</code>)<br><code>archive_obj</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>resolve_memory_source(src)</code></td><td><code>src</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>get_cached_sample(filename, flags=0, max_chans=64, chan_flags=None)</code></td><td><code>filename</code> (any, default: <code>required</code>)<br><code>flags</code> (any, default: <code>0</code>)<br><code>max_chans</code> (any, default: <code>64</code>)<br><code>chan_flags</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>release_sample(handle)</code></td><td><code>handle</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>load_sound_file(filename, key=None, target=&#x27;hstream&#x27;)</code></td><td><code>filename</code> (any, default: <code>required</code>)<br><code>key</code> (any, default: <code>None</code>)<br><code>target</code> (any, default: <code>&#x27;hstream&#x27;</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>get_mem_buffer(key)</code></td><td><code>key</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>free_mem_buffer(key)</code></td><td><code>key</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>clear_all_buffers()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>load_codec_plugins(names=None)</code></td><td><code>names</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>Auto-load available BASS codec/format plugins (FLAC, Opus, AAC, ALAC, WMA, MPC, MIDI, SSL).</td></tr>
+    <tr><td><span class="badge">function</span><code>init_sound(dev=-1, freq=44100, period=10, bbuffer=500, flags=0, clsid=None)</code></td><td><code>dev</code> (any, default: <code>-1</code>)<br><code>freq</code> (any, default: <code>44100</code>)<br><code>period</code> (any, default: <code>10</code>)<br><code>bbuffer</code> (any, default: <code>500</code>)<br><code>flags</code> (any, default: <code>0</code>)<br><code>clsid</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>shutdown_sound()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>HStreamEntry</code></h3>
+<table class="api-tbl" id="tbl_sound_modules.control_HStreamEntry">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__(ch, p=None)</code></td><td><code>ch</code> (any, default: <code>required</code>)<br><code>p</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>SoundPreload</code></h3>
+<table class="api-tbl" id="tbl_sound_modules.control_SoundPreload">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__(fn, data=None, c_buf=None, ptr=None, size=0, fobj=None)</code></td><td><code>fn</code> (any, default: <code>required</code>)<br><code>data</code> (any, default: <code>None</code>)<br><code>c_buf</code> (any, default: <code>None</code>)<br><code>ptr</code> (any, default: <code>None</code>)<br><code>size</code> (any, default: <code>0</code>)<br><code>fobj</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>close()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>MixerNode</code></h3>
+<table class="api-tbl" id="tbl_sound_modules.control_MixerNode">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">constructor</span><code>__init__(parent=None, for_single_sound=False, for_decode=False, floatingpoint=True, freq=44100, chans=2)</code></td><td><code>parent</code> (any, default: <code>None</code>)<br><code>for_single_sound</code> (any, default: <code>False</code>)<br><code>for_decode</code> (any, default: <code>False</code>)<br><code>floatingpoint</code> (any, default: <code>True</code>)<br><code>freq</code> (any, default: <code>44100</code>)<br><code>chans</code> (any, default: <code>2</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>add_mixer(m)</code></td><td><code>m</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>remove_mixer(m, internal=False)</code></td><td><code>m</code> (any, default: <code>required</code>)<br><code>internal</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>add_channel(raw_ch, paused=False, flags=0)</code></td><td><code>raw_ch</code> (any, default: <code>required</code>)<br><code>paused</code> (any, default: <code>False</code>)<br><code>flags</code> (any, default: <code>0</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>remove_channel(raw_ch)</code></td><td><code>raw_ch</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_mixer(m=None)</code></td><td><code>m</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>free()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<script>
+function filterMod(q) {
+  q = (q || '').toLowerCase();
+  var rows = document.querySelectorAll('.api-tbl tbody tr');
+  for (var i = 0; i < rows.length; i++) {
+    rows[i].style.display = rows[i].innerText.toLowerCase().indexOf(q) !== -1 ? '' : 'none';
+  }
+}
+</script>
+  </main>
+  <footer role="contentinfo">
+    PyAudioGaming Official Documentation &mdash; Cross-Platform Audio Gaming for Windows, Linux, macOS, Android, iOS &amp; Web.
+  </footer>
+</body>
+</html>

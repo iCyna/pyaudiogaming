@@ -8,11 +8,13 @@ Single-config build tool driving PyInstaller, Nuitka, Cython/GCC/MSVC, cx_Freeze
 
 [MODULE FUNCTIONS]
 ----------------------------------------
-* prepare_android(project, name, data=(), arch=None, extra_reqs=()) -> any
-* build_android(project, name, data=(), arch=None, args=(), prepare_only=False, rename_file=None, out_dir=None) -> any
-* prepare_beeware(project, name, target_os, data=(), arch=None, extra_reqs=()) -> any
+* preflight_check(project, data=(), target_os=None, extra_reqs=(), test_run=False, test_timeout=5.0) -> any
+  Verify syntax, detect missing modules, check data paths, and optionally smoke-test the project.
+* prepare_android(project, name, data=(), arch=None, extra_reqs=(), workers=None, error_mode=1) -> any
+* build_android(project, name, data=(), arch=None, args=(), prepare_only=False, rename_file=None, out_dir=None, workers=None, error_mode=1) -> any
+* prepare_beeware(project, name, target_os, data=(), arch=None, extra_reqs=(), error_mode=1) -> any
   Chuẩn bị workspace Briefcase hoàn chỉnh cho iOS, macOS, Linux, Windows hoặc Web.
-* build_beeware(project, name, target_os, data=(), arch=None, args=(), prepare_only=False, rename_file=None, out_dir=None) -> any
+* build_beeware(project, name, target_os, data=(), arch=None, args=(), prepare_only=False, rename_file=None, out_dir=None, error_mode=1) -> any
   Build ứng dụng qua BeeWare (Briefcase) cho iOS, macOS, Linux, Windows hoặc Web.
 * parse_val(val) -> any
 * get_target_lib_info(os_name, arch_override=None) -> any
@@ -24,7 +26,9 @@ Single-config build tool driving PyInstaller, Nuitka, Cython/GCC/MSVC, cx_Freeze
 * resolve_gcc_binary(host_os, target_os, arch=None, is_cpp=False) -> any
 * build_command(tool, PROJECT, PROJECT_FULL_NAME, rename_file, args_compile, zstandard, target_os, arch=None) -> any
 * run_build_step(cmd_or_list, project_name) -> any
-* build(PROJECT=None, PROJECT_FULL_NAME=None, args_compile=[], data=[], rename_file=None, packet=False, zstandard=True, mode='pyinstaller', platforms=None, arch=None) -> any
+* build_g2rt_windows(project, name, data=(), arch=None, args=(), rename_file=None, out_dir=None, workers=None, error_mode=1, preserve_user_files=None) -> any
+  Build Windows: 1 file <name>.exe (embedded runtime) + 1 file g2rt.dll (all Cython modules + ChaCha20 vault).
+* build(PROJECT=None, PROJECT_FULL_NAME=None, args_compile=[], data=[], rename_file=None, packet=False, zstandard=True, mode='pyinstaller', platforms=None, arch=None, log=False, workers=None, error_mode=1, use_g2rt_tk=True, check=True, test_run=False, preserve_user_files=None) -> any
 * create_template(filename='build.txt', legacy=False) -> any
 * interactive_make() -> any
 * work(config_file) -> any

@@ -1,0 +1,6 @@
+﻿Module,Owner,Kind,Symbol,Parameters,Returns,Description
+inputBox,module,function,check_qt,,any,
+inputBox,module,function,check,,any,
+inputBox,module,function,kbt,"self, title, message, password=False, dir_dialog=False, file_dialog=False, config=None",any,
+inputBox,module,function,kbc,"self, title, message, choices, multi=False, config=None",any,
+inputBox,module,function,dialogMessage,"title, message, style=INFO, y=True, n=False, config=None",any,

@@ -30,6 +30,14 @@
           "doc": ""
         },
         {
+          "name": "cipher",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
           "name": "generate_key",
           "kind": "method",
           "signature": "password: str",
@@ -54,7 +62,7 @@
               "default": "required"
             }
           ],
-          "returns": "Fernet",
+          "returns": "any",
           "doc": "Tạo đối tượng Fernet từ key."
         },
         {

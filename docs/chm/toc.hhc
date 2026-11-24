@@ -15,11 +15,15 @@
   <UL>
     <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.window"><param name="Local" value="..\html\modules\window.html"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.speech"><param name="Local" value="..\html\modules\speech.html"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.g2access"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.sound_pool"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.sound_fx"><param name="Local" value="..\html\modules\sound_fx.html"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.sound_modules.control"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.menu"><param name="Local" value="..\html\modules\menu.html"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.vb"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.gui"><param name="Local" value="..\html\modules\gui.html"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.inputBox"><param name="Local" value="..\html\modules\inputBox.html"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.key"><param name="Local" value="..\html\modules\key.html"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.timer"><param name="Local" value="..\html\modules\timer.html"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.haptics"><param name="Local" value="..\html\modules\haptics.html"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.notify"><param name="Local" value="..\html\modules\notify.html"></OBJECT>
@@ -29,6 +33,8 @@
     <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.input_map"><param name="Local" value="..\html\modules\input_map.html"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.file"><param name="Local" value="..\html\modules\file.html"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.utils"><param name="Local" value="..\html\modules\utils.html"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.buffer"><param name="Local" value="..\html\modules\buffer.html"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.common"><param name="Local" value="..\html\modules\common.html"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.system"><param name="Local" value="..\html\modules\system.html"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Name" value="pyaudiogaming.compile"><param name="Local" value="..\html\modules\compile.html"></OBJECT>
   </UL>

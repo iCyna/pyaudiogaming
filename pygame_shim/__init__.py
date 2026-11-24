@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Android BeeWare native pygame shim for PyAudioGaming."""
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# Native mobile pygame compatibility shim for PyAudioGaming.
+# Supports Android and iOS.
+
 from .locals import *  # noqa: F401,F403
 from .rect import Rect
 from .surface import Surface
@@ -12,7 +15,9 @@ from . import draw
 from . import font
 from . import scrap
 from . import mouse
+from . import joystick
 from . import _android_bridge
+from . import _ios_bridge
 
 error = RuntimeError
 _INIT_DONE = False

@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Thread-safe pygame.event queue shim."""
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# Thread-safe pygame.event queue shim.
+# Supports Android and iOS.
+
 from collections import deque
 import threading
 

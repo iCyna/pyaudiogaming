@@ -402,3 +402,25 @@ BASS_FX_BPM_BeatGetParameters = func_type(ctypes.c_bool, ctypes.c_uint32, ctypes
 
 #BOOL BASS_FXDEF(BASS_FX_BPM_BeatFree)(DWORD handle);
 BASS_FX_BPM_BeatFree = func_type(ctypes.c_bool, ctypes.c_uint32)(('BASS_FX_BPM_BeatFree', bass_fx_module))
+
+# Additional BASS_FX 2.4 structures & constants (ECHO4, ROTATE)
+BASS_FX_BFX_ECHO4 = 0x10016
+
+
+class BASS_BFX_ECHO4(ctypes.Structure):
+    _fields_ = [
+        ('fDryMix', ctypes.c_float),
+        ('fWetMix', ctypes.c_float),
+        ('fFeedback', ctypes.c_float),
+        ('fDelay', ctypes.c_float),
+        ('bStereo', ctypes.c_int),
+        ('lChannel', ctypes.c_int),
+    ]
+
+
+class BASS_BFX_ROTATE(ctypes.Structure):
+    _fields_ = [
+        ('fRate', ctypes.c_float),
+        ('lChannel', ctypes.c_int),
+    ]
+

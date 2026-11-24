@@ -21,11 +21,15 @@ Title=PyAudioGaming Official Documentation
 ..\html\style.css
 ..\html\modules\window.html
 ..\html\modules\speech.html
+..\html\modules\g2access.html
 ..\html\modules\sound_pool.html
 ..\html\modules\sound_fx.html
+..\html\modules\sound_modules.control.html
 ..\html\modules\menu.html
 ..\html\modules\vb.html
 ..\html\modules\gui.html
+..\html\modules\inputBox.html
+..\html\modules\key.html
 ..\html\modules\timer.html
 ..\html\modules\haptics.html
 ..\html\modules\notify.html
@@ -35,5 +39,7 @@ Title=PyAudioGaming Official Documentation
 ..\html\modules\input_map.html
 ..\html\modules\file.html
 ..\html\modules\utils.html
+..\html\modules\buffer.html
+..\html\modules\common.html
 ..\html\modules\system.html
 ..\html\modules\compile.html

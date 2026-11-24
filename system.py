@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-# System checker for libraries
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# Platform detection and native shared library path resolver.
+# Supports Windows, Linux, macOS, Android, and iOS.
 
 import platform
 import os

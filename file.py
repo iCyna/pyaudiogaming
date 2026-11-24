@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-# copyright 2025 belong ihcyna (Labubu)<phucnggo29@gmail.com>.
-#files loader, saver and encoder functions etc
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# File loader, saver, and encrypted JSON/pickle storage helpers.
+# Supports Windows, Linux, macOS, Android, and iOS.
 
 import json
 import hashlib
@@ -8,19 +9,22 @@ import pickle
 import os
 import shutil
 import base64
-from cryptography.fernet import Fernet
 import io
-from Crypto.Cipher import AES
-from Crypto.Util.Padding import pad, unpad
 
 class File:
 	def __init__(self, password: str, encode: bool = False, aes: bool = False):
 		self.key = self.generate_key(password)
-		self.cipher = self.dokey(self.key)
+		self._cipher = None
 		self.aes_key = hashlib.sha256(password.encode()).digest()  # Tạo khóa AES từ khóa Fernet
 		self.file_obj = None
 		self.encode = encode
 		self.aes = aes
+
+	@property
+	def cipher(self):
+		if self._cipher is None:
+			self._cipher = self.dokey(self.key)
+		return self._cipher
 
 	@staticmethod
 	def generate_key(password: str) -> bytes:
@@ -30,15 +34,18 @@ class File:
 		return base64.urlsafe_b64encode(hashlib.sha256(password.encode()).digest())
 
 	@staticmethod
-	def dokey(key: bytes) -> Fernet:
+	def dokey(key: bytes):
 		"""
 		Tạo đối tượng Fernet từ key.
 		"""
+		from cryptography.fernet import Fernet
 		return Fernet(key)
 	def aes_encrypt(self, data: bytes) -> bytes:
 		"""
 		Mã hóa dữ liệu bằng AES.
 		"""
+		from Crypto.Cipher import AES
+		from Crypto.Util.Padding import pad
 		iv = os.urandom(16)
 		cipher = AES.new(self.aes_key, AES.MODE_CBC, iv)
 		encrypted_data = cipher.encrypt(pad(data, AES.block_size))
@@ -48,6 +55,8 @@ class File:
 		"""
 		Giải mã dữ liệu bằng AES.
 		"""
+		from Crypto.Cipher import AES
+		from Crypto.Util.Padding import unpad
 		iv = data[:16]
 		encrypted_data = data[16:]
 		cipher = AES.new(self.aes_key, AES.MODE_CBC, iv)

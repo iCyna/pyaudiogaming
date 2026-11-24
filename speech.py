@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-# speech wrapper functions
-# copyright 2026 belong ihcyna (Labubu)<phucnggo29@gmail.com>.
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# Screen reader and TTS speech output wrapper with per-engine profiles.
+# Supports Windows, Linux, macOS, Android, and iOS.
 
-from .accessible_output2.outputs.auto import *
+from .g2access import Auto, Router
 
 class Speech:
 	def __init__(self):
@@ -77,6 +78,14 @@ class Speech:
 	def set_speech_auto_pause(self, enabled): return self.speech.set_auto_pause(enabled)
 	def list_voices(self): return self.speech.list_voices()
 	get_speech_voices = list_voices
+	def list_engines(self): return self.speech.list_engines()
+	def get_speech_engine(self): return self.speech.get_engine()
+	def set_speech_engine(self, value): return self.speech.set_engine(value)
+	def list_voice_languages(self): return self.speech.list_voice_languages()
+	def get_speech_voice_language(self): return self.speech.get_voice_language()
+	def set_speech_voice_language(self, value): return self.speech.set_voice_language(value)
+	def get_speech_use_system_default(self): return self.speech.get_use_system_default()
+	def set_speech_use_system_default(self, value): return self.speech.set_use_system_default(value)
 	def get_outputs(self, active_only=False): return self.speech.get_outputs(active_only=active_only)
 	get_screen_readers = get_outputs
 	def get_output(self): return self.speech.get_output()

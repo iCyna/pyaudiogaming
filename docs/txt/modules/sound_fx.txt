@@ -1,10 +1,10 @@
 ========================================================================
 MODULE: pyaudiogaming.sound_fx
-sound_fx — Real-Time Audio Effects (Reverb, EQ, Echo, Distortion, Chorus)
+sound_fx — Unified FX Engine (BASS DX8, BASS_FX & 45 Steam Audio Presets)
 ========================================================================
 
 SUMMARY:
-High-level DSP effect presets and real-time BASS_FX / DX8 effect chains attached to any sound or mixer channel.
+High-level DSP & Steam Audio acoustic FX catalog: 17 DX8 Reverbs, Freeverb, Echo/Echo2/Echo3/Echo4, Rotate, Chorus, Flanger, Phaser, AutoWah, Compressor, Distortion, PitchShift, 12 Biquad Filters, 45 Steam Audio presets, and dynamic colon-string parser.
 
 
 [CLASS Basic]
@@ -64,6 +64,14 @@ Central BASS_FX, DX8, and Steam Audio preset collection & dynamic string FX pars
 * Basic.pitch_monster() -> any [method]
 * Basic.pitch_chipmunk() -> any [method]
 * Basic.pitch_deep_voice() -> any [method]
+* Basic.echo4_multitap() -> any [method]
+* Basic.rotate_stereo() -> any [method]
+* Basic.dx8_chorus() -> any [method]
+* Basic.dx8_flanger() -> any [method]
+* Basic.dx8_compressor() -> any [method]
+* Basic.dx8_distortion() -> any [method]
+* Basic.dx8_i3dl2_hall() -> any [method]
+* Basic.dx8_parameq_boost() -> any [method]
 * Basic.peakeq_bass_boost() -> any [method]
 * Basic.bqf_lowpass_wall() -> any [method]
 * Basic.lpf_underwater() -> any [method]

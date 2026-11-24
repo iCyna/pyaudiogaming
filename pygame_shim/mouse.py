@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-"""pygame.mouse shim."""
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# pygame.mouse pointer and button state shim.
+# Supports Android and iOS.
 
 _POS = (0, 0)
 _BUTTONS = [False, False, False]

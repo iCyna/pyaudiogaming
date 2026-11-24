@@ -8,6 +8,16 @@ NVDA & TalkBack accessible UI engine featuring advanced text input (with Ctrl+Sh
 
 [MODULE FUNCTIONS]
 ----------------------------------------
+* register_keyboard_layout(lang_code, rows, label=None) -> any
+  Register or override a language keyboard layout (4 rows of key tokens).
+* register_composer(lang_code, composer_fn) -> any
+  Register an optional input composer fn(prefix, ch) -> (new_prefix, composed_bool) for any language.
+* compose_unicode_nfc(prefix, ch) -> any
+  Universal Unicode NFC combining-mark composer (works for all scripts with zero language bias).
+* detect_os_keyboard_languages() -> any
+  Auto-detect enabled keyboard languages from OS (Android / iOS / Windows / locale).
+* navigate_text(lines, x, y, direction, granularity='character') -> any
+  Move cursor by direction (-1/+1) at granularity (character/word/line/sentence/paragraph).
 * dialog(title='Dialog', text='', buttons=('OK', 'Cancel'), default=0, cancel=1, callback=None, window=None) -> any
   Interactive modal dialog with multi-button navigation and touch support.
 * message(m, callback=None, open=None, move=None, close=None, window=None) -> any
@@ -34,6 +44,29 @@ NVDA & TalkBack accessible UI engine featuring advanced text input (with Ctrl+Sh
   Quick single-choice accessible selection box returning selected item string or None.
 * progress_box(title='Working', text='', step_fn=None, cancelable=True, announce_step=10, cancel_text='Cancel', window=None) -> any
   Accessible modal progress dialog.
+
+[CLASS ClipboardHistory]
+----------------------------------------
+* ClipboardHistory.__init__(max_items=15) -> any [constructor]
+* ClipboardHistory.push(text) -> any [method]
+* ClipboardHistory.list_items() -> any [method]
+
+[CLASS VirtualKeyboard]
+----------------------------------------
+Language-neutral OS-aware 4-row touch virtual keyboard with 3-state Shift, 1-tap lift / 2-tap double-tap modes, Unicode NFC diacritics, and pluggable composers.
+* VirtualKeyboard.__init__(number_only=False, single_tap_type=True, langs=None, composers=None, top_ratio=0.42) -> any [constructor]
+* VirtualKeyboard.current_lang() -> any [property]
+* VirtualKeyboard.current_rows() -> any [method]
+* VirtualKeyboard.display_label(tok) -> any [method]
+* VirtualKeyboard.spoken_label(tok) -> any [method]
+* VirtualKeyboard.key_at(nx, ny) -> any [method]
+* VirtualKeyboard.cycle_shift() -> any [method]
+* VirtualKeyboard.cycle_lang() -> any [method]
+* VirtualKeyboard.compose_char(prefix, ch) -> any [method]
+* VirtualKeyboard.activate_key(tok) -> any [method]
+* VirtualKeyboard.flush_pending(say_fn=None) -> any [method]
+  Commit pending 1-tap focus after double-tap timeout (TalkBack TouchExplorer model).
+* VirtualKeyboard.handle_touch(ev_type, finger_id, nx, ny, say_fn=None, fdown=1792, fup=1793, fmotion=1794) -> any [method]
 
 [CLASS form]
 ----------------------------------------

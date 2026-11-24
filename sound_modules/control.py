@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
-# Core BASS controller, cross-platform zero-copy preload, HSAMPLE cache & direct stream manager.
+# Core BASS lifecycle, codec plugin loader, preload/mmap cache, and stream manager.
+# Supports Windows, Linux, macOS, Android, and iOS.
 
 import os, sys, time, mmap, struct, ctypes, threading
 from .. import system, buffer as global_buffer
@@ -39,6 +40,8 @@ BASS_POS_BYTE = getattr(bass, 'BASS_POS_BYTE', 0)
 # Global states, limits & caches
 PCM_LIMIT, CACHE_LIMIT, SYNC_PRELOAD_LIMIT, MMAP_LIMIT = 100 * 1024 * 1024, 256 * 1024 * 1024, 2 * 1024 * 1024, 128 * 1024 * 1024
 sound_initialized, master_output, default_mixer, last_channel, _clean_counter = False, None, None, None, 0
+loaded_plugins = {}
+DEFAULT_CODEC_PLUGINS = ("bassflac", "bassopus", "bass_aac", "bass_alac", "basswma", "bass_mpc", "bassmidi")
 preload_mutex = threading.RLock()
 sound_preloads, encoded_preloads, mem_buffers, ptr_lookup, sample_cache, _path_cache = {}, {}, {}, {}, {}, {}
 spak_registry, spak_archives = {}, {}
@@ -471,12 +474,33 @@ class MixerNode:
 			bass.BASS_StreamFree(self.channel); unregister_hstream(self.store_channel)
 			self.channel, self.store_channel = 0, None
 
+def load_codec_plugins(names=None):
+	"""Auto-load available BASS codec/format plugins (FLAC, Opus, AAC, ALAC, WMA, MPC, MIDI, SSL)."""
+	targets = DEFAULT_CODEC_PLUGINS if names is None else tuple(names)
+	for name in targets:
+		if name in loaded_plugins:
+			continue
+		try:
+			path = system.get_path(name)
+			if not path or not os.path.isfile(path):
+				continue
+			h = bass.BASS_PluginLoad(path, 0)
+			if h:
+				loaded_plugins[name] = int(h)
+			elif bass.BASS_ErrorGetCode() == 14:
+				loaded_plugins[name] = -1
+		except Exception:
+			pass
+	return dict(loaded_plugins)
+
+
 def init_sound(dev=-1, freq=44100, period=10, bbuffer=500, flags=0, clsid=None):
 	global sound_initialized, master_output
 	if sound_initialized: return True
 	# Configure direct hardware/OS mixing pipeline without intermediate master mixer latency
 	if _IS_WIN: bass.BASS_SetConfig(BASS_CONFIG_DEV_DEFAULT, 1)
 	bass.BASS_SetConfig(BASS_CONFIG_FLOATDSP, 1)
+	bass.BASS_SetConfig(getattr(bass, "BASS_CONFIG_SRC", 43), 4)  # 32-point sinc resampling for crisp TTS & audio
 	bass.BASS_SetConfig(BASS_CONFIG_ASYNCFILE_BUFFER, 262144)
 	bass.BASS_SetConfig(BASS_CONFIG_DEV_PERIOD, period)
 	bass.BASS_SetConfig(BASS_CONFIG_BUFFER, max(100, bbuffer))
@@ -498,6 +522,9 @@ def shutdown_sound():
 		unregister_hstream(last_channel)
 		if ch: bass.BASS_StreamFree(ch)
 	clear_all_buffers()
+	try: bass.BASS_PluginFree(0)
+	except Exception: pass
+	loaded_plugins.clear()
 	bass.BASS_Free(); bass.BASS_RecordFree()
 	sound_initialized, master_output = False, None
 	return True

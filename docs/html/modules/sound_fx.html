@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>sound_fx — Real-Time Audio Effects (Reverb, EQ, Echo, Distortion, Chorus) — PyAudioGaming</title>
+  <title>sound_fx — Unified FX Engine (BASS DX8, BASS_FX &amp; 45 Steam Audio Presets) — PyAudioGaming</title>
   <link rel="stylesheet" href="../style.css">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to main content</a>
   <header role="banner">
-    <h1>sound_fx — Real-Time Audio Effects (Reverb, EQ, Echo, Distortion, Chorus) — PyAudioGaming</h1>
+    <h1>sound_fx — Unified FX Engine (BASS DX8, BASS_FX &amp; 45 Steam Audio Presets) — PyAudioGaming</h1>
     <nav aria-label="Documentation Navigation">
     <a href="../index.html" class="">Home</a>
     <a href="../01_getting_started.html" class="">01. Getting Started</a>
@@ -23,13 +23,22 @@
   </header>
   <main id="main-content" role="main">
 <p><a href="../api_reference.html">&larr; Back to All Modules</a></p>
-<div class="callout"><strong>Summary:</strong> High-level DSP effect presets and real-time BASS_FX / DX8 effect chains attached to any sound or mixer channel.</div>
+<div class="callout"><strong>Summary:</strong> High-level DSP &amp; Steam Audio acoustic FX catalog: 17 DX8 Reverbs, Freeverb, Echo/Echo2/Echo3/Echo4, Rotate, Chorus, Flanger, Phaser, AutoWah, Compressor, Distortion, PitchShift, 12 Biquad Filters, 45 Steam Audio presets, and dynamic colon-string parser.</div>
 <h2>Usage Guide &amp; Examples</h2>
 
 <h3>How to Use</h3>
-<p>Attach audio effects such as reverb, parametric EQ, echo, chorus, compressor, or distortion to any playing channel for caves, underwater zones, radio filters, or muffled rooms.</p>
-<pre><code>from pyaudiogaming import sound_fx
-# Attach FX to a channel handle from sound_pool.sound</code></pre>
+<ul>
+  <li>Attach any preset by name via <code>s.setfx("preset_name", **overrides)</code>, update live with <code>s.set_fx_param(...)</code>, or remove with <code>s.remove_fx(...)</code> / <code>s.remove_all_fx()</code>.</li>
+  <li><strong>Steam Audio (45 built-in presets):</strong> 16 rooms (<code>steam_small_room</code>, <code>steam_cave</code>, <code>steam_tunnel</code>, <code>steam_underwater</code>, ...), 17 materials/direct (<code>steam_wall_brick</code>, <code>steam_wall_concrete</code>, <code>steam_occlusion_heavy</code>, <code>steam_air_absorption</code>, ...), 3 multi-path (<code>steam_pathing_corridor</code>, ...), and 9 surround/ambisonics (<code>steam_virtual_surround_7_1</code>, <code>steam_ambisonics_2nd</code>, ...).</li>
+  <li><strong>Dynamic Colon-String FX:</strong> Pass inline parameter strings such as <code>"reverb:0:-8:1800:0.4"</code>, <code>"lowpass:650:0.707"</code>, <code>"echo4:0.9:0.45:0.4:0.3:1"</code>, <code>"rotate:0.5"</code>, <code>"steam_reverb:1.4:1.1:0.7"</code>, <code>"steam_direct:0.8:2.5"</code>, or <code>"steam_ambisonics:2"</code>.</li>
+</ul>
+<pre><code>from pyaudiogaming.sound_pool import output, sound
+output(ThreeD=True)
+s = sound()
+s.stream("res/sounds/voice.ogg", ThreeD=True)
+s.setfx("steam_wall_brick", occlusion=0.75)
+s.setfx("lowpass:800:0.707")
+s.play()</code></pre>
 
 <h2>Parameter &amp; API Tables</h2>
 <label for="mod-search">Filter symbols in this module:</label>
@@ -91,6 +100,14 @@
     <tr><td><span class="badge">method</span><code>pitch_monster()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">method</span><code>pitch_chipmunk()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">method</span><code>pitch_deep_voice()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>echo4_multitap()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>rotate_stereo()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>dx8_chorus()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>dx8_flanger()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>dx8_compressor()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>dx8_distortion()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>dx8_i3dl2_hall()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>dx8_parameq_boost()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">method</span><code>peakeq_bass_boost()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">method</span><code>bqf_lowpass_wall()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">method</span><code>lpf_underwater()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>

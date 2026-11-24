@@ -1,6 +1,10 @@
 ﻿Module,Owner,Kind,Symbol,Parameters,Returns,Description
 window,WindowBase,constructor,WindowBase.__init__,platform=None,any,
+window,WindowBase,property,WindowBase.speech,,any,
 window,WindowBase,method,WindowBase.init,"x, y, ttl, vv=0, show_vv=False, author=''",any,
+window,WindowBase,method,WindowBase.set_fullscreen,enabled=True,any,"Toggle true edge-to-edge fullscreen and system edge-gesture exclusion (dynamic, non-hardcoded)."
+window,WindowBase,method,WindowBase.get_fullscreen,,any,
+window,WindowBase,method,WindowBase.set_gesture_mode,mode='game',any,Set gesture mode: 'game' (continuous sliding movement) or 'ui' (TalkBack explore + flick only).
 window,WindowBase,method,WindowBase.touchPos,,any,Trả về tọa độ chuẩn hóa (0.0 -> 1.0) của ngón tay đang chạm hoặc chuột.
 window,WindowBase,method,WindowBase.in_zone,"zone, pos=None",any,Kiểm tra điểm chạm hiện tại (hoặc pos truyền vào) có nằm trong vùng zone không.
 window,WindowBase,method,WindowBase.frameUpdate,,any,
@@ -13,6 +17,9 @@ window,WindowBase,method,WindowBase.mouseReleased,button=1,any,
 window,WindowBase,method,WindowBase.mousePressing,button=1,any,
 window,WindowBase,method,WindowBase.tap,"fingers=None, count=1, zone=None",any,"Kiểm tra cử chỉ chạm màn hình: - Mặc định tap() trả về số lần chạm (tương thích 100% với code cũ). - Có thể lọc theo số ngón (fingers=2), số lần chạm liên tiếp (count=2 cho double-tap), và vùng màn hình (zone=""right"")."
 window,WindowBase,method,WindowBase.double_tap,"fingers=1, zone=None",any,Kiểm tra chạm đúp (chuẩn TalkBack/VoiceOver để kích hoạt).
+window,WindowBase,method,WindowBase.tap_pos,"fingers=1, count=1, zone=None",any,"Return normalized (x, y) position of the matching tap event, or None."
+window,WindowBase,method,WindowBase.explore_pos,zone=None,any,"Return latest normalized (x, y) position during 1-finger Explore-by-Touch, or None."
+window,WindowBase,method,WindowBase.explore_end_pos,zone=None,any,"Return normalized (x, y) position when 1-finger Explore-by-Touch ends, or None."
 window,WindowBase,method,WindowBase.long_press,"fingers=1, zone=None",any,Kiểm tra nhấn giữ tại chỗ trên màn hình (không trượt).
 window,WindowBase,method,WindowBase.keySlide,"direction, fingers=None, zone=None",any,"Kiểm tra vuốt nhấc tay theo hướng, số ngón tay (fingers) và khu vực (zone)."
 window,WindowBase,method,WindowBase.swipe,"direction, fingers=None, zone=None",any,

@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Android Chaquopy / BeeWare native bridge for the pygame shim."""
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# Android Chaquopy/BeeWare native bridge for the pygame shim.
+# Supports Android.
+
 import threading
 from . import locals as _L
 from . import event as _event
@@ -408,6 +411,51 @@ def hide_keyboard():
             v.hideKeyboard()
         except Exception:
             pass
+
+
+def set_fullscreen(enabled=True):
+    """Safely toggle Android ActionBar / FLAG_FULLSCREEN without breaking PygameView touch dispatch."""
+    if not _HAS_JAVA:
+        return False
+    want_fs = bool(enabled)
+    v = get_view()
+    act = get_activity()
+    if act is None:
+        return False
+    try:
+        WMParams = jclass("android.view.WindowManager$LayoutParams")
+
+        def _apply_fs():
+            try:
+                if hasattr(act, "getSupportActionBar"):
+                    ab = act.getSupportActionBar()
+                    if ab is not None:
+                        ab.hide() if want_fs else ab.show()
+                elif hasattr(act, "getActionBar"):
+                    ab = act.getActionBar()
+                    if ab is not None:
+                        ab.hide() if want_fs else ab.show()
+            except Exception:
+                pass
+            try:
+                win = act.getWindow()
+                if win is not None:
+                    if want_fs:
+                        win.addFlags(WMParams.FLAG_FULLSCREEN)
+                    else:
+                        win.clearFlags(WMParams.FLAG_FULLSCREEN)
+            except Exception:
+                pass
+            if v is not None:
+                try:
+                    v.requestFocus()
+                except Exception:
+                    pass
+
+        _run_on_ui_sync(_apply_fs, timeout=1.0)
+        return True
+    except Exception:
+        return False
 
 
 def set_clipboard(text):

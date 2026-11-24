@@ -1,15 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Cross-platform persistent storage & ConfigStore for PyAudioGaming.
-
-Solves the classic mobile/desktop storage pitfall:
-- On Android (BeeWare/Chaquopy/Buildozer) and iOS: writes into the app's private
-  persistent ``filesDir`` (``$HOME``), never into the ephemeral read-only APK asset folder.
-- On Windows / macOS / Linux: uses standard OS app-data directories OR a portable
-  local folder (``portable=True``, e.g. ``res/``) while STILL automatically using
-  persistent internal storage on mobile!
-- All writes are atomic (``.tmp`` + ``fsync`` + ``os.replace``) with optional ``.bak``
-  recovery so sudden app termination never corrupts user saves or config.
-"""
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# Persistent app storage paths and ConfigStore manager.
+# Supports Windows, Linux, macOS, Android, and iOS.
 
 import json
 import os

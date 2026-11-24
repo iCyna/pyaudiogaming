@@ -1,0 +1,41 @@
+{
+  "module": "common",
+  "classes": [],
+  "functions": [
+    {
+      "name": "run",
+      "kind": "function",
+      "signature": "cmd, sh=False",
+      "params": [
+        {
+          "name": "cmd",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "sh",
+          "type": "any",
+          "default": "False"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "mkdir",
+      "kind": "function",
+      "signature": "fld",
+      "params": [
+        {
+          "name": "fld",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    }
+  ],
+  "title": "common — System & Process Utility Helpers",
+  "summary": "Lightweight filesystem, process execution, and environment utilities shared across PyAudioGaming modules."
+}

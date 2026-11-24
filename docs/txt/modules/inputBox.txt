@@ -1,0 +1,15 @@
+========================================================================
+MODULE: pyaudiogaming.inputBox
+inputBox — Native OS Dialogs with Accessible SDL Fallbacks
+========================================================================
+
+SUMMARY:
+Cross-platform input prompts, message boxes, and file/folder pickers using native OS dialogs (Win32/Cocoa/GTK/Android) with automatic vb.form SDL fallback.
+
+[MODULE FUNCTIONS]
+----------------------------------------
+* check_qt() -> any
+* check() -> any
+* kbt(self, title, message, password=False, dir_dialog=False, file_dialog=False, config=None) -> any
+* kbc(self, title, message, choices, multi=False, config=None) -> any
+* dialogMessage(title, message, style=INFO, y=True, n=False, config=None) -> any

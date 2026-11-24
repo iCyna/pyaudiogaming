@@ -35,11 +35,15 @@ EX_DIR = DOCS_DIR / "examples"
 TARGET_MODULES = [
 	"window",
 	"speech",
+	"g2access",
 	"sound_pool",
 	"sound_fx",
+	"sound_modules.control",
 	"menu",
 	"vb",
 	"gui",
+	"inputBox",
+	"key",
 	"timer",
 	"haptics",
 	"notify",
@@ -49,6 +53,8 @@ TARGET_MODULES = [
 	"input_map",
 	"file",
 	"utils",
+	"buffer",
+	"common",
 	"system",
 	"compile",
 ]
@@ -106,36 +112,116 @@ sp.set_speech_rate(55)</code></pre>
 """,
 	},
 	"sound_pool": {
-		"title": "sound_pool — BASS Audio Engine, 3D HRTF, Steam Audio & Recording",
-		"summary": "Full-featured BASS audio engine: output/input device management, streaming & cached samples, fading, binaural HRTF, Steam Audio wall occlusion, push streams, and microphone recording.",
+		"title": "sound_pool — BASS Audio Engine, 3D HRTF, Tempo/Tone, URL Streaming & Recording",
+		"summary": "Complete BASS audio engine: playback, 3D binaural HRTF & Steam Audio occlusion, Tempo/Tone (0..100+%), Reverse, URL streaming, LUFS loudness, native WAV/MP3/OGG/FLAC/OPUS encoding, Tags, Sync callbacks, Mixer/Split/Matrix, MIDI, VST, WASAPI, and live recording.",
 		"guide": """
 <h3>How to Use</h3>
 <ol>
-  <li>Initialize audio output once with <code>out = output(device=-1)</code>.</li>
-  <li>Create a <code>sound()</code> object, call <code>stream(path)</code>, configure <code>volume</code>/<code>pan</code>/<code>pitch</code>, and call <code>play()</code> or <code>play_looped()</code>.</li>
-  <li>For 3D binaural audio, pass <code>mono=True</code>, call <code>attach_hrtf_dsp()</code>, and call <code>update_hrtf_listener(...)</code> each frame.</li>
-  <li>For real-time voice chat or procedural audio, use <code>record(mono=True, draw=True)</code> and <code>sound.stream("", mono=True, draw=True)</code> + <code>push(pcm_bytes)</code>.</li>
+  <li>Initialize audio output once with <code>out = output(ThreeD=True)</code> (HRTF prewarms automatically without blocking startup).</li>
+  <li>Stream local files, SPAK buffers, or <strong>HTTP/HTTPS URLs</strong> seamlessly via <code>s.stream(path_or_url, ThreeD=True, tempo=True, reverse=False)</code> — <code>utils.is_url()</code> automatically routes URLs through <code>BASS_StreamCreateURL</code>.</li>
+  <li>Adjust speed without pitch via <code>s.set_tempo(125)</code> and pitch without speed via <code>s.set_tone(150)</code> on the intuitive <code>0..100+</code> scale (<code>100</code> = normal; <code>set_tone</code> even works on regular streams without <code>tempo=True</code>!).</li>
+  <li>Move 3D sounds smoothly with <code>s.set3d(...)</code>, <code>s.slide3d(...)</code> (uses native C <code>BASS_HRTF_SlidePosition</code> for one-shot slides), <code>s.slide_hrtf_position(...)</code>, and <code>s.slide_hrtf_attribute(...)</code>.</li>
+  <li>Read metadata with <code>s.get_tags()</code>, measure EBU R128 loudness via <code>s.start_loudness()</code> / <code>s.get_loudness()</code>, encode to WAV/MP3/OGG/FLAC/OPUS via <code>s.start_encode(...)</code>, attach event callbacks with <code>s.on_sync("end", cb)</code>, or use <code>WasapiManager</code> on Windows.</li>
 </ol>
-<pre><code>from pyaudiogaming.sound_pool import output, sound, update_hrtf_listener
+<pre><code>from pyaudiogaming.sound_pool import output, sound, add_hrtf_env_box, update_hrtf_listener
 
-out = output(device=-1, frequency=44100)
+out = output(ThreeD=True)
 s = sound()
-s.stream("res/sounds/beacon.ogg", mono=True)
-s.attach_hrtf_dsp()
-s.volume = 80
-s.play_looped()
-
-update_hrtf_listener(0, 0, 1.7, 0, 1, 0, 0, 0, 1)</code></pre>
+s.stream("res/sounds/beacon.ogg", mono=True, ThreeD=True, tempo=True)
+s.set_tempo(120)          # 1.2x speed, unchanged pitch
+s.set_tone(115)           # +15% pitch, unchanged speed
+s.setfx("steam_cave")     # Steam Audio acoustic reverb
+s.slide3d(0, 0, 0, -8, 2, 0, 8, 2, 0, 1500, "once")
+s.play()</code></pre>
 """,
 	},
 	"sound_fx": {
-		"title": "sound_fx — Real-Time Audio Effects (Reverb, EQ, Echo, Distortion, Chorus)",
-		"summary": "High-level DSP effect presets and real-time BASS_FX / DX8 effect chains attached to any sound or mixer channel.",
+		"title": "sound_fx — Unified FX Engine (BASS DX8, BASS_FX & 45 Steam Audio Presets)",
+		"summary": "High-level DSP & Steam Audio acoustic FX catalog: 17 DX8 Reverbs, Freeverb, Echo/Echo2/Echo3/Echo4, Rotate, Chorus, Flanger, Phaser, AutoWah, Compressor, Distortion, PitchShift, 12 Biquad Filters, 45 Steam Audio presets, and dynamic colon-string parser.",
 		"guide": """
 <h3>How to Use</h3>
-<p>Attach audio effects such as reverb, parametric EQ, echo, chorus, compressor, or distortion to any playing channel for caves, underwater zones, radio filters, or muffled rooms.</p>
-<pre><code>from pyaudiogaming import sound_fx
-# Attach FX to a channel handle from sound_pool.sound</code></pre>
+<ul>
+  <li>Attach any preset by name via <code>s.setfx("preset_name", **overrides)</code>, update live with <code>s.set_fx_param(...)</code>, or remove with <code>s.remove_fx(...)</code> / <code>s.remove_all_fx()</code>.</li>
+  <li><strong>Steam Audio (45 built-in presets):</strong> 16 rooms (<code>steam_small_room</code>, <code>steam_cave</code>, <code>steam_tunnel</code>, <code>steam_underwater</code>, ...), 17 materials/direct (<code>steam_wall_brick</code>, <code>steam_wall_concrete</code>, <code>steam_occlusion_heavy</code>, <code>steam_air_absorption</code>, ...), 3 multi-path (<code>steam_pathing_corridor</code>, ...), and 9 surround/ambisonics (<code>steam_virtual_surround_7_1</code>, <code>steam_ambisonics_2nd</code>, ...).</li>
+  <li><strong>Dynamic Colon-String FX:</strong> Pass inline parameter strings such as <code>"reverb:0:-8:1800:0.4"</code>, <code>"lowpass:650:0.707"</code>, <code>"echo4:0.9:0.45:0.4:0.3:1"</code>, <code>"rotate:0.5"</code>, <code>"steam_reverb:1.4:1.1:0.7"</code>, <code>"steam_direct:0.8:2.5"</code>, or <code>"steam_ambisonics:2"</code>.</li>
+</ul>
+<pre><code>from pyaudiogaming.sound_pool import output, sound
+output(ThreeD=True)
+s = sound()
+s.stream("res/sounds/voice.ogg", ThreeD=True)
+s.setfx("steam_wall_brick", occlusion=0.75)
+s.setfx("lowpass:800:0.707")
+s.play()</code></pre>
+""",
+	},
+	"g2access": {
+		"title": "g2access — Compact High-Performance Screen Reader & BASS-Routed TTS Engine",
+		"summary": "Zero-bloat accessibility & TTS router with shared AudioPipeline (BASS PCM, LRU cache, 3D/HRTF/FX) and dedicated OS drivers: windows.py, android.py, ios.py, macos.py, linux.py.",
+		"guide": """
+<h3>How to Use</h3>
+<ul>
+  <li>Use <code>Router()</code> (alias <code>Auto()</code>) directly or through <code>pyaudiogaming.speech.Speech()</code>.</li>
+  <li>Automatically lazy-loads only the current OS drivers (<code>NVDA</code>, <code>ZDSR</code>, <code>JAWS</code>, <code>SystemAccess</code>, <code>Dolphin</code>, <code>PCTalker</code>, <code>SAPI5</code> on Windows; <code>TalkBack/Jieshuo</code> + <code>AndroidTTS</code> on Android; <code>VoiceOver</code> + <code>AVSpeech</code> / <code>say</code> on iOS/macOS; <code>SpeechDispatcher</code> + <code>eSpeak</code> on Linux).</li>
+  <li>All PCM-capable TTS engines share <code>AudioPipeline</code> for instant LRU-cached playback with full BASS <code>volume</code>, <code>pan</code>, <code>mono</code>, <code>hrtf</code>, <code>fx</code>, and <code>speak3d(...)</code>.</li>
+</ul>
+<pre><code>from pyaudiogaming.g2access import Router
+
+r = Router()
+print("Available:", r.get_outputs(), "Active:", r.get_active_output())
+r.output("Hello from G2Access!", interrupt=True)
+r.speak3d("Behind you!", 0, 0, 0, 0, -5, 0)</code></pre>
+""",
+	},
+	"sound_modules.control": {
+		"title": "sound_modules.control — Core BASS Lifecycle, Codec Plugins & Zero-Copy Cache",
+		"summary": "Low-level BASS initialization, on-demand codec plugin loader (FLAC, Opus, AAC, ALAC, WMA, MPC, MIDI), mmap/RAM preloading, HSAMPLE caching, and SPAK memory buffer registry.",
+		"guide": """
+<h3>How to Use</h3>
+<p>Most apps use <code>sound_pool.output()</code>, which calls <code>control.init_sound()</code> automatically. Use <code>control</code> directly for custom memory buffers, explicit codec loading, or cache cleanup.</p>
+<pre><code>from pyaudiogaming.sound_modules import control
+
+control.init_sound(dev=-1, freq=44100)
+control.load_codec_plugins()
+control.load_sound_file("res/sounds/click.ogg", key="ui_click", target="both")</code></pre>
+""",
+	},
+	"inputBox": {
+		"title": "inputBox — Native OS Dialogs with Accessible SDL Fallbacks",
+		"summary": "Cross-platform input prompts, message boxes, and file/folder pickers using native OS dialogs (Win32/Cocoa/GTK/Android) with automatic vb.form SDL fallback.",
+		"guide": """
+<h3>How to Use</h3>
+<pre><code>from pyaudiogaming import inputBox
+
+name = inputBox.kbt(None, "Player Name", "Enter your name:")
+audio_path = inputBox.kbt(None, "Select Audio", "Pick a sound file", file_dialog=True)
+inputBox.dialogMessage("Saved", f"Welcome, {name}!", inputBox.INFO)</code></pre>
+""",
+	},
+	"key": {
+		"title": "key — Keyboard Mapping & Chord Parser",
+		"summary": "Complete key-name to pygame keycode lookup table (<code>ksum</code>) and shortcut chord parser (<code>chord('ctrl+shift+s')</code>).",
+		"guide": """
+<h3>How to Use</h3>
+<pre><code>from pyaudiogaming import key
+
+code = key.ksum["space"]
+kc, mod_mask = key.chord("ctrl+shift+b")</code></pre>
+""",
+	},
+	"buffer": {
+		"title": "buffer — Shared Runtime Registries & Handle Buffers",
+		"summary": "Central in-memory registry holding the active window frame, audio device handles, stream/sample buffers, and active sound pool references.",
+		"guide": """
+<h3>How to Use</h3>
+<p>Managed automatically by <code>Window</code>, <code>sound_pool</code>, and <code>speech</code>. Inspect <code>buffer.frame</code> or <code>buffer.hAudiobuffers</code> when integrating custom extensions.</p>
+""",
+	},
+	"common": {
+		"title": "common — System & Process Utility Helpers",
+		"summary": "Lightweight filesystem, process execution, and environment utilities shared across PyAudioGaming modules.",
+		"guide": """
+<h3>How to Use</h3>
+<p>Helper utilities used internally by build and runtime tools.</p>
 """,
 	},
 	"menu": {
@@ -482,57 +568,68 @@ def _short_doc(node) -> str:
 
 
 def introspect_module(mod_name: str) -> dict:
-	"""Parse ``pyaudiogaming/<mod_name>.py`` with ``ast`` and return structured API metadata."""
-	py_path = PKG_DIR / f"{mod_name}.py"
+	"""Parse ``pyaudiogaming/<mod_name>.py`` (or package directory / dotted path) with ``ast``."""
+	parts = mod_name.split(".")
+	cand_file = PKG_DIR.joinpath(*parts[:-1], f"{parts[-1]}.py")
+	cand_dir = PKG_DIR.joinpath(*parts)
+	py_files = []
+	if cand_file.is_file():
+		py_files = [cand_file]
+	elif cand_dir.is_dir():
+		py_files = sorted(p for p in cand_dir.glob("*.py") if p.name != "__init__.py")
 	result = {"module": mod_name, "classes": [], "functions": []}
-	if not py_path.is_file():
+	if not py_files:
 		return result
 
-	tree = ast.parse(py_path.read_text(encoding="utf-8", errors="replace"), filename=str(py_path))
-	for node in tree.body:
-		if isinstance(node, ast.ClassDef):
-			if node.name.startswith("_"):
-				continue
-			cls_info = {
-				"name": node.name,
-				"doc": _short_doc(node),
-				"methods": [],
-			}
-			for item in node.body:
-				if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)):
-					if item.name.startswith("_") and item.name != "__init__":
-						continue
-					is_prop = any(
-						(isinstance(d, ast.Name) and d.id == "property")
-						or (isinstance(d, ast.Attribute) and d.attr == "setter")
-						for d in item.decorator_list
-					)
-					is_setter = any(isinstance(d, ast.Attribute) and d.attr == "setter" for d in item.decorator_list)
-					if is_setter:
-						continue
-					is_static = any(isinstance(d, ast.Name) and d.id == "staticmethod" for d in item.decorator_list)
-					params = _extract_params(item.args, is_method=not is_static)
-					cls_info["methods"].append({
-						"name": item.name,
-						"kind": "property" if is_prop else ("constructor" if item.name == "__init__" else "method"),
-						"signature": _format_sig(params),
-						"params": params,
-						"returns": _unparse_safe(item.returns) or "any",
-						"doc": _short_doc(item),
-					})
-			result["classes"].append(cls_info)
-		elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-			if node.name.startswith("_"):
-				continue
-			params = _extract_params(node.args, is_method=False)
-			result["functions"].append({
-				"name": node.name,
-				"kind": "function",
-				"signature": _format_sig(params),
-				"params": params,
-				"returns": _unparse_safe(node.returns) or "any",
-				"doc": _short_doc(node),
-			})
+	seen_cls, seen_fn = set(), set()
+	for py_path in py_files:
+		tree = ast.parse(py_path.read_text(encoding="utf-8", errors="replace"), filename=str(py_path))
+		for node in tree.body:
+			if isinstance(node, ast.ClassDef):
+				if node.name.startswith("_") or node.name in seen_cls:
+					continue
+				seen_cls.add(node.name)
+				cls_info = {
+					"name": node.name,
+					"doc": _short_doc(node),
+					"methods": [],
+				}
+				for item in node.body:
+					if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)):
+						if item.name.startswith("_") and item.name != "__init__":
+							continue
+						is_prop = any(
+							(isinstance(d, ast.Name) and d.id == "property")
+							or (isinstance(d, ast.Attribute) and d.attr == "setter")
+							for d in item.decorator_list
+						)
+						is_setter = any(isinstance(d, ast.Attribute) and d.attr == "setter" for d in item.decorator_list)
+						if is_setter:
+							continue
+						is_static = any(isinstance(d, ast.Name) and d.id == "staticmethod" for d in item.decorator_list)
+						params = _extract_params(item.args, is_method=not is_static)
+						cls_info["methods"].append({
+							"name": item.name,
+							"kind": "property" if is_prop else ("constructor" if item.name == "__init__" else "method"),
+							"signature": _format_sig(params),
+							"params": params,
+							"returns": _unparse_safe(item.returns) or "any",
+							"doc": _short_doc(item),
+						})
+				result["classes"].append(cls_info)
+			elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+				if node.name.startswith("_") or node.name in seen_fn:
+					continue
+				seen_fn.add(node.name)
+				params = _extract_params(node.args, is_method=False)
+				result["functions"].append({
+					"name": node.name,
+					"kind": "function",
+					"signature": _format_sig(params),
+					"params": params,
+					"returns": _unparse_safe(node.returns) or "any",
+					"doc": _short_doc(node),
+				})
 	return result
 
 
@@ -853,18 +950,299 @@ if __name__ == "__main__":
     main()
 ''',
 	"05_advanced_3d_audio_hrtf.py": '''# -*- coding: utf-8 -*-
-"""Example 05 (Advanced): 3D Spatial Bearing & Distance Utilities."""
-from pyaudiogaming.utils import clock_direction, distance_3d
+"""Example 05 (Advanced): 3D Binaural HRTF, slide3d, Steam Audio Wall Occlusion & Reverb."""
+import time
+from pyaudiogaming.sound_pool import (
+    output, sound,
+    add_hrtf_env_box, clear_hrtf_env_boxes, set_hrtf_auto_raycast,
+    update_hrtf_listener, set_hrtf_distance_model,
+)
+from pyaudiogaming.sound_modules import pybass_hrtf
 
 
-def describe_target(px, py, pz, tx, ty, tz):
-    dist = distance_3d(px, py, pz, tx, ty, tz)
-    hour = clock_direction(tx - px, ty - py)
-    return f"Target at {hour} o'clock, {dist:.1f} meters away."
+def main():
+    output(ThreeD=True)
+    set_hrtf_distance_model(min_dist=1.0, max_dist=50.0, rolloff=0.12, blend_step=0.25)
+
+    # Register a brick wall between listener (0,0,0) and sound source (0,5,0)
+    clear_hrtf_env_boxes()
+    add_hrtf_env_box(pybass_hrtf.BASS_HRTF_MAT_BRICK, -5, 5, 2, 3, -2, 4)
+    set_hrtf_auto_raycast(True)
+    update_hrtf_listener(0, 0, 0, yaw=0.0, pitch=0.0, roll=0.0)
+
+    s = sound()
+    s.stream("res/sounds/beacon.ogg", mono=True, ThreeD=True)
+    s.set_hrtf_source_radius(1.0)
+    s.setfx("steam_cave", reverb_wet=0.35)
+    s.play_looped()
+
+    # Smooth C-level HRTF 3D slide from left (-6, 3, 0) to right (6, 3, 0) over 2 seconds
+    s.slide3d(0, 0, 0, -6, 3, 0, 6, 3, 0, 2000, "once")
+    s.slide_hrtf_attribute("occlusion", 0.7, 1000)
+    time.sleep(2.2)
+    s.close()
 
 
 if __name__ == "__main__":
-    print(describe_target(0, 0, 0, 6, 2, 0))
+    main()
+''',
+	"06_tempo_tone_reverse_url.py": '''# -*- coding: utf-8 -*-
+"""Example 06: Tempo (speed without pitch), Tone (pitch without speed), Reverse, URL Stream, Tags & Sync."""
+import time
+from pyaudiogaming.sound_pool import output, sound
+
+
+def main():
+    output()
+
+    # 1. Tempo & Tone on intuitive 0..100+ scale (100 = normal)
+    s = sound()
+    s.stream("res/sounds/music.ogg", tempo=True)
+    print("Tags:", s.get_tags())
+    s.on_sync("end", lambda h, c, d: print("Track finished!"))
+    s.set_tempo(125)   # 125% speed, pitch unchanged
+    s.set_tone(115)    # 115% pitch, speed unchanged
+    s.play()
+    time.sleep(2.0)
+    s.fade(500, 100, type="tempo")  # smoothly return to 100% speed
+    time.sleep(0.6)
+    s.close()
+
+    # 2. Tone also works on regular streams (auto BFX_PITCHSHIFT fallback)
+    s2 = sound()
+    s2.stream("res/sounds/voice.ogg")
+    s2.set_tone(80)    # deeper voice without slowing down
+    s2.play()
+    time.sleep(1.5)
+    s2.close()
+
+    # 3. Reverse playback
+    s3 = sound()
+    s3.stream("res/sounds/sfx.ogg", reverse=True)
+    s3.set_reverse_direction(True)
+    s3.play()
+    time.sleep(1.0)
+    s3.close()
+
+    # 4. Direct HTTP/HTTPS URL streaming (auto-detected via utils.is_url)
+    radio = sound()
+    radio.stream("https://example.com/stream.mp3")
+    radio.on_sync("meta", lambda h, c, d: print("Now playing:", radio.get_tags()))
+    radio.play()
+    time.sleep(2.0)
+    radio.close()
+
+
+if __name__ == "__main__":
+    main()
+''',
+	"07_audio_fx_and_steam_presets.py": '''# -*- coding: utf-8 -*-
+"""Example 07: Unified Audio FX (DX8, BASS_FX, Biquad Filters, 45 Steam Audio Presets & Dynamic Strings)."""
+import time
+from pyaudiogaming.sound_pool import output, sound
+from pyaudiogaming.sound_fx import Basic
+
+
+def main():
+    output(ThreeD=True)
+    catalog = Basic()
+    print("DX8/BFX presets:", len(catalog.fxs))
+    print("Filters:", len(catalog.filters))
+    print("Steam Audio presets:", len(catalog.steam_fxs))
+
+    s = sound()
+    s.stream("res/sounds/voice.ogg", ThreeD=True)
+    s.play_looped()
+
+    for preset in ("steam_hall", "steam_wall_concrete", "echo4_multitap", "rotate_stereo", "dx8_i3dl2_hall", "underwater"):
+        s.remove_all_fx()
+        s.setfx(preset)
+        print("Applied preset:", preset)
+        time.sleep(1.2)
+
+    # Dynamic colon-string FX with live parameter tweak
+    s.remove_all_fx()
+    s.setfx("lowpass:900:0.707")
+    s.setfx("steam_ambisonics:2")
+    s.set_fx_param(cutoff=500.0)
+    time.sleep(1.2)
+    s.close()
+
+
+if __name__ == "__main__":
+    main()
+''',
+	"08_recording_encoding_loudness.py": '''# -*- coding: utf-8 -*-
+"""Example 08: Live Microphone Recording, Native C Encoding (WAV/MP3/OGG/FLAC/OPUS), Loudness LUFS & WASAPI."""
+import time
+from pyaudiogaming.sound_pool import output, sound, record, WasapiManager
+
+
+def main():
+    output()
+
+    # 1. Measure EBU R128 Loudness (LUFS) & True Peak
+    s = sound()
+    s.stream("res/sounds/music.ogg")
+    s.start_loudness()
+    s.play()
+    time.sleep(1.5)
+    print("Integrated LUFS:", s.get_loudness("integrated"), "TruePeak:", s.get_loudness("truepeak"))
+    s.close()
+
+    # 2. Record microphone & encode directly to OGG / OPUS / MP3 / FLAC / WAV
+    rec = record()
+    rec.start(freq=48000, chans=1, period_ms=20, gain=1.0)
+    rec.start_encode("mic_capture.ogg", fmt="ogg")
+    time.sleep(2.0)
+    rec.stop_encode()
+    rec.close()
+
+    # 3. List Windows WASAPI devices (including loopback capture devices)
+    for dev in WasapiManager.devices():
+        print(dev["index"], dev["name"], "loopback=" + str(dev["is_loopback"]))
+
+
+if __name__ == "__main__":
+    main()
+''',
+	"09_mixer_split_midi_vst.py": '''# -*- coding: utf-8 -*-
+"""Example 09: Sub-Mixing (mixer), Matrix Routing, Split Streams, Realtime MIDI Synth & VST."""
+import time
+from pyaudiogaming.sound_pool import output, sound, mixer, musical, vst
+
+
+def main():
+    output()
+
+    # 1. Sub-mixer with matrix routing
+    mx = mixer()
+    mx.create(frequency=44100, channels=2)
+    s1 = sound()
+    s1.stream("res/sounds/ambience.ogg", decode=True)
+    mx.add(s1)
+    s1.set_matrix([[1.0, 0.0], [0.0, 1.0]])  # stereo identity matrix
+    mx.play()
+
+    # 2. Split a single decode source into two independent channels
+    src = sound()
+    src.stream("res/sounds/music.ogg", decode=True)
+    ch_dry = src.split()
+    ch_wet = src.split()
+    if ch_dry and ch_wet:
+        ch_wet.setfx("hall")
+        ch_dry.play()
+        ch_wet.play()
+
+    # 3. Realtime MIDI synthesizer (requires a .sf2 SoundFont)
+    midi = musical()
+    if midi.create_realtime(channels=16):
+        # midi.load_font("res/gm.sf2")
+        midi.play()
+        midi.note_on(0, 60, velocity=110)  # Middle C
+        time.sleep(0.4)
+        midi.note_off(0, 60)
+        midi.close()
+
+    # 4. VST instrument / DSP effect control example
+    # synth = vst()
+    # if synth.create_instrument("plugins/MySynth.dll"):
+    #     synth.set_vst_param(0, 0.75)
+    #     synth.play()
+
+    time.sleep(0.5)
+    if ch_dry: ch_dry.close()
+    if ch_wet: ch_wet.close()
+    src.close(); s1.close(); mx.close()
+
+
+if __name__ == "__main__":
+    main()
+''',
+	"10_g2access_speech_3d.py": '''# -*- coding: utf-8 -*-
+"""Example 10: G2Access High-Performance Screen Reader & 3D BASS-Routed TTS."""
+import time
+from pyaudiogaming.sound_pool import output
+from pyaudiogaming.speech import Speech
+
+
+def main():
+    output(ThreeD=True)
+    sp = Speech()
+    print("Available outputs:", sp.get_outputs())
+    print("Active output:", sp.get_active_screen_reader())
+    print("Capabilities:", sp.get_capabilities())
+
+    # Route TTS through BASS with 3D HRTF & zone-reactive FX
+    sp.set_speech_hrtf(True)
+    sp.set_speech_zone_fx_provider(lambda: "steam_small_room")
+    sp.set_speech_fx("zone")
+    sp.say("Welcome to G2Access!")
+    time.sleep(1.2)
+    sp.say3d("Footsteps to your left!", 0, 0, 0, -6, 2, 0)
+    time.sleep(1.5)
+
+
+if __name__ == "__main__":
+    main()
+''',
+	"11_spak_and_encrypted_files.py": '''# -*- coding: utf-8 -*-
+"""Example 11: Encrypted SPAK Sound Archives & AES/Fernet File Storage."""
+import tempfile
+from pathlib import Path
+from pyaudiogaming import utils
+from pyaudiogaming.file import File
+
+
+def main():
+    tmp = Path(tempfile.mkdtemp(prefix="pyag_demo_"))
+
+    # 1. Encrypted JSON save/load with File (Fernet + AES)
+    store = File(password="my_secret_key", encode=True, aes=True)
+    save_path = tmp / "profile.dat"
+    store.save({"hero": "Knight", "gold": 500}, str(save_path), mode="wb+", type="json")
+    loaded = store.load(str(save_path), mode="rb", type="json")
+    print("Loaded encrypted profile:", loaded)
+
+    # 2. Pack a folder or dict of sounds into an encrypted .spak archive
+    spak_out = tmp / "sounds.spak"
+    utils.make_spak({"sfx/beep.raw": b"\\x00" * 64}, output_path=str(spak_out), password="demo")
+    print("Created SPAK:", spak_out, spak_out.stat().st_size, "bytes")
+
+
+if __name__ == "__main__":
+    main()
+''',
+	"12_notify_app_link_timer.py": '''# -*- coding: utf-8 -*-
+"""Example 12: System Notifications, File Associations (app_link), InputBox & Precision Timers."""
+import time
+from pyaudiogaming import notify, app_link
+from pyaudiogaming.timer import Timer, CooldownManager, TimerScheduler
+
+
+def main():
+    # 1. High-precision Timer, CooldownManager, and TimerScheduler (works headless)
+    t = Timer()
+    cd = CooldownManager()
+    sched = TimerScheduler()
+    sched.after(150, lambda: print(f"Scheduled event fired at {t.elapsed} ms!"))
+
+    if cd.use("ping", 1000):
+        print("Cooldown 'ping' started, remaining:", round(cd.remaining_seconds("ping"), 2), "s")
+
+    for _ in range(25):
+        sched.update()
+        time.sleep(0.01)
+
+    # 2. Launch URI / file-open argument reader
+    print("Launch URI/path:", app_link.get_launch_uri())
+
+    # 3. System notification (Windows Toast / Android Notification / macOS / Linux)
+    notify.send("PyAudioGaming", "Background task completed!")
+
+
+if __name__ == "__main__":
+    main()
 ''',
 }
 

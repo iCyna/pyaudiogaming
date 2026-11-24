@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-"""pygame.time shim."""
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# pygame.time monotonic clock and tick shim.
+# Supports Android and iOS.
+
 import time as _time
 
 _START_NS = _time.monotonic_ns()

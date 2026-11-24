@@ -3,9 +3,48 @@
   "classes": [],
   "functions": [
     {
+      "name": "preflight_check",
+      "kind": "function",
+      "signature": "project, data=(), target_os=None, extra_reqs=(), test_run=False, test_timeout=5.0",
+      "params": [
+        {
+          "name": "project",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "data",
+          "type": "any",
+          "default": "()"
+        },
+        {
+          "name": "target_os",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "extra_reqs",
+          "type": "any",
+          "default": "()"
+        },
+        {
+          "name": "test_run",
+          "type": "any",
+          "default": "False"
+        },
+        {
+          "name": "test_timeout",
+          "type": "any",
+          "default": "5.0"
+        }
+      ],
+      "returns": "any",
+      "doc": "Verify syntax, detect missing modules, check data paths, and optionally smoke-test the project."
+    },
+    {
       "name": "prepare_android",
       "kind": "function",
-      "signature": "project, name, data=(), arch=None, extra_reqs=()",
+      "signature": "project, name, data=(), arch=None, extra_reqs=(), workers=None, error_mode=1",
       "params": [
         {
           "name": "project",
@@ -31,6 +70,16 @@
           "name": "extra_reqs",
           "type": "any",
           "default": "()"
+        },
+        {
+          "name": "workers",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "error_mode",
+          "type": "any",
+          "default": "1"
         }
       ],
       "returns": "any",
@@ -39,7 +88,7 @@
     {
       "name": "build_android",
       "kind": "function",
-      "signature": "project, name, data=(), arch=None, args=(), prepare_only=False, rename_file=None, out_dir=None",
+      "signature": "project, name, data=(), arch=None, args=(), prepare_only=False, rename_file=None, out_dir=None, workers=None, error_mode=1",
       "params": [
         {
           "name": "project",
@@ -80,6 +129,16 @@
           "name": "out_dir",
           "type": "any",
           "default": "None"
+        },
+        {
+          "name": "workers",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "error_mode",
+          "type": "any",
+          "default": "1"
         }
       ],
       "returns": "any",
@@ -88,7 +147,7 @@
     {
       "name": "prepare_beeware",
       "kind": "function",
-      "signature": "project, name, target_os, data=(), arch=None, extra_reqs=()",
+      "signature": "project, name, target_os, data=(), arch=None, extra_reqs=(), error_mode=1",
       "params": [
         {
           "name": "project",
@@ -119,6 +178,11 @@
           "name": "extra_reqs",
           "type": "any",
           "default": "()"
+        },
+        {
+          "name": "error_mode",
+          "type": "any",
+          "default": "1"
         }
       ],
       "returns": "any",
@@ -127,7 +191,7 @@
     {
       "name": "build_beeware",
       "kind": "function",
-      "signature": "project, name, target_os, data=(), arch=None, args=(), prepare_only=False, rename_file=None, out_dir=None",
+      "signature": "project, name, target_os, data=(), arch=None, args=(), prepare_only=False, rename_file=None, out_dir=None, error_mode=1",
       "params": [
         {
           "name": "project",
@@ -173,6 +237,11 @@
           "name": "out_dir",
           "type": "any",
           "default": "None"
+        },
+        {
+          "name": "error_mode",
+          "type": "any",
+          "default": "1"
         }
       ],
       "returns": "any",
@@ -404,9 +473,68 @@
       "doc": ""
     },
     {
+      "name": "build_g2rt_windows",
+      "kind": "function",
+      "signature": "project, name, data=(), arch=None, args=(), rename_file=None, out_dir=None, workers=None, error_mode=1, preserve_user_files=None",
+      "params": [
+        {
+          "name": "project",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "name",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "data",
+          "type": "any",
+          "default": "()"
+        },
+        {
+          "name": "arch",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "args",
+          "type": "any",
+          "default": "()"
+        },
+        {
+          "name": "rename_file",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "out_dir",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "workers",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "error_mode",
+          "type": "any",
+          "default": "1"
+        },
+        {
+          "name": "preserve_user_files",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": "Build Windows: 1 file <name>.exe (embedded runtime) + 1 file g2rt.dll (all Cython modules + ChaCha20 vault)."
+    },
+    {
       "name": "build",
       "kind": "function",
-      "signature": "PROJECT=None, PROJECT_FULL_NAME=None, args_compile=[], data=[], rename_file=None, packet=False, zstandard=True, mode='pyinstaller', platforms=None, arch=None",
+      "signature": "PROJECT=None, PROJECT_FULL_NAME=None, args_compile=[], data=[], rename_file=None, packet=False, zstandard=True, mode='pyinstaller', platforms=None, arch=None, log=False, workers=None, error_mode=1, use_g2rt_tk=True, check=True, test_run=False, preserve_user_files=None",
       "params": [
         {
           "name": "PROJECT",
@@ -455,6 +583,41 @@
         },
         {
           "name": "arch",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "log",
+          "type": "any",
+          "default": "False"
+        },
+        {
+          "name": "workers",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "error_mode",
+          "type": "any",
+          "default": "1"
+        },
+        {
+          "name": "use_g2rt_tk",
+          "type": "any",
+          "default": "True"
+        },
+        {
+          "name": "check",
+          "type": "any",
+          "default": "True"
+        },
+        {
+          "name": "test_run",
+          "type": "any",
+          "default": "False"
+        },
+        {
+          "name": "preserve_user_files",
           "type": "any",
           "default": "None"
         }

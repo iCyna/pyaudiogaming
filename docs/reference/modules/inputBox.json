@@ -1,0 +1,146 @@
+{
+  "module": "inputBox",
+  "classes": [],
+  "functions": [
+    {
+      "name": "check_qt",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "check",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "kbt",
+      "kind": "function",
+      "signature": "self, title, message, password=False, dir_dialog=False, file_dialog=False, config=None",
+      "params": [
+        {
+          "name": "self",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "title",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "message",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "password",
+          "type": "any",
+          "default": "False"
+        },
+        {
+          "name": "dir_dialog",
+          "type": "any",
+          "default": "False"
+        },
+        {
+          "name": "file_dialog",
+          "type": "any",
+          "default": "False"
+        },
+        {
+          "name": "config",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "kbc",
+      "kind": "function",
+      "signature": "self, title, message, choices, multi=False, config=None",
+      "params": [
+        {
+          "name": "self",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "title",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "message",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "choices",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "multi",
+          "type": "any",
+          "default": "False"
+        },
+        {
+          "name": "config",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "dialogMessage",
+      "kind": "function",
+      "signature": "title, message, style=INFO, y=True, n=False, config=None",
+      "params": [
+        {
+          "name": "title",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "message",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "style",
+          "type": "any",
+          "default": "INFO"
+        },
+        {
+          "name": "y",
+          "type": "any",
+          "default": "True"
+        },
+        {
+          "name": "n",
+          "type": "any",
+          "default": "False"
+        },
+        {
+          "name": "config",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    }
+  ],
+  "title": "inputBox — Native OS Dialogs with Accessible SDL Fallbacks",
+  "summary": "Cross-platform input prompts, message boxes, and file/folder pickers using native OS dialogs (Win32/Cocoa/GTK/Android) with automatic vb.form SDL fallback."
+}

@@ -1,7 +1,9 @@
-"""Register bundled codecs; load feature add-ons on demand."""
+# -*- coding: utf-8 -*-
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# Codec plugin registry and lazy BASS add-on loader.
+# Supports Windows, Linux, macOS, Android, and iOS.
+
 import importlib
-import logging
-from .. import system
 
 CODECS = {
     "windows": ("pybassopus", "pybassflac", "pybasswma", "pybass_aac", "pybass_alac", "pybassmpc"),
@@ -11,9 +13,13 @@ CODECS = {
     "ios": ("pybassopus", "pybassflac", "pybassmpc"),
 }
 errors = {}
-for _name in CODECS.get(system.get_platform()["os"], ()):
-    try:
-        importlib.import_module("." + _name, __name__)
-    except (OSError, AttributeError, ImportError) as _error:
-        errors[_name] = str(_error)
-        logging.getLogger(__name__).debug("Optional codec %s: %s", _name, _error)
+
+
+def load_all_codecs():
+    """Explicitly import all optional codec wrappers for the current platform."""
+    from .. import system
+    for name in CODECS.get(system.get_platform()["os"], ()):
+        try:
+            importlib.import_module("." + name, __name__)
+        except (OSError, AttributeError, ImportError) as err:
+            errors[name] = str(err)

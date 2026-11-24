@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>06. Cross-Platform Building &amp; Shipping (compile.py &amp; G2RT)</title>
+  <title>06. Cross-Platform Building &amp; Shipping (compile.py)</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to main content</a>
   <header role="banner">
-    <h1>06. Cross-Platform Building &amp; Shipping (compile.py &amp; G2RT)</h1>
+    <h1>06. Cross-Platform Building &amp; Shipping (compile.py)</h1>
     <nav aria-label="Documentation Navigation">
     <a href="index.html" class="">Home</a>
     <a href="01_getting_started.html" class="">01. Getting Started</a>
@@ -23,100 +23,24 @@
   </header>
   <main id="main-content" role="main">
 
-<h2>1. Quick Start with <code>mode = g2rt</code></h2>
-<p>
-  <strong>G2RT</strong> is PyAudioGaming's built-in unified cross-platform builder. Using the bundled
-  <code>pyaudiogaming/include/g2rt_toolkit.g2rt</code> runtime package, you can build standalone
-  distributables for <strong>Windows, Android, iOS, Linux, and macOS</strong> directly from Windows
-  in seconds — without installing Gradle, Android SDK/NDK, or Xcode.
-</p>
+<h2>1. Sample <code>build.txt</code></h2>
 <pre><code>project = main
-project_full_name = MyAudioGame
+project_full_name = my_audio_game
 rename_file = game
-data = [res, maps]
-mode = g2rt
-platforms = [windows, android, linux, macos, ios]
-arch = null
-error_mode = 1
-use_g2rt_tk = true
-args_compile = [--package-id=com.mygame.app]</code></pre>
-
+args_compile = [--noconsole]
+data = [res]
+mode = pyinstaller      # pyinstaller | nuitka | cython | gcc | cx_freeze | beeware
+platforms = windows     # windows | linux | macos | android | ios | web
+arch = null</code></pre>
 <h2>2. Build Commands</h2>
 <pre><code>python -m pyaudiogaming.compile create build.txt
 python -m pyaudiogaming.compile make
 python -m pyaudiogaming.compile build.txt</code></pre>
-
-<h2>3. Supported Platforms &amp; CPU Architectures (<code>mode = g2rt</code>)</h2>
-<table>
-  <thead>
-    <tr>
-      <th>Platform</th>
-      <th>Default <code>arch</code></th>
-      <th>Supported <code>arch</code> Values</th>
-      <th>Output Format</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code>windows</code></td>
-      <td><code>x64</code></td>
-      <td><code>x64</code>, <code>x86</code></td>
-      <td>Standalone <code>.exe</code> + runtime</td>
-    </tr>
-    <tr>
-      <td><code>android</code></td>
-      <td><code>arm64</code></td>
-      <td><code>arm64</code> (<code>arm64-v8a</code>), <code>x86_64</code></td>
-      <td>Signed standalone <code>.apk</code> (ready to install)</td>
-    </tr>
-    <tr>
-      <td><code>linux</code></td>
-      <td><code>x64</code></td>
-      <td><code>x64</code>, <code>arm64</code> (<code>aarch64</code>), <code>armhf</code></td>
-      <td><code>.tar.gz</code> bundle with executable <code>run.sh</code></td>
-    </tr>
-    <tr>
-      <td><code>macos</code></td>
-      <td><code>arm64</code></td>
-      <td><code>arm64</code> (Apple Silicon), <code>x64</code> (Intel)</td>
-      <td><code>.zip</code> containing <code>.app</code> bundle</td>
-    </tr>
-    <tr>
-      <td><code>ios</code></td>
-      <td><code>arm64</code></td>
-      <td><code>arm64</code> (device), <code>simulator</code></td>
-      <td>Unsigned <code>.ipa</code> (install via Sideloadly/AltStore or sign with Apple cert)</td>
-    </tr>
-  </tbody>
-</table>
-
-<h2>4. Key Configuration Options</h2>
-<ul>
-  <li><strong><code>use_g2rt_tk = true</code></strong> (default): Uses the fast offline G2RT toolkit for Android, iOS, Linux, and macOS. Set <code>use_g2rt_tk = false</code> (or <code>0</code>) to fall back to the legacy Briefcase / Gradle / BeeWare pipeline.</li>
-  <li><strong><code>arch = [x64, arm64]</code></strong>: Build multiple CPU architectures in a single command, or leave <code>arch = null</code> for automatic platform defaults.</li>
-  <li><strong><code>error_mode</code></strong>: <code>0</code> = write traceback to log file, <code>1</code> = display native error dialog (default), <code>2</code> = silent exit.</li>
-  <li><strong><code>args_compile</code></strong>:
-    <ul>
-      <li><code>--package-id=com.yourname.game</code> — Custom Android Application ID / Apple Bundle Identifier.</li>
-      <li><code>--keystore=path/to/key.pem</code> — Custom PEM signing key + certificate for Android APK signing.</li>
-      <li><code>--no-default-reqs</code> — Skip automatic bundling of default third-party dependencies.</li>
-      <li>Any non-flag package name (e.g. <code>requests</code>) is automatically resolved for the target OS and architecture and cached for fast offline rebuilds.</li>
-    </ul>
-  </li>
-</ul>
-
-<h2>5. Performance &amp; Caching</h2>
-<p>
-  PyAudioGaming automatically caches extracted runtimes, resolved dependencies, and unchanged asset
-  archives in <code>%LOCALAPPDATA%\PyAudioGaming\</code> (or <code>~/.cache/pyaudiogaming/</code>).
-  First-time builds initialize the cache once; subsequent rebuilds complete in a few seconds.
-</p>
-
 <p>Module Reference: <a href="modules/compile.html">compile</a> | <a href="modules/system.html">system</a></p>
 
   </main>
   <footer role="contentinfo">
-    PyAudioGaming Official Documentation &mdash; Copyright (c) 2025-2026 ihcyna (Labubu). All rights reserved.
+    PyAudioGaming Official Documentation &mdash; Cross-Platform Audio Gaming for Windows, Linux, macOS, Android, iOS &amp; Web.
   </footer>
 </body>
 </html>

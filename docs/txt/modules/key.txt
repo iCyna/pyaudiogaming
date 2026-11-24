@@ -1,0 +1,14 @@
+========================================================================
+MODULE: pyaudiogaming.key
+key — Keyboard Mapping & Chord Parser
+========================================================================
+
+SUMMARY:
+Complete key-name to pygame keycode lookup table (<code>ksum</code>) and shortcut chord parser (<code>chord('ctrl+shift+s')</code>).
+
+[MODULE FUNCTIONS]
+----------------------------------------
+* token(min=4, max=12) -> any
+* code(name) -> any
+* chord(name) -> any
+* match(mod, mask) -> any

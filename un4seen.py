@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# Utility script for extracting bundled Un4seen BASS archives.
+# Supports Windows, Linux, macOS, Android, and iOS.
+
 import os
 import zipfile
 import shutil

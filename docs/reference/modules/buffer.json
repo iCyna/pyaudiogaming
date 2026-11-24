@@ -1,0 +1,7 @@
+{
+  "module": "buffer",
+  "classes": [],
+  "functions": [],
+  "title": "buffer — Shared Runtime Registries & Handle Buffers",
+  "summary": "Central in-memory registry holding the active window frame, audio device handles, stream/sample buffers, and active sound pool references."
+}

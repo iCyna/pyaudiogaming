@@ -1,0 +1,717 @@
+{
+  "module": "sound_modules.control",
+  "classes": [
+    {
+      "name": "HStreamEntry",
+      "doc": "",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "ch, p=None",
+          "params": [
+            {
+              "name": "ch",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "p",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "SoundPreload",
+      "doc": "",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "fn, data=None, c_buf=None, ptr=None, size=0, fobj=None",
+          "params": [
+            {
+              "name": "fn",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "data",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "c_buf",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "ptr",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "size",
+              "type": "any",
+              "default": "0"
+            },
+            {
+              "name": "fobj",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "close",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "MixerNode",
+      "doc": "",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "parent=None, for_single_sound=False, for_decode=False, floatingpoint=True, freq=44100, chans=2",
+          "params": [
+            {
+              "name": "parent",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "for_single_sound",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "for_decode",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "floatingpoint",
+              "type": "any",
+              "default": "True"
+            },
+            {
+              "name": "freq",
+              "type": "any",
+              "default": "44100"
+            },
+            {
+              "name": "chans",
+              "type": "any",
+              "default": "2"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "add_mixer",
+          "kind": "method",
+          "signature": "m",
+          "params": [
+            {
+              "name": "m",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "remove_mixer",
+          "kind": "method",
+          "signature": "m, internal=False",
+          "params": [
+            {
+              "name": "m",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "internal",
+              "type": "any",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "add_channel",
+          "kind": "method",
+          "signature": "raw_ch, paused=False, flags=0",
+          "params": [
+            {
+              "name": "raw_ch",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "paused",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "flags",
+              "type": "any",
+              "default": "0"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "remove_channel",
+          "kind": "method",
+          "signature": "raw_ch",
+          "params": [
+            {
+              "name": "raw_ch",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_mixer",
+          "kind": "method",
+          "signature": "m=None",
+          "params": [
+            {
+              "name": "m",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "free",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "name": "parse_flags",
+      "kind": "function",
+      "signature": "base_flags=0, **kwargs",
+      "params": [
+        {
+          "name": "base_flags",
+          "type": "any",
+          "default": "0"
+        },
+        {
+          "name": "**kwargs",
+          "type": "dict",
+          "default": "optional"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "bass_call",
+      "kind": "function",
+      "signature": "func, *args, check_error=False, default=0",
+      "params": [
+        {
+          "name": "func",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "*args",
+          "type": "tuple",
+          "default": "optional"
+        },
+        {
+          "name": "check_error",
+          "type": "any",
+          "default": "False"
+        },
+        {
+          "name": "default",
+          "type": "any",
+          "default": "0"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "encode_path",
+      "kind": "function",
+      "signature": "path",
+      "params": [
+        {
+          "name": "path",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "register_hstream",
+      "kind": "function",
+      "signature": "channel",
+      "params": [
+        {
+          "name": "channel",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "unregister_hstream",
+      "kind": "function",
+      "signature": "e",
+      "params": [
+        {
+          "name": "e",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "make_wav_header",
+      "kind": "function",
+      "signature": "total_len, freq, bits, chans, fmt=3",
+      "params": [
+        {
+          "name": "total_len",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "freq",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "bits",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "chans",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "fmt",
+          "type": "any",
+          "default": "3"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "get_sound_preload",
+      "kind": "function",
+      "signature": "filename, allow_creating=False",
+      "params": [
+        {
+          "name": "filename",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "allow_creating",
+          "type": "any",
+          "default": "False"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "sound_preload_perform",
+      "kind": "function",
+      "signature": "channel, filename",
+      "params": [
+        {
+          "name": "channel",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "filename",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "preload_encoded",
+      "kind": "function",
+      "signature": "filename, use_mmap=True",
+      "params": [
+        {
+          "name": "filename",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "use_mmap",
+          "type": "any",
+          "default": "True"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "preload",
+      "kind": "function",
+      "signature": "filename",
+      "params": [
+        {
+          "name": "filename",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "trigger_preload_async",
+      "kind": "function",
+      "signature": "filename",
+      "params": [
+        {
+          "name": "filename",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "sound_preload_release",
+      "kind": "function",
+      "signature": "pre",
+      "params": [
+        {
+          "name": "pre",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "sound_preloads_clean",
+      "kind": "function",
+      "signature": "force=False",
+      "params": [
+        {
+          "name": "force",
+          "type": "any",
+          "default": "False"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "extract_raw_bytes",
+      "kind": "function",
+      "signature": "data",
+      "params": [
+        {
+          "name": "data",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "save_mem_buffer",
+      "kind": "function",
+      "signature": "key, data_bytes, target='both', aliases=None",
+      "params": [
+        {
+          "name": "key",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "data_bytes",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "target",
+          "type": "any",
+          "default": "'both'"
+        },
+        {
+          "name": "aliases",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "register_spak_lazy",
+      "kind": "function",
+      "signature": "primary_key, aliases, loader_fn, target='both', archive_obj=None",
+      "params": [
+        {
+          "name": "primary_key",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "aliases",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "loader_fn",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "target",
+          "type": "any",
+          "default": "'both'"
+        },
+        {
+          "name": "archive_obj",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "resolve_memory_source",
+      "kind": "function",
+      "signature": "src",
+      "params": [
+        {
+          "name": "src",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "get_cached_sample",
+      "kind": "function",
+      "signature": "filename, flags=0, max_chans=64, chan_flags=None",
+      "params": [
+        {
+          "name": "filename",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "flags",
+          "type": "any",
+          "default": "0"
+        },
+        {
+          "name": "max_chans",
+          "type": "any",
+          "default": "64"
+        },
+        {
+          "name": "chan_flags",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "release_sample",
+      "kind": "function",
+      "signature": "handle",
+      "params": [
+        {
+          "name": "handle",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "load_sound_file",
+      "kind": "function",
+      "signature": "filename, key=None, target='hstream'",
+      "params": [
+        {
+          "name": "filename",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "key",
+          "type": "any",
+          "default": "None"
+        },
+        {
+          "name": "target",
+          "type": "any",
+          "default": "'hstream'"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "get_mem_buffer",
+      "kind": "function",
+      "signature": "key",
+      "params": [
+        {
+          "name": "key",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "free_mem_buffer",
+      "kind": "function",
+      "signature": "key",
+      "params": [
+        {
+          "name": "key",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "clear_all_buffers",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "load_codec_plugins",
+      "kind": "function",
+      "signature": "names=None",
+      "params": [
+        {
+          "name": "names",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": "Auto-load available BASS codec/format plugins (FLAC, Opus, AAC, ALAC, WMA, MPC, MIDI, SSL)."
+    },
+    {
+      "name": "init_sound",
+      "kind": "function",
+      "signature": "dev=-1, freq=44100, period=10, bbuffer=500, flags=0, clsid=None",
+      "params": [
+        {
+          "name": "dev",
+          "type": "any",
+          "default": "-1"
+        },
+        {
+          "name": "freq",
+          "type": "any",
+          "default": "44100"
+        },
+        {
+          "name": "period",
+          "type": "any",
+          "default": "10"
+        },
+        {
+          "name": "bbuffer",
+          "type": "any",
+          "default": "500"
+        },
+        {
+          "name": "flags",
+          "type": "any",
+          "default": "0"
+        },
+        {
+          "name": "clsid",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "shutdown_sound",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "any",
+      "doc": ""
+    }
+  ],
+  "title": "sound_modules.control — Core BASS Lifecycle, Codec Plugins & Zero-Copy Cache",
+  "summary": "Low-level BASS initialization, on-demand codec plugin loader (FLAC, Opus, AAC, ALAC, WMA, MPC, MIDI), mmap/RAM preloading, HSAMPLE caching, and SPAK memory buffer registry."
+}

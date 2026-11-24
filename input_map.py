@@ -1,21 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Unified cross-platform Action / Input Mapping for PyAudioGaming.
-
-Unifies PC keyboard (single keys & modifier chords), mouse, Android/iOS touch gestures
-(``tap`` / ``swipe`` via ``Window``), and Gamepad (buttons, D-pad, triggers, sticks)
-under clean named actions — with interactive rebinding, JSON persistence, and
-screen-reader friendly descriptions.
-
-Binding syntax examples:
-- Keyboard: ``"space"``, ``"enter"``, ``"escape"``, ``"f2"``, ``"ctrl+s"``, ``"shift+left"``, ``"alt+enter"``
-- Touch: ``"tap:1:2"`` (1 finger, 2 taps), ``"tap:1:2:left-play"`` (with zone),
-  ``"swipe:left"``, ``"swipe:up:2"`` (2-finger swipe up), ``"swipe:right:1:center"``
-- Mouse: ``"mouse:left"``, ``"mouse:right"``, ``"mouse:middle"``
-- Gamepad: ``"pad:a"``, ``"pad:b"``, ``"pad:x"``, ``"pad:y"``, ``"pad:lb"``, ``"pad:rb"``,
-  ``"pad:start"``, ``"pad:back"``, ``"pad:0"``, ``"pad:dpad_up"``, ``"pad:dpad_down"``,
-  ``"pad:dpad_left"``, ``"pad:dpad_right"``, ``"pad:lx-"``, ``"pad:lx+"``, ``"pad:ly-"``, ``"pad:ly+"``,
-  ``"pad:lt"``, ``"pad:rt"``
-"""
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# Unified action mapping for keyboard, mouse, touch gestures, and gamepads.
+# Supports Windows, Linux, macOS, Android, and iOS.
 
 import json
 from pathlib import Path

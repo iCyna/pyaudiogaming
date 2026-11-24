@@ -1,5 +1,7 @@
 package org.pyaudiogaming;
 
+import java.util.Arrays;
+import java.util.Collections;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Application;
@@ -55,6 +57,7 @@ public class PygameView extends View {
 
     private volatile EventBridge bridge = null;
     private volatile Activity hostActivity = null;
+    private volatile boolean immersiveEnabled = true;
     private Application.ActivityLifecycleCallbacks lifecycleCallbacks = null;
 
     // Two-finger pinch / rotate tracking
@@ -198,6 +201,7 @@ public class PygameView extends View {
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
         );
+        applyImmersiveMode();
         requestFocus();
 
         Application app = activity.getApplication();
@@ -344,9 +348,85 @@ public class PygameView extends View {
         }
     }
 
+    public void setImmersiveMode(final boolean enabled) {
+        this.immersiveEnabled = enabled;
+        final Activity act = this.hostActivity;
+        Runnable task = new Runnable() {
+            @Override
+            public void run() {
+                applyImmersiveMode();
+                updateGestureExclusion(getWidth(), getHeight());
+            }
+        };
+        if (act != null) {
+            act.runOnUiThread(task);
+        } else {
+            post(task);
+        }
+    }
+
+    private void applyImmersiveMode() {
+        try {
+            Activity act = this.hostActivity;
+            Window w = (act != null) ? act.getWindow() : null;
+            if (immersiveEnabled) {
+                if (w != null) {
+                    w.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+                    if (Build.VERSION.SDK_INT >= 28) {
+                        WindowManager.LayoutParams lp = w.getAttributes();
+                        lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+                        w.setAttributes(lp);
+                    }
+                }
+                int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+                setSystemUiVisibility(flags);
+            } else {
+                if (w != null) {
+                    w.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+                }
+                setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+            }
+            requestFocus();
+        } catch (Throwable ignored) {
+        }
+    }
+
+    private void updateGestureExclusion(int w, int h) {
+        if (Build.VERSION.SDK_INT >= 29) {
+            try {
+                if (!immersiveEnabled || w <= 0 || h <= 0) {
+                    setSystemGestureExclusionRects(Collections.<Rect>emptyList());
+                    return;
+                }
+                float density = getResources().getDisplayMetrics().density;
+                int edgeW = Math.min(w / 6, (int) (48 * density));
+                int maxBandH = Math.min(h, (int) (200 * density));
+                int bandTop = Math.max(0, h - maxBandH);
+                Rect leftEdge = new Rect(0, bandTop, edgeW, h);
+                Rect rightEdge = new Rect(w - edgeW, bandTop, w, h);
+                setSystemGestureExclusionRects(Arrays.asList(leftEdge, rightEdge));
+            } catch (Throwable ignored) {
+            }
+        }
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        updateGestureExclusion(right - left, bottom - top);
+    }
+
     @Override
     public void onWindowFocusChanged(boolean hasWindowFocus) {
         super.onWindowFocusChanged(hasWindowFocus);
+        if (hasWindowFocus) {
+            applyImmersiveMode();
+        }
         EventBridge b = bridge;
         if (b != null) {
             b.onFocusChanged(hasWindowFocus);

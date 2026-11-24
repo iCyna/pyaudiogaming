@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-# virtual box multifunctional
-# copyright 2025 belong ihcyna (Labubu)<phucnggo29@gmail.com>.
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# Accessible virtual form, input, and dialog controls over SDL/audio.
+# Supports Windows, Linux, macOS, Android, and iOS.
 
-import os, time, unicodedata, webbrowser, pygame
+import locale, math, os, re, sys, time, unicodedata, webbrowser, pygame
 from copy import deepcopy
 from .sound_pool import playsingle
 from .utils import get_window, open_url as _open_url
@@ -12,11 +13,400 @@ try:
 except Exception:
 	_haptics = None
 
+_HAPTICS_ENABLED = False
+
 
 def _haptic_preset(name):
-	if _haptics is not None:
+	if _HAPTICS_ENABLED and _haptics is not None:
 		try: _haptics.preset(name)
 		except Exception: pass
+
+
+# ---------------------------------------------------------------------------
+# Neutral OS-Aware Virtual Keyboard, Unicode NFC Composer, Multi-Granularity Navigator & Clipboard History
+# ---------------------------------------------------------------------------
+
+LANG_LABELS = {
+	"en": "English", "fr": "French", "de": "German", "es": "Spanish",
+	"pt": "Portuguese", "it": "Italian", "ru": "Russian", "uk": "Ukrainian",
+	"pl": "Polish", "tr": "Turkish", "el": "Greek", "vi": "Vietnamese",
+}
+
+_WIN_LANG_ID_MAP = {
+	0x09: "en", 0x0C: "fr", 0x07: "de", 0x0A: "es", 0x16: "pt",
+	0x10: "it", 0x19: "ru", 0x22: "uk", 0x15: "pl", 0x1F: "tr", 0x08: "el", 0x2A: "vi",
+}
+
+KEYBOARD_LAYOUTS = {
+	"en": [list("qwertyuiop"), list("asdfghjkl"), ["SHIFT"] + list("zxcvbnm") + ["BKSP"], ["MODE_NUM", "LANG", "SPACE", ".", "DONE"]],
+	"fr": [list("azertyuiop"), list("qsdfghjklm"), ["SHIFT"] + list("wxcvbn") + ["'", "BKSP"], ["MODE_NUM", "LANG", "SPACE", ".", "DONE"]],
+	"de": [list("qwertzuiopü"), list("asdfghjklöä"), ["SHIFT"] + list("yxcvbnmß") + ["BKSP"], ["MODE_NUM", "LANG", "SPACE", ".", "DONE"]],
+	"es": [list("qwertyuiop"), list("asdfghjklñ"), ["SHIFT"] + list("zxcvbnm") + ["BKSP"], ["MODE_NUM", "LANG", "SPACE", ".", "DONE"]],
+	"ru": [list("йцукенгшщзх"), list("фывапролджэ"), ["SHIFT"] + list("ячсмитьбю") + ["BKSP"], ["MODE_NUM", "LANG", "SPACE", ".", "DONE"]],
+	"el": [list("ςερτυθιοπ"), list("ασδφγηξκλ"), ["SHIFT"] + list("ζχψωβνμ") + ["BKSP"], ["MODE_NUM", "LANG", "SPACE", ".", "DONE"]],
+}
+
+_VKB_PAGE_LAYOUTS = {
+	"numeric": [list("1234567890"), ["-", "/", ":", ";", "(", ")", "$", "&", "@", "\""], ["MODE_SYM", ".", ",", "?", "!", "'", "_", "BKSP"], ["MODE_ABC", "LANG", "SPACE", "MODE_ACC", "DONE"]],
+	"symbols": [["[", "]", "{", "}", "#", "%", "^", "*", "+", "="], ["_", "\\", "|", "~", "<", ">", "€", "£", "¥", "•"], ["MODE_NUM", ".", ",", "?", "!", "'", "/", "BKSP"], ["MODE_ABC", "LANG", "SPACE", "MODE_EMOJI", "DONE"]],
+	"diacritics": [
+		["\u0301", "\u0300", "\u0309", "\u0303", "\u0323", "\u0302", "\u0306", "\u031B", "\u0308", "\u030A"],
+		["\u0304", "\u030C", "\u0327", "\u0307", "\u0328", "\u030B", "\u030F", "đ", "ß", "ñ"],
+		["MODE_NUM", "ç", "æ", "ø", "ł", "œ", "þ", "BKSP"],
+		["MODE_ABC", "LANG", "SPACE", "MODE_EMOJI", "DONE"],
+	],
+	"emoji": [["😀", "😄", "😊", "😉", "😍", "🤔", "😢", "😡", "😎", "🙏"], ["👍", "👎", "👏", "🙌", "🤝", "✌️", "👌", "❤️", "🔥", "⭐"], ["MODE_NUM", "✨", "💯", "✅", "❌", "⚠️", "🎉", "BKSP"], ["MODE_ABC", "LANG", "SPACE", "MODE_SYM", "DONE"]],
+}
+
+_VKB_KEY_WEIGHTS = {"SHIFT": 1.5, "BKSP": 1.5, "DONE": 1.5, "SPACE": 3.6, "MODE_NUM": 1.3, "MODE_SYM": 1.3, "MODE_ABC": 1.3, "MODE_EMOJI": 1.2, "MODE_ACC": 1.2, "LANG": 1.3}
+_VKB_SPECIAL_SPEECH = {"SHIFT": "shift", "BKSP": "backspace", "SPACE": "space", "DONE": "done", "MODE_NUM": "numbers", "MODE_SYM": "symbols", "MODE_ABC": "letters", "MODE_EMOJI": "emoji", "MODE_ACC": "accents", "LANG": "language"}
+_VKB_COMPOSERS = {}
+GRANULARITIES = ("character", "word", "line", "sentence", "paragraph")
+
+
+def register_keyboard_layout(lang_code, rows, label=None):
+	"""Register or override a language keyboard layout (4 rows of key tokens)."""
+	code = str(lang_code).strip().lower()
+	if code and rows:
+		KEYBOARD_LAYOUTS[code] = [list(r) for r in rows]
+		if label:
+			LANG_LABELS[code] = str(label)
+
+
+def register_composer(lang_code, composer_fn):
+	"""Register an optional input composer fn(prefix, ch) -> (new_prefix, composed_bool) for any language."""
+	code = str(lang_code).strip().lower()
+	if code and callable(composer_fn):
+		_VKB_COMPOSERS[code] = composer_fn
+
+
+def compose_unicode_nfc(prefix, ch):
+	"""Universal Unicode NFC combining-mark composer (works for all scripts with zero language bias)."""
+	if not prefix or not ch or len(ch) != 1:
+		return prefix + ch, False
+	if unicodedata.combining(ch):
+		combined = unicodedata.normalize("NFC", prefix[-1] + ch)
+		return prefix[:-1] + combined, True
+	return prefix + ch, False
+
+
+def detect_os_keyboard_languages():
+	"""Auto-detect enabled keyboard languages from OS (Android / iOS / Windows / locale)."""
+	langs = []
+	def _add(raw):
+		if not raw: return
+		c = re.split(r"[-_.\s@]", str(raw).strip().lower())[0]
+		if len(c) in (2, 3) and c.isalpha() and c not in langs:
+			langs.append(c)
+
+	if "ANDROID_ARGUMENT" in os.environ or hasattr(sys, "getandroidapilevel"):
+		try:
+			from java import jclass
+			app = jclass("android.app.ActivityThread").currentApplication()
+			if app is not None:
+				imm = app.getSystemService("input_method")
+				if imm is not None:
+					cur_sub = imm.getCurrentInputMethodSubtype()
+					if cur_sub is not None: _add(str(cur_sub.getLanguageTag() or cur_sub.getLocale() or ""))
+					im_list = imm.getEnabledInputMethodList()
+					if im_list is not None:
+						for idx in range(im_list.size()):
+							subs = imm.getEnabledInputMethodSubtypeList(im_list.get(idx), True)
+							if subs is not None:
+								for sidx in range(subs.size()):
+									st = subs.get(sidx)
+									if str(st.getMode() or "") == "keyboard":
+										_add(str(st.getLanguageTag() or st.getLocale() or ""))
+		except Exception:
+			pass
+		try:
+			from java import jclass
+			_add(str(jclass("java.util.Locale").getDefault().getLanguage()))
+		except Exception:
+			pass
+	elif sys.platform == "ios":
+		try:
+			from rubicon.objc import ObjCClass
+			for m in (ObjCClass("UITextInputMode").activeInputModes or ()):
+				_add(str(getattr(m, "primaryLanguage", "") or ""))
+			for item in (ObjCClass("NSLocale").preferredLanguages or ()):
+				_add(str(item))
+		except Exception:
+			pass
+	elif sys.platform == "win32":
+		try:
+			import ctypes
+			u32 = ctypes.windll.user32
+			cnt = u32.GetKeyboardLayoutList(0, None)
+			if cnt > 0:
+				buf = (ctypes.c_void_p * cnt)()
+				u32.GetKeyboardLayoutList(cnt, buf)
+				for hkl in buf:
+					if hkl and (int(hkl) & 0x3FF) in _WIN_LANG_ID_MAP:
+						_add(_WIN_LANG_ID_MAP[int(hkl) & 0x3FF])
+		except Exception:
+			pass
+	try:
+		_add(locale.getlocale()[0] or "")
+	except Exception:
+		pass
+	if "en" not in langs:
+		langs.append("en")
+	return langs or ["en"]
+
+
+def _lines_to_offset(lines, x, y):
+	off = sum(len(lines[r]) + 1 for r in range(min(y, len(lines))))
+	return off + min(x, len(lines[y])) if 0 <= y < len(lines) else off
+
+
+def _offset_to_xy(lines, off):
+	rem = max(0, int(off))
+	for r, ln in enumerate(lines):
+		if rem <= len(ln): return rem, r
+		rem -= len(ln) + 1
+	return len(lines[-1]), len(lines) - 1
+
+
+def navigate_text(lines, x, y, direction, granularity="character"):
+	"""Move cursor by direction (-1/+1) at granularity (character/word/line/sentence/paragraph)."""
+	full_text, cur_off = "\n".join(lines), _lines_to_offset(lines, x, y)
+	n_len = len(full_text)
+	if granularity == "character":
+		if direction < 0:
+			if cur_off <= 0: return 0, 0, "", True
+			nxt = cur_off - 1; nx, ny = _offset_to_xy(lines, nxt); ch = full_text[nxt]
+			return nx, ny, ("new line" if ch == "\n" else ("space" if ch == " " else ch)), False
+		if cur_off >= n_len:
+			nx, ny = _offset_to_xy(lines, n_len); return nx, ny, "", True
+		nxt = cur_off + 1; nx, ny = _offset_to_xy(lines, nxt); ch = full_text[nxt] if nxt < n_len else "end"
+		return nx, ny, ("new line" if ch == "\n" else ("space" if ch == " " else ch)), False
+
+	if granularity == "word": spans = [(m.start(), m.end()) for m in re.finditer(r"\S+", full_text)]
+	elif granularity == "line":
+		spans, pos = [], 0
+		for part in full_text.split("\n"):
+			spans.append((pos, pos + len(part))); pos += len(part) + 1
+	elif granularity == "sentence":
+		spans = [(m.start(), m.end()) for m in re.finditer(r"[^.!?\n]+[.!?]?", full_text) if m.group(0).strip()]
+	elif granularity == "paragraph":
+		spans = [(m.start(), m.end()) for m in re.finditer(r"(?:[^\n]+(?:\n(?!\s*\n)[^\n]+)*)", full_text) if m.group(0).strip()]
+	else:
+		spans = []
+	if not spans: return x, y, "", True
+
+	cur_idx = 0
+	for idx, (s, e) in enumerate(spans):
+		if cur_off < s: cur_idx = max(0, idx - 1) if direction > 0 else idx; break
+		if s <= cur_off <= e: cur_idx = idx; break
+		cur_idx = idx
+	if direction > 0:
+		if cur_off >= spans[-1][0] and cur_idx == len(spans) - 1:
+			nx, ny = _offset_to_xy(lines, spans[-1][1])
+			return nx, ny, full_text[spans[-1][0]:spans[-1][1]].strip(), cur_off >= spans[-1][1]
+		target_idx = cur_idx + 1 if cur_off >= spans[cur_idx][0] and (cur_idx + 1 < len(spans)) else cur_idx
+	else:
+		if cur_off <= spans[0][0] and cur_idx == 0:
+			return 0, 0, full_text[spans[0][0]:spans[0][1]].strip(), True
+		target_idx = cur_idx - 1 if cur_off <= spans[cur_idx][0] and cur_idx > 0 else cur_idx
+	s, e = spans[target_idx]; nx, ny = _offset_to_xy(lines, s)
+	return nx, ny, full_text[s:e].strip(), False
+
+
+class ClipboardHistory:
+	def __init__(self, max_items=15):
+		self.max_items, self.items = max(1, int(max_items)), []
+
+	def push(self, text):
+		s = str(text or "")
+		if not s: return
+		if s in self.items: self.items.remove(s)
+		self.items.insert(0, s)
+		if len(self.items) > self.max_items: self.items = self.items[:self.max_items]
+
+	def list_items(self):
+		return list(self.items)
+
+
+CLIPBOARD_HISTORY = ClipboardHistory()
+
+
+class VirtualKeyboard:
+	"""Language-neutral OS-aware 4-row touch virtual keyboard with 3-state Shift,
+	1-tap lift / 2-tap double-tap modes, Unicode NFC diacritics, and pluggable composers."""
+
+	def __init__(self, number_only=False, single_tap_type=True, langs=None, composers=None, top_ratio=0.42):
+		self.langs = list(langs) if langs else detect_os_keyboard_languages()
+		self.lang_idx, self.page = 0, ("numeric" if number_only else "letters")
+		self.shift_state = 0  # 0 = off, 1 = on (1 char), 2 = caps lock
+		self.single_tap_type = bool(single_tap_type)
+		self.composers = {**_VKB_COMPOSERS, **(composers or {})}
+		self.top_ratio = float(top_ratio)
+		self.active_finger = self.split_finger = self.hover_key = self.focused_key = None
+		self._down_pos = None
+		self._down_ts = 0.0
+		self._moved = False
+		self._pending_tap_key = None
+		self._pending_tap_pos = None
+		self._pending_tap_ts = 0.0
+
+	@property
+	def current_lang(self):
+		return self.langs[self.lang_idx % len(self.langs)] if self.langs else "en"
+
+	def current_rows(self):
+		if self.page in _VKB_PAGE_LAYOUTS: return _VKB_PAGE_LAYOUTS[self.page]
+		return KEYBOARD_LAYOUTS.get(self.current_lang, KEYBOARD_LAYOUTS["en"])
+
+	def display_label(self, tok):
+		lbl_map = {"LANG": self.current_lang.upper(), "BKSP": "Del", "SPACE": "Space", "DONE": "Done", "MODE_NUM": "123", "MODE_SYM": "#+=", "MODE_ABC": "ABC", "MODE_EMOJI": "Emoji", "MODE_ACC": "Acc"}
+		if tok == "SHIFT": return "CAPS" if self.shift_state == 2 else ("SHIFT*" if self.shift_state == 1 else "Shift")
+		if tok in lbl_map: return lbl_map[tok]
+		if len(tok) == 1 and unicodedata.combining(tok): return "\u25CC" + tok
+		if self.page in ("letters", "diacritics") and self.shift_state > 0 and len(tok) == 1 and tok.isalpha(): return tok.upper()
+		return tok
+
+	def spoken_label(self, tok):
+		if tok == "LANG": return f"language {LANG_LABELS.get(self.current_lang, self.current_lang)}"
+		if tok == "SHIFT": return "caps lock on" if self.shift_state == 2 else ("shift on" if self.shift_state == 1 else "shift off")
+		if tok in _VKB_SPECIAL_SPEECH: return _VKB_SPECIAL_SPEECH[tok]
+		if len(tok) == 1 and unicodedata.combining(tok): return _unicode_label(tok)
+		if self.page in ("letters", "diacritics") and self.shift_state > 0 and len(tok) == 1 and tok.isalpha(): return f"capital {tok.upper()}"
+		return tok
+
+	def key_at(self, nx, ny):
+		if ny < self.top_ratio or ny > 1.0 or nx < 0.0 or nx > 1.0: return None
+		rows = self.current_rows()
+		r_idx = min(len(rows) - 1, max(0, int(((ny - self.top_ratio) / max(0.01, 1.0 - self.top_ratio)) * len(rows))))
+		row = rows[r_idx]
+		weights = [_VKB_KEY_WEIGHTS.get(k, 1.0) for k in row]
+		target_x, acc = nx * sum(weights), 0.0
+		for k, w in zip(row, weights):
+			acc += w
+			if target_x <= acc: return k
+		return row[-1]
+
+	def cycle_shift(self):
+		self.shift_state = (self.shift_state + 1) % 3
+		return "shift on" if self.shift_state == 1 else ("caps lock on" if self.shift_state == 2 else "shift off")
+
+	def cycle_lang(self):
+		if len(self.langs) > 1: self.lang_idx = (self.lang_idx + 1) % len(self.langs)
+		return LANG_LABELS.get(self.current_lang, self.current_lang)
+
+	def compose_char(self, prefix, ch):
+		fn = self.composers.get(self.current_lang) or self.composers.get("*")
+		if callable(fn):
+			return fn(prefix, ch)
+		return compose_unicode_nfc(prefix, ch)
+
+	def activate_key(self, tok):
+		if tok == "SHIFT": return "state", None, self.cycle_shift()
+		if tok == "LANG": self.page = "letters"; return "state", None, self.cycle_lang()
+		page_map = {"MODE_NUM": ("numeric", "numbers"), "MODE_SYM": ("symbols", "symbols"), "MODE_ACC": ("diacritics", "accents"), "MODE_EMOJI": ("emoji", "emoji")}
+		if tok in page_map:
+			self.page, msg = page_map[tok]; return "state", None, msg
+		if tok == "MODE_ABC":
+			self.page = "letters"; return "state", None, f"letters, {LANG_LABELS.get(self.current_lang, self.current_lang)}"
+		if tok == "BKSP": return "backspace", None, ""
+		if tok == "DONE": return "done", None, ""
+		if tok == "SPACE": return "char", " ", ""
+		ch = tok.upper() if (self.page in ("letters", "diacritics") and self.shift_state > 0 and len(tok) == 1 and tok.isalpha()) else tok
+		if self.page in ("letters", "diacritics") and self.shift_state == 1 and len(ch) == 1 and ch.isalpha():
+			self.shift_state = 0
+		return "char", ch, ""
+
+	def flush_pending(self, say_fn=None):
+		"""Commit pending 1-tap focus after double-tap timeout (TalkBack TouchExplorer model)."""
+		if self._pending_tap_key is not None and self.active_finger is None:
+			if (time.monotonic() - self._pending_tap_ts) >= 0.28:
+				k = self._pending_tap_key
+				self._pending_tap_key = self._pending_tap_pos = None
+				if k:
+					self.focused_key = k
+					if say_fn: say_fn(self.spoken_label(k))
+
+	def handle_touch(self, ev_type, finger_id, nx, ny, say_fn=None, fdown=1792, fup=1793, fmotion=1794):
+		# Split-tap: while primary finger explores/holds a key, tapping with a 2nd finger activates immediately
+		if self.active_finger is not None and finger_id != self.active_finger:
+			if ev_type == fdown:
+				self.split_finger = finger_id
+			elif ev_type == fup and finger_id == self.split_finger:
+				self.split_finger = None
+				target_k = self.hover_key or self.focused_key
+				if target_k:
+					self.focused_key = target_k
+					return self.activate_key(target_k)
+			return None
+
+		if ev_type == fdown:
+			if ny < self.top_ratio: return None
+			self.active_finger = finger_id
+			self._down_pos = (nx, ny)
+			self._down_ts = time.monotonic()
+			self._moved = False
+			k = self.key_at(nx, ny)
+			self.hover_key = k
+			if self.single_tap_type:
+				if k:
+					self.focused_key = k
+					if say_fn: say_fn(self.spoken_label(k))
+				return None
+			# 2-tap mode: if Tap 2 arrives within timeout & double-tap slop, do NOT change focused_key or speak!
+			if self._pending_tap_key is not None:
+				p_dist = math.hypot(nx - self._pending_tap_pos[0], ny - self._pending_tap_pos[1]) if self._pending_tap_pos else 0.0
+				if (self._down_ts - self._pending_tap_ts) > 0.28 or p_dist > 0.14:
+					old_k = self._pending_tap_key
+					self._pending_tap_key = self._pending_tap_pos = None
+					if old_k:
+						self.focused_key = old_k
+						if say_fn: say_fn(self.spoken_label(old_k))
+			return None
+
+		if ev_type == fmotion and finger_id == self.active_finger:
+			dist = math.hypot(nx - self._down_pos[0], ny - self._down_pos[1]) if self._down_pos else 0.0
+			if dist > 0.025:
+				was_moved = self._moved
+				self._moved = True
+				self._pending_tap_key = self._pending_tap_pos = None
+				k = self.key_at(nx, ny)
+				if (not was_moved) or (k != self.hover_key):
+					self.hover_key = k
+					if k:
+						self.focused_key = k
+						if say_fn: say_fn(self.spoken_label(k))
+			return None
+
+		if ev_type == fup and finger_id == self.active_finger:
+			k = self.key_at(nx, ny) or self.hover_key
+			was_moved = self._moved
+			self.active_finger = self.hover_key = self._down_pos = None
+			self._moved = False
+			if self.single_tap_type:
+				if not k: return None
+				self.focused_key = k
+				return self.activate_key(k)
+			# 2-tap mode (Google TalkBack / VoiceOver standard):
+			# - Slide/explore onto a key -> focuses & speaks that key in real time
+			# - Single tap on a key -> after 280ms, focuses & speaks that exact key
+			# - Double-tap ANYWHERE on the keyboard -> activates current focused_key without switching focus!
+			if was_moved:
+				if k: self.focused_key = k
+				self._pending_tap_key = self._pending_tap_pos = None
+				return None
+			now = time.monotonic()
+			if self._pending_tap_key is not None and (now - self._pending_tap_ts) <= 0.28:
+				pending_k = self._pending_tap_key
+				self._pending_tap_key = self._pending_tap_pos = None
+				target_k = self.focused_key if self.focused_key is not None else (pending_k or k)
+				if target_k:
+					self.focused_key = target_k
+					return self.activate_key(target_k)
+				return None
+			self._pending_tap_key = k
+			self._pending_tap_pos = (nx, ny)
+			self._pending_tap_ts = now
+		return None
 
 
 def _unicode_label(ch):
@@ -60,6 +450,8 @@ INPUT_CONFIG = {
 	"keyboard_modes": ["standard", "numeric", "symbols", "emoji"],
 	"custom_keyboards": {},
 	"keyboard-mode-text": "keyboard mode: %s",
+	"use_os_keyboard": False, "haptics": False, "release_fullscreen": False,
+	"vkb_enabled": None, "vkb_single_tap_type": False, "vkb_composers": {},
 	"edit-text": "edit", "readonly-text": "read only", "multiline-text": "multi line",
 	"password-text": "password", "number-text": "number only",
 	"suggestion-text": "%d suggestions, %s",
@@ -82,6 +474,7 @@ INPUT_CONFIG = {
 
 FORM_CONFIG = {
 	"permissions": ["read", "move", "enter", "edit", "check", "cancel", "context"],
+	"release_fullscreen": False,
 	"button-text": "button", "check-text": "check box", "switch-text": "switch",
 	"on-text": "on", "off-text": "off", "link-text": "link", "group-text": "grouping",
 	"out-of-group-text": "out of %s", "page-text": "page", "unavailable-text": "unavailable",
@@ -141,6 +534,8 @@ class _TouchEngine:
 class _Renderer:
 	"""Android Material Dark GUI renderer for Input, Message, Dialog, Table and Form."""
 	_fonts, _rects = {}, {}
+	_last_render_sig = None
+	_last_render_rects = {}
 
 	@classmethod
 	def get_font(cls, size=17, bold=False, italic=False, name=None):
@@ -193,9 +588,14 @@ class _Renderer:
 		return btn_rects
 
 	@classmethod
-	def draw_input(cls, wnd, title, lines, x, y, norm_sel_fn, has_sel, password, config, suggs=None, s_idx=-1):
+	def draw_input(cls, wnd, title, lines, x, y, norm_sel_fn, has_sel, password, config, suggs=None, s_idx=-1, vkb_obj=None):
 		surf = cls.get_surface(wnd)
 		if not surf: return {}
+		sel_sig = norm_sel_fn() if has_sel else None
+		vkb_sig = (vkb_obj.page, vkb_obj.current_lang, vkb_obj.shift_state, vkb_obj.hover_key, vkb_obj.focused_key) if vkb_obj is not None else None
+		render_sig = ("input", id(surf), surf.get_size(), title, tuple(lines), x, y, sel_sig, bool(password), tuple(suggs or ()), s_idx, vkb_sig)
+		if cls._last_render_sig == render_sig:
+			return cls._last_render_rects
 		w, h = surf.get_size()
 		surf.fill(config.get("bg_color") or (16, 18, 24))
 		pad, f_title, f_meta, f_txt = 24, cls.get_font(19, True), cls.get_font(14), cls.get_font(config.get("font_size", 18), name=config.get("font"))
@@ -218,7 +618,9 @@ class _Renderer:
 			surf.blit(ts, (ar.centerx - ts.get_width() // 2, ar.centery - ts.get_height() // 2))
 			ui_rects[key] = ar; ax += 74
 
-		by, bh = pad + 36, h - pad * 2 - 78
+		vkb_top = int(h * vkb_obj.top_ratio) if vkb_obj is not None else h
+		by = pad + 36
+		bh = (vkb_top - by - 10) if vkb_obj is not None else (h - pad * 2 - 78)
 		brect = pygame.Rect(pad, by, w - pad * 2, max(60, bh))
 		pygame.draw.rect(surf, (26, 29, 38), brect, border_radius=8)
 		pygame.draw.rect(surf, (220, 160, 60) if config.get("readonly") else (90, 160, 250), brect, 2, border_radius=8)
@@ -260,15 +662,42 @@ class _Renderer:
 				surf.blit(f_meta.render(str(sg), True, (255, 255, 255)), (sx_chip + 12, sy_chip + 4))
 				ui_rects[f"sug_{i}"] = crect; sx_chip += cw + 8
 
-		st = f"Ln {y + 1}/{len(lines)}, Col {x + 1} | Tab/Down: Suggestions | Enter: Confirm | Esc: Cancel"
-		surf.blit(f_meta.render(st, True, (145, 150, 165)), (pad, h - 24))
+		if vkb_obj is not None:
+			kb_y0 = int(h * vkb_obj.top_ratio)
+			kb_h = max(40, h - kb_y0)
+			rows = vkb_obj.current_rows()
+			row_h = max(24, kb_h // max(1, len(rows)))
+			f_kb = cls.get_font(16, True)
+			for r_idx, row in enumerate(rows):
+				weights = [_VKB_KEY_WEIGHTS.get(k, 1.0) for k in row]
+				tw, cur_x = sum(weights), 4.0
+				ry = kb_y0 + r_idx * row_h + 3
+				for k, kw in zip(row, weights):
+					cell_w = ((w - 8.0) * kw / tw)
+					kr = pygame.Rect(int(cur_x), ry, max(16, int(cell_w) - 4), row_h - 6)
+					is_hov = (k == vkb_obj.hover_key or k == vkb_obj.focused_key)
+					bg = (65, 130, 230) if is_hov else ((48, 56, 76) if k in _VKB_SPECIAL_SPEECH else (32, 36, 48))
+					pygame.draw.rect(surf, bg, kr, border_radius=6)
+					pygame.draw.rect(surf, (255, 220, 90) if is_hov else (75, 85, 110), kr, 2 if is_hov else 1, border_radius=6)
+					lbl = f_kb.render(vkb_obj.display_label(k), True, (255, 255, 255))
+					surf.blit(lbl, (kr.centerx - lbl.get_width() // 2, kr.centery - lbl.get_height() // 2))
+					cur_x += cell_w
+		else:
+			st = f"Ln {y + 1}/{len(lines)}, Col {x + 1} | Tab/Down: Suggestions | Enter: Confirm | Esc: Cancel"
+			surf.blit(f_meta.render(st, True, (145, 150, 165)), (pad, h - 24))
 		pygame.display.flip()
+		cls._last_render_sig = render_sig
+		cls._last_render_rects = ui_rects
 		return ui_rects
 
 	@classmethod
 	def draw_form(cls, f):
 		surf = cls.get_surface(f.wnd)
 		if not surf: return {}
+		vis_sig = tuple((it["name"], str(it.get("value")), bool(it.get("expanded")), it.get("tab_cursor"), it.get("tree_cursor"), it.get("row"), it.get("col"), bool(it["config"].get("password")), bool(it["config"].get("hidden"))) for it in f.items)
+		render_sig = ("form", id(surf), surf.get_size(), id(f), f.cursor, vis_sig)
+		if cls._last_render_sig == render_sig:
+			return cls._last_render_rects
 		w, h = surf.get_size()
 		surf.fill(f.config.get("bg_color") or (16, 18, 24))
 		cls._rects = {"items": {}, "tabs": {}, "combos": {}, "trees": {}, "cells": {}}
@@ -443,10 +872,13 @@ class _Renderer:
 		footer = f"Item {cur_v_idx + 1}/{len(vis)} | Touch/Tab/Arrows: Navigate | Double-Tap Hold: Context Menu"
 		surf.blit(f_small.render(footer, True, (140, 145, 165)), (pad, h - 22))
 		pygame.display.flip()
+		cls._last_render_sig = render_sig
+		cls._last_render_rects = cls._rects
 		return cls._rects
 
 
 def _copy(text):
+	CLIPBOARD_HISTORY.push(text)
 	if system.get_platform()["os"] == "windows":
 		try:
 			import win32clipboard as clip
@@ -747,6 +1179,166 @@ def _input(title="", text="", callback=None, password=False, get_data=True, new_
 		else:
 			bf.say(msg)
 
+	# Self-voicing Virtual Keyboard (auto-enabled on mobile unless use_os_keyboard=True)
+	is_mob = system.get_platform()["os"] in ("android", "ios") or getattr(bf, "platform", "") == "mobile"
+	vkb_flag = config.get("vkb_enabled")
+	use_vkb = (is_mob if vkb_flag is None else bool(vkb_flag)) and not config.get("use_os_keyboard", False) and not config.get("readonly", False)
+	vkb_obj = VirtualKeyboard(
+		number_only=bool(config.get("number_only")),
+		single_tap_type=bool(config.get("vkb_single_tap_type", False)),
+		composers=config.get("vkb_composers"),
+	) if use_vkb else None
+	gran_idx, sel_mode, use_os_kb_live = 0, False, bool(config.get("use_os_keyboard", False))
+
+	def _do_vkb_backspace():
+		nonlocal x, y
+		if not has_perm(1):
+			play("cannot delete-sound", "cannot delete-text"); return
+		if has_sel():
+			save_state(); d = del_sel()
+			play("delete-sound", "delete-text", d if has_perm(2) else config.get("cannot read-text", "star"))
+		elif x > 0:
+			save_state(); ch = lines[y][x - 1]
+			lines[y] = lines[y][:x - 1] + lines[y][x:]; x -= 1
+			play("delete-sound", "delete-text", ch if has_perm(2) else config.get("cannot read-text", "star"))
+		elif y > 0:
+			save_state(); x = len(lines[y - 1]); lines[y - 1] += lines[y]; lines.pop(y); y -= 1
+			play("delete-sound", "delete-text", config.get("new line-text", "line feed"))
+		else:
+			play("edge text-sound", None)
+		update_suggestions()
+
+	def _set_os_kb_visible(show_flag):
+		nonlocal vkb_obj, use_os_kb_live
+		use_os_kb_live = bool(show_flag)
+		bf._vkb_os_kb_shown = use_os_kb_live
+		if show_flag:
+			vkb_obj = None
+			pygame.key.start_text_input()
+			try:
+				from .pygame_shim import _android_bridge, _ios_bridge
+				if _android_bridge.is_android_java_available(): _android_bridge.show_keyboard()
+				elif _ios_bridge.is_ios_available(): _ios_bridge.show_keyboard()
+			except Exception:
+				pass
+			bf.say("OS keyboard on")
+		else:
+			pygame.key.stop_text_input()
+			try:
+				from .pygame_shim import _android_bridge, _ios_bridge
+				if _android_bridge.is_android_java_available(): _android_bridge.hide_keyboard()
+				elif _ios_bridge.is_ios_available(): _ios_bridge.hide_keyboard()
+			except Exception:
+				pass
+			vkb_obj = VirtualKeyboard(
+				number_only=bool(config.get("number_only")),
+				single_tap_type=bool(config.get("vkb_single_tap_type", False)),
+				composers=config.get("vkb_composers"),
+			)
+			bf.say("Virtual keyboard on")
+
+	def _open_clipboard_history_menu():
+		items = CLIPBOARD_HISTORY.list_items()
+		if not items:
+			bf.say("Clipboard history empty"); return
+		from .menu import menu as _Menu
+		cm = _Menu()
+		cm.initialize(bf, "Clipboard history", [it[:80] for it in items] + ["Cancel"])
+		cm.open()
+		while True:
+			bf.frameUpdate()
+			res = cm.frameUpdate()
+			if res is None: continue
+			if res == -1 or res == len(items): bf.say("Cancelled"); return
+			if insert_text(items[res], True):
+				play("paste-sound", None); say_content(items[res])
+			return
+
+	def _open_edit_actions_menu():
+		nonlocal x, y, startx, starty, endx, endy, sel_mode
+		from .menu import menu as _Menu
+		act_list = [
+			("sel_toggle", "Stop selection" if sel_mode else "Start selection"),
+			("sel_all", "Select all"),
+			("sel_start", "Select to start"),
+			("sel_end", "Select to end"),
+			("cut", "Cut"),
+			("copy", "Copy"),
+			("paste", "Paste"),
+			("clip_hist", "Clipboard history"),
+			("undo", "Undo"),
+			("redo", "Redo"),
+			("read_all", "Read all"),
+		]
+		if vkb_obj is not None:
+			mode_lbl = "Switch to 2-tap typing" if vkb_obj.single_tap_type else "Switch to 1-tap typing"
+			act_list.append(("toggle_tap", mode_lbl))
+		act_list.append(("toggle_oskb", "Switch to virtual keyboard" if use_os_kb_live else "Switch to OS keyboard"))
+		act_list.append(("done", "Done"))
+		act_list.append(("cancel", "Cancel"))
+		em = _Menu()
+		em.initialize(bf, "Edit actions", [lbl for code, lbl in act_list])
+		em.open()
+		while True:
+			bf.frameUpdate()
+			res = em.frameUpdate()
+			if res is None: continue
+			if res == -1: bf.say("Closed"); return None
+			code = act_list[res][0]
+			if code == "sel_toggle":
+				sel_mode = not sel_mode
+				if sel_mode: startx, starty, endx, endy = x, y, x, y; bf.say("Selection started")
+				else: clear_sel(); bf.say("Selection stopped")
+			elif code == "sel_all":
+				starty, startx, endy, endx = 0, 0, len(lines) - 1, len(lines[-1]); y, x = endy, endx; announce_sel()
+			elif code == "sel_start":
+				starty, startx, endy, endx = y, x, 0, 0; y, x = 0, 0; announce_sel()
+			elif code == "sel_end":
+				ey_i, ex_i = len(lines) - 1, len(lines[-1])
+				starty, startx, endy, endx = y, x, ey_i, ex_i; y, x = ey_i, ex_i; announce_sel()
+			elif code == "cut":
+				if not has_perm(12): play("cannot cut-sound", "cannot cut-text")
+				else:
+					txt_c = get_sel() or "\n".join(lines)
+					if txt_c:
+						save_state(); _copy(txt_c)
+						if has_sel(): del_sel()
+						else: lines[:] = [""]; x = y = 0
+						sel_mode = False; play("cut-sound", None); bf.say("Cut")
+			elif code == "copy":
+				if not has_perm(13): play("cannot copy-sound", "cannot copy-text")
+				else:
+					txt_c = get_sel() or "\n".join(lines)
+					if txt_c: _copy(txt_c); play("copy-sound", None); bf.say("Copied")
+			elif code == "paste":
+				if not has_perm(14): play("cannot paste-sound", "cannot paste-text")
+				else:
+					c_txt = _paste()
+					if c_txt and insert_text(c_txt, True): play("paste-sound", None); say_content(c_txt)
+					else: bf.say("Clipboard empty")
+			elif code == "clip_hist":
+				_open_clipboard_history_menu()
+			elif code == "undo":
+				if undo_s and has_perm(10):
+					redo_s.append((list(lines), x, y)); lines[:], x, y = undo_s.pop(); clear_sel(); play("undo-sound", None); say_content(lines[y])
+				else: play("cannot undo-sound", "cannot undo-text")
+			elif code == "redo":
+				if redo_s and has_perm(11):
+					undo_s.append((list(lines), x, y)); lines[:], x, y = redo_s.pop(); clear_sel(); play("redo-sound", None); say_content(lines[y])
+				else: play("cannot redo-sound", "cannot redo-text")
+			elif code == "read_all":
+				say_content("\n".join(lines))
+			elif code == "toggle_tap" and vkb_obj is not None:
+				vkb_obj.single_tap_type = not vkb_obj.single_tap_type
+				bf.say("1-tap lift typing" if vkb_obj.single_tap_type else "2-tap typing")
+			elif code == "toggle_oskb":
+				_set_os_kb_visible(not use_os_kb_live)
+			elif code == "done":
+				return "DONE"
+			elif code == "cancel":
+				return "CANCEL"
+			return None
+
 	play("open-sound", None)
 	init_sp = _build_input_announcement(title, text, password, config)
 	if init_sp: bf.say(init_sp)
@@ -754,11 +1346,81 @@ def _input(title="", text="", callback=None, password=False, get_data=True, new_
 	while True:
 		bf.frameUpdate()
 		eff_password = bool(password) and not reveal_pw
-		ui_rects = config["draw_callback"](lines, x, y, norm_sel, has_sel(), eff_password, config) if config.get("draw_callback") else _Renderer.draw_input(bf, title, lines, x, y, norm_sel, has_sel(), eff_password, config, suggs, s_idx)
+		ui_rects = config["draw_callback"](lines, x, y, norm_sel, has_sel(), eff_password, config) if config.get("draw_callback") else _Renderer.draw_input(bf, title, lines, x, y, norm_sel, has_sel(), eff_password, config, suggs, s_idx, vkb_obj=vkb_obj)
 		if callback: callback()
 		ctrl = bf.keyPressing("lcontrol") or bf.keyPressing("rcontrol")
 		shift = bf.keyPressing("lshift") or bf.keyPressing("rshift")
 		alt = bf.keyPressing("lalt") or bf.keyPressing("ralt")
+
+		# Mobile touch navigation (top text area + 2-finger shortcuts + bottom virtual keyboard)
+		if hasattr(bf, "keySlide"):
+			if bf.keySlide("left", fingers=2):
+				play("exit-sound", None); return None
+			if bf.keySlide("right", fingers=2):
+				play("confirm-sound", None); return "\n".join(lines)
+			top_zone = (0.0, 0.0, 1.0, vkb_obj.top_ratio if vkb_obj is not None else 1.0)
+			if bf.keySlide("up", fingers=2, zone=top_zone):
+				if sel_mode: starty, startx, endy, endx = y, x, 0, 0
+				else: clear_sel()
+				x, y = 0, 0
+				bf.say("Selected to start" if sel_mode else "Start of text")
+				continue
+			if bf.keySlide("down", fingers=2, zone=top_zone):
+				ey_i, ex_i = len(lines) - 1, len(lines[-1])
+				if sel_mode: starty, startx, endy, endx = y, x, ey_i, ex_i
+				else: clear_sel()
+				x, y = ex_i, ey_i
+				bf.say("Selected to end" if sel_mode else "End of text")
+				continue
+			if bf.keySlide("up", fingers=1, zone=top_zone):
+				gran_idx = (gran_idx - 1) % len(GRANULARITIES)
+				bf.say(GRANULARITIES[gran_idx]); continue
+			if bf.keySlide("down", fingers=1, zone=top_zone):
+				gran_idx = (gran_idx + 1) % len(GRANULARITIES)
+				bf.say(GRANULARITIES[gran_idx]); continue
+			if bf.keySlide("left", fingers=1, zone=top_zone) or bf.keySlide("right", fingers=1, zone=top_zone):
+				nav_dir = -1 if bf.keySlide("left", fingers=1, zone=top_zone) else 1
+				gran_name = GRANULARITIES[gran_idx]
+				nx, ny, spoken, at_edge = navigate_text(lines, x, y, nav_dir, gran_name)
+				if sel_mode:
+					if startx == -1: startx, starty = x, y
+					endx, endy = nx, ny
+				else:
+					clear_sel()
+				x, y = nx, ny
+				if at_edge and not spoken: play("edge text-sound", None)
+				elif spoken: say_content(spoken, is_char=(gran_name == "character" and len(spoken) == 1))
+				continue
+			if bf.tap(fingers=1, count=2, zone=top_zone):
+				act_res = _open_edit_actions_menu()
+				if act_res == "DONE": play("confirm-sound", None); return "\n".join(lines)
+				if act_res == "CANCEL": play("exit-sound", None); return None
+				continue
+			if bf.tap(fingers=1, count=1, zone=top_zone) == 1:
+				say_content("\n".join(lines)); continue
+
+		evs = bf.events if hasattr(bf, "events") else pygame.event.get()
+		if vkb_obj is not None:
+			vkb_obj.flush_pending(say_fn=bf.say)
+			for ev_t in evs:
+				if ev_t.type in (pygame.FINGERDOWN, pygame.FINGERMOTION, pygame.FINGERUP):
+					v_res = vkb_obj.handle_touch(ev_t.type, ev_t.finger_id, ev_t.x, ev_t.y, say_fn=bf.say, fdown=pygame.FINGERDOWN, fup=pygame.FINGERUP, fmotion=pygame.FINGERMOTION)
+					if v_res is not None:
+						v_act, v_pay, v_msg = v_res
+						if v_act == "state" and v_msg: bf.say(v_msg)
+						elif v_act == "backspace": _do_vkb_backspace()
+						elif v_act == "done": play("confirm-sound", None); return "\n".join(lines)
+						elif v_act == "char" and v_pay:
+							if not has_sel() and has_perm(0):
+								new_pref, composed = vkb_obj.compose_char(lines[y][:x], v_pay)
+								if composed:
+									save_state()
+									lines[y] = new_pref + lines[y][x:]
+									x = len(new_pref)
+									update_suggestions()
+									say_content(new_pref[-1] if new_pref else "", is_char=True)
+									continue
+							insert_text(v_pay)
 
 		# Ctrl + Shift + Alt + Backspace -> Cycle universal keyboard modes (standard / numeric / symbols / emoji / custom)
 		if ctrl and shift and alt and bf.keyPressed("backspace"):
@@ -825,7 +1487,7 @@ def _input(title="", text="", callback=None, password=False, get_data=True, new_
 			else: play("edge text-sound", None)
 
 		evs = bf.events if hasattr(bf, "events") else pygame.event.get()
-		for act, pos in touch.update(evs):
+		for act, pos in (touch.update(evs) if not is_mob else ()):
 			if act in ("tap", "double_tap") and ui_rects:
 				if ui_rects.get("done") and ui_rects["done"].collidepoint(pos): play("confirm-sound", None); return "\n".join(lines)
 				if ui_rects.get("copy") and ui_rects["copy"].collidepoint(pos) and has_perm(13): _copy(get_sel() or lines[y]); play("copy-sound", None)
@@ -933,30 +1595,6 @@ def _input(title="", text="", callback=None, password=False, get_data=True, new_
 				if config.get("enter_submit"): config["enter_submit"]()
 				return "\n".join(lines)
 
-		# TalkBack / VoiceOver touch gestures inside vb.input
-		if hasattr(bf, "keySlide"):
-			if bf.keySlide("left", fingers=2):
-				if suggs: suggs.clear(); s_idx = -1; continue
-				play("exit-sound", None); return None
-			if bf.keySlide("right", fingers=2):
-				if config.get("tab exit"):
-					config["tab exit"](1)
-					return "\n".join(lines)
-				elif get_data:
-					play("confirm-sound", None)
-					if config.get("enter_submit"): config["enter_submit"]()
-					return "\n".join(lines)
-			if bf.tap(fingers=2, count=2) and get_data:
-				play("confirm-sound", None)
-				if config.get("enter_submit"): config["enter_submit"]()
-				return "\n".join(lines)
-			if bf.tap(fingers=1, count=2):
-				if suggs and s_idx >= 0: apply_suggestion(s_idx); continue
-				try: pygame.key.start_text_input()
-				except Exception: pass
-			elif bf.tap(fingers=1, count=1) == 1:
-				say_content(lines[y] if not password else "\n".join(lines))
-
 		def move_c(ny, nx, snd="move text-sound"):
 			nonlocal x, y, startx, starty, endx, endy
 			if shift:
@@ -964,7 +1602,7 @@ def _input(title="", text="", callback=None, password=False, get_data=True, new_
 				y, x = ny, nx; endy, endx = y, x; play(snd, None); announce_sel()
 			else: clear_sel(True); y, x = ny, nx; play(snd, None)
 
-		if bf.keyPressing("left", 200) or (hasattr(bf, "keySlide") and bf.keySlide("left", fingers=1)):
+		if bf.keyPressing("left", 200):
 			if ctrl:
 				if x > 0:
 					nx = x - 1
@@ -978,7 +1616,7 @@ def _input(title="", text="", callback=None, password=False, get_data=True, new_
 			elif y > 0: move_c(y - 1, len(lines[y - 1])); (not shift and bf.say(config.get("new line-text", "line feed")))
 			else: clear_sel(True); play("edge text-sound", None); say_content(lines[y][x] if lines[y] and x < len(lines[y]) else "", True)
 
-		if bf.keyPressing("right", 200) or (hasattr(bf, "keySlide") and bf.keySlide("right", fingers=1)):
+		if bf.keyPressing("right", 200):
 			if ctrl:
 				if x < len(lines[y]):
 					nx = x
@@ -992,12 +1630,12 @@ def _input(title="", text="", callback=None, password=False, get_data=True, new_
 			elif y < len(lines) - 1: move_c(y + 1, 0); (not shift and bf.say(config.get("new line-text", "line feed")))
 			else: clear_sel(True); play("edge text-sound", None); say_content(lines[y][x - 1] if lines[y] and x > 0 else "", True)
 
-		if bf.keyPressing("up", 200) or (hasattr(bf, "keySlide") and bf.keySlide("up", fingers=1)):
+		if bf.keyPressing("up", 200):
 			if suggs and s_idx >= 0: s_idx = (s_idx - 1) % len(suggs); bf.say(suggs[s_idx])
 			elif y > 0: move_c(y - 1, min(x, len(lines[y - 1])), "move line-sound"); (not shift and say_content(lines[y]))
 			else: clear_sel(True); play("edge text-sound", None); say_content(lines[y])
 
-		if bf.keyPressing("down", 200) or (hasattr(bf, "keySlide") and bf.keySlide("down", fingers=1)):
+		if bf.keyPressing("down", 200):
 			if suggs and y == len(lines) - 1: s_idx = (s_idx + 1) % len(suggs); bf.say(suggs[s_idx])
 			elif y < len(lines) - 1: move_c(y + 1, min(x, len(lines[y + 1])), "move line-sound"); (not shift and say_content(lines[y]))
 			else: clear_sel(True); play("edge text-sound", None); say_content(lines[y])
@@ -1014,21 +1652,45 @@ def input(title="", text="", callback=None, password=False, get_data=True, new_c
 	target = window or get_window()
 	if target is not None and hasattr(target, "clear_input"): target.clear_input()
 	else: pygame.event.clear([pygame.KEYDOWN, pygame.KEYUP, pygame.TEXTINPUT, pygame.TEXTEDITING])
-	pygame.key.start_text_input()
-	pygame.key.set_text_input_rect(pygame.Rect(0, 0, 320, 32))
-	try:
-		from .pygame_shim import _android_bridge
-		if _android_bridge.is_android_java_available(): _android_bridge.show_keyboard()
-	except Exception:
-		pass
+	eff_cfg = {**INPUT_CONFIG, **(new_config or {})}
+	is_mob = system.get_platform()["os"] in ("android", "ios") or getattr(target, "platform", "") == "mobile"
+	use_os_kb = bool(eff_cfg.get("use_os_keyboard", False)) or not is_mob
+	if use_os_kb:
+		pygame.key.start_text_input()
+		pygame.key.set_text_input_rect(pygame.Rect(0, 0, 320, 32))
+		if is_mob:
+			try:
+				from .pygame_shim import _android_bridge, _ios_bridge
+				if _android_bridge.is_android_java_available(): _android_bridge.show_keyboard()
+				elif _ios_bridge.is_ios_available(): _ios_bridge.show_keyboard()
+			except Exception:
+				pass
+	prev_gm = getattr(target, "gesture_mode", "game") if target is not None else "game"
+	prev_fs = target.get_fullscreen() if (target is not None and hasattr(target, "get_fullscreen")) else True
+	rel_fs = bool(eff_cfg.get("release_fullscreen", True))
+	if target is not None:
+		if hasattr(target, "set_gesture_mode"): target.set_gesture_mode("ui")
+		if rel_fs and prev_fs and hasattr(target, "set_fullscreen"): target.set_fullscreen(False)
+		target._vkb_os_kb_shown = bool(use_os_kb)
 	try: return _input(title, text, callback, password, get_data, new_config, window)
 	finally:
-		pygame.key.stop_text_input()
-		try:
-			from .pygame_shim import _android_bridge
-			if _android_bridge.is_android_java_available(): _android_bridge.hide_keyboard()
-		except Exception:
-			pass
+		if use_os_kb or getattr(target, "_vkb_os_kb_shown", False):
+			if target is not None: target._vkb_os_kb_shown = False
+			pygame.key.stop_text_input()
+			if is_mob:
+				try:
+					from .pygame_shim import _android_bridge, _ios_bridge
+					if _android_bridge.is_android_java_available(): _android_bridge.hide_keyboard()
+					elif _ios_bridge.is_ios_available(): _ios_bridge.hide_keyboard()
+				except Exception:
+					pass
+		if target is not None:
+			if hasattr(target, "set_gesture_mode"): target.set_gesture_mode(prev_gm)
+			if rel_fs and hasattr(target, "set_fullscreen"): target.set_fullscreen(prev_fs)
+		if target is not None and hasattr(target, "clear_input"):
+			target.clear_input()
+		else:
+			pygame.event.clear([pygame.KEYDOWN, pygame.KEYUP, pygame.TEXTINPUT, pygame.TEXTEDITING, pygame.FINGERDOWN, pygame.FINGERMOTION, pygame.FINGERUP])
 
 
 class form:
@@ -1372,7 +2034,22 @@ class form:
 			if nxt["kind"] == "input" and not nxt["config"].get("disabled") and getattr(self.wnd, "platform", "pc") != "mobile": self.enter()
 			else: self.read()
 
+	def _restore_window_modes(self):
+		if getattr(self, "_ui_mode_active", False):
+			self._ui_mode_active = False
+			if hasattr(self.wnd, "set_gesture_mode"):
+				self.wnd.set_gesture_mode(getattr(self, "_prev_gm", "game"))
+			if self.config.get("release_fullscreen", True) and hasattr(self.wnd, "set_fullscreen"):
+				self.wnd.set_fullscreen(getattr(self, "_prev_fs", True))
+
 	def mainloop(self):
+		self._prev_gm = getattr(self.wnd, "gesture_mode", "game")
+		self._prev_fs = self.wnd.get_fullscreen() if hasattr(self.wnd, "get_fullscreen") else True
+		self._ui_mode_active = True
+		if hasattr(self.wnd, "set_gesture_mode"):
+			self.wnd.set_gesture_mode("ui")
+		if self.config.get("release_fullscreen", True) and self._prev_fs and hasattr(self.wnd, "set_fullscreen"):
+			self.wnd.set_fullscreen(False)
 		self._sound("open")
 		if self.config["label"] and self.allowed("read"): self.wnd.say(self.config["label"])
 		if self.items and self.items[self.cursor]["kind"] == "input" and getattr(self.wnd, "platform", "pc") != "mobile": self.enter()
@@ -1446,6 +2123,8 @@ class form:
 				pms = edit.get("permissions", INPUT_CONFIG["permissions"])
 				edit["permissions"] = [p for p in (range(15) if -1 in pms else pms) if p != 2]
 			res = input(cfg["label"] if self.allowed("read", item) else "", str(item["value"] if item["value"] is not None else ""), password=cfg.get("password", False), new_config=edit, window=self.wnd)
+			_Renderer._last_render_sig = None
+			if hasattr(self.wnd, "clear_input"): self.wnd.clear_input()
 			if res is not None and not ro: item["value"] = res
 			if item["callback"]: item["callback"](self, item)
 			if step: self.move(step[0]); return item["name"]
@@ -1509,6 +2188,7 @@ class form:
 			self._sound("enter", item)
 
 		if item["callback"]: item["callback"](self, item)
+		if k == "button": self._restore_window_modes()
 		return item["name"]
 
 	def _update_slider(self, item):
@@ -1627,6 +2307,69 @@ class form:
 		if self.wnd.keyPressed("enter") or self.wnd.tap(fingers=1, count=2): return self.enter()
 		return None
 
+	def _focus_at_norm_pos(self, nx, ny, rects, announce_same=True):
+		"""TalkBack Explore-by-Touch / 1-tap hit-test: focus and read the control at normalized (nx, ny)."""
+		if not rects:
+			if announce_same: self.read()
+			return False
+		surf = _Renderer.get_surface(self.wnd)
+		w, h = surf.get_size() if surf is not None else (800, 600)
+		pos = (int(nx * w), int(ny * h))
+		for (t_name, tidx), tr in rects.get("tabs", {}).items():
+			if tr.collidepoint(pos):
+				t_it = next(x for x in self.items if x["name"] == t_name)
+				t_idx = self.items.index(t_it)
+				if self.cursor != t_idx or t_it["tab_cursor"] != tidx:
+					t_it["tab_cursor"] = tidx; t_it["value"] = t_it["tabs"][tidx]
+					self.cursor = t_idx; self._sound("tab", t_it); self.read()
+				elif announce_same:
+					self.read()
+				return True
+		for (c_name, ci), cr in rects.get("combos", {}).items():
+			if cr.collidepoint(pos):
+				c_it = next(x for x in self.items if x["name"] == c_name)
+				t_idx = self.items.index(c_it)
+				if self.cursor != t_idx or c_it["menu"].cursor != ci:
+					self.cursor = t_idx; c_it["menu"].cursor = ci; c_it["value"] = ci
+					self._sound("focus", c_it); self.wnd.say(c_it["menu"].getReadStr())
+				elif announce_same:
+					self.wnd.say(c_it["menu"].getReadStr())
+				return True
+		for (tr_name, ti), tr_r in rects.get("trees", {}).items():
+			if tr_r.collidepoint(pos):
+				tr_it = next(x for x in self.items if x["name"] == tr_name)
+				t_idx = self.items.index(tr_it)
+				if self.cursor != t_idx or tr_it["tree_cursor"] != ti:
+					self.cursor = t_idx; tr_it["tree_cursor"] = ti
+					tr_it["value"] = tr_it["flat"][ti]["node"].get("path", tr_it["flat"][ti]["node"]["label"])
+					self._sound("focus", tr_it); self.wnd.say(self._format_tree_entry(tr_it))
+				elif announce_same:
+					self.wnd.say(self._format_tree_entry(tr_it))
+				return True
+		for (tb_name, ri, ci), cr in rects.get("cells", {}).items():
+			if cr.collidepoint(pos) and ri >= 0:
+				tb_it = next(x for x in self.items if x["name"] == tb_name)
+				t_idx = self.items.index(tb_it)
+				if self.cursor != t_idx or tb_it["row"] != ri or tb_it["col"] != ci:
+					self.cursor = t_idx; tb_it["row"], tb_it["col"] = ri, ci
+					tb_it["value"] = (ri, ci, tb_it["rows"][ri][ci])
+					self._sound("table", tb_it); self.wnd.say(self._format_table_cell(tb_it))
+				elif announce_same:
+					self.wnd.say(self._format_table_cell(tb_it))
+				return True
+		for i_name, ir in rects.get("items", {}).items():
+			if ir.collidepoint(pos):
+				target = next(x for x in self.items if x["name"] == i_name)
+				t_idx = self.items.index(target)
+				if self.cursor != t_idx:
+					self.cursor = t_idx; self._sound("focus", target); self.read()
+				elif announce_same:
+					self.read()
+				return True
+		if announce_same:
+			self.read()
+		return False
+
 	def frameUpdate(self):
 		if self._pending_btn:
 			res, self._pending_btn = self._pending_btn, None
@@ -1642,10 +2385,19 @@ class form:
 		rects = _Renderer.draw_form(self)
 		shift = self.wnd.keyPressing("lshift") or self.wnd.keyPressing("rshift") or self.wnd.keyPressing("shift")
 		ctrl = self.wnd.keyPressing("lcontrol") or self.wnd.keyPressing("rcontrol")
+		is_mob = getattr(self.wnd, "platform", "pc") == "mobile"
 
-		# Handle Android-style touch gestures (tap to focus, double-tap to activate, double-tap hold for context menu)
+		# Mobile TalkBack Explore-by-Touch: slide finger across controls to focus & announce exact item under finger
+		if is_mob and hasattr(self.wnd, "explore_pos"):
+			exp_p = self.wnd.explore_pos()
+			if exp_p is not None:
+				self._focus_at_norm_pos(exp_p[0], exp_p[1], rects, announce_same=False)
+				return None
+
+		# Handle desktop mouse touch gestures (disabled on mobile where WindowBase TalkBack TouchExplorer owns touch)
 		evs = self.wnd.events if hasattr(self.wnd, "events") else []
-		for act, pos in self._touch.update(evs):
+		touch_acts = self._touch.update(evs) if not is_mob else []
+		for act, pos in touch_acts:
 			if act == "context_hold":
 				self.open_context_menu(); return None
 			if act == "scroll":
@@ -1708,15 +2460,19 @@ class form:
 					if self.items[self.cursor] not in vis and vis: self.cursor = self.items.index(vis[0])
 					return None
 
-		# NVDA Quick Navigation Keys (H: Heading, B: Button, E: Edit, C: Combo, T: Table, Q: Quote) when not in combo/tree
+		# NVDA Quick Navigation Keys & Mobile gestures (same priority order as menu.py: 2-finger cancel first)
 		cur_it = self.items[self.cursor] if self.items else None
-		if self.wnd.keyPressed("tab"): self.move(-1 if shift else 1)
-		elif self.wnd.keySlide("left", fingers=1): self.move(-1)
-		elif self.wnd.keySlide("right", fingers=1): self.move(1)
-		elif (self.wnd.keyPressed("esc") or self.wnd.keySlide("left", fingers=2)) and self.allowed("cancel"):
+		if (self.wnd.keyPressed("esc") or self.wnd.keySlide("left", fingers=2)) and self.allowed("cancel"):
 			if cur_it and cur_it["kind"] == "combo" and cur_it.get("expanded"):
 				cur_it["expanded"] = False; self._sound("collapse", cur_it); self.read(); return None
-			self._sound("cancel"); return -1
+			self._sound("cancel"); self._restore_window_modes(); return -1
+		elif self.wnd.keyPressed("tab"): self.move(-1 if shift else 1)
+		elif self.wnd.keySlide("left", fingers=1): self.move(-1)
+		elif self.wnd.keySlide("right", fingers=1): self.move(1)
+		elif is_mob and hasattr(self.wnd, "tap_pos") and self.wnd.tap_pos(fingers=1, count=1) is not None:
+			t_pos = self.wnd.tap_pos(fingers=1, count=1)
+			self._focus_at_norm_pos(t_pos[0], t_pos[1], rects, announce_same=True)
+			return None
 
 		elif cur_it:
 			k = cur_it["kind"]
@@ -1773,12 +2529,15 @@ class form:
 	def open(self):
 		"""Run modal form loop; return clicked button name or -1 on cancel."""
 		self.mainloop()
-		while True:
-			self.wnd.frameUpdate()
-			res = self.frameUpdate()
-			if res == -1 or (res is not None and any(it["name"] == res and it["kind"] == "button" for it in self.items)):
-				self.wnd.wait(5)
-				return res
+		try:
+			while True:
+				self.wnd.frameUpdate()
+				res = self.frameUpdate()
+				if res == -1 or (res is not None and any(it["name"] == res and it["kind"] == "button" for it in self.items)):
+					self.wnd.wait(5)
+					return res
+		finally:
+			self._restore_window_modes()
 
 	# --- Extended Form API & NVDA Quick-Nav / Dynamic Helpers ---
 

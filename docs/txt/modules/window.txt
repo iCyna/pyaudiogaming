@@ -10,7 +10,13 @@ Core application window managing the SDL2/pygame loop, keyboard edge/hold detect
 [CLASS WindowBase]
 ----------------------------------------
 * WindowBase.__init__(platform=None) -> any [constructor]
+* WindowBase.speech() -> any [property]
 * WindowBase.init(x, y, ttl, vv=0, show_vv=False, author='') -> any [method]
+* WindowBase.set_fullscreen(enabled=True) -> any [method]
+  Toggle true edge-to-edge fullscreen and system edge-gesture exclusion (dynamic, non-hardcoded).
+* WindowBase.get_fullscreen() -> any [method]
+* WindowBase.set_gesture_mode(mode='game') -> any [method]
+  Set gesture mode: 'game' (continuous sliding movement) or 'ui' (TalkBack explore + flick only).
 * WindowBase.touchPos() -> any [method]
   Trả về tọa độ chuẩn hóa (0.0 -> 1.0) của ngón tay đang chạm hoặc chuột.
 * WindowBase.in_zone(zone, pos=None) -> any [method]
@@ -28,6 +34,12 @@ Core application window managing the SDL2/pygame loop, keyboard edge/hold detect
   Kiểm tra cử chỉ chạm màn hình: - Mặc định tap() trả về số lần chạm (tương thích 100% với code cũ). - Có thể lọc theo số ngón (fingers=2), số lần chạm liên tiếp (count=2 cho double-tap), và vùng màn hình (zone="right").
 * WindowBase.double_tap(fingers=1, zone=None) -> any [method]
   Kiểm tra chạm đúp (chuẩn TalkBack/VoiceOver để kích hoạt).
+* WindowBase.tap_pos(fingers=1, count=1, zone=None) -> any [method]
+  Return normalized (x, y) position of the matching tap event, or None.
+* WindowBase.explore_pos(zone=None) -> any [method]
+  Return latest normalized (x, y) position during 1-finger Explore-by-Touch, or None.
+* WindowBase.explore_end_pos(zone=None) -> any [method]
+  Return normalized (x, y) position when 1-finger Explore-by-Touch ends, or None.
 * WindowBase.long_press(fingers=1, zone=None) -> any [method]
   Kiểm tra nhấn giữ tại chỗ trên màn hình (không trượt).
 * WindowBase.keySlide(direction, fingers=None, zone=None) -> any [method]

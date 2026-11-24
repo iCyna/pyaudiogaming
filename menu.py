@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-# Idea from Yukio Nozawa and continue by ihcyna(Labubu)
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# Audio-accessible menu navigation with keyboard, touch, and speech output.
+# Supports Windows, Linux, macOS, Android, and iOS.
 
 from . import key
 from .sound_pool import *
@@ -112,9 +114,19 @@ class menu:
 	def open(self):
 		"""Starts the menu."""
 		if not self.items: return
+		if self.handle_touch and hasattr(self.wnd, "set_gesture_mode"):
+			self._prev_gm = getattr(self.wnd, "gesture_mode", "game")
+			self._gm_active = True
+			self.wnd.set_gesture_mode("ui")
 		say_str = f"{self.title}, {self.getReadStr()}" if self.title else self.getReadStr()
 		if self.allowed("read"): self.wnd.say(say_str)
 		if self.openSound: playsingle(self.openSound)
+
+	def _restore_gesture_mode(self):
+		if getattr(self, "_gm_active", False):
+			self._gm_active = False
+			if hasattr(self.wnd, "set_gesture_mode"):
+				self.wnd.set_gesture_mode(getattr(self, "_prev_gm", "game"))
 
 	def jumpCursor(self, c, wrap=None):
 		"""Jumps to a specific cursor position, handling sounds, edge hits, and wrap-arounds."""
@@ -236,9 +248,11 @@ class menu:
 		return None
 
 	def cancel(self):
+		self._restore_gesture_mode()
 		if self.cancelSound: playsingle(self.cancelSound)
 
 	def enter(self):
+		self._restore_gesture_mode()
 		if self.enterSound and self.cursor >= 0: playsingle(self.enterSound)
 
 	def getCursorPos(self):

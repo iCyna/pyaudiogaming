@@ -1,15 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Cross-platform File Association, Launch URI Reader & Single-Instance IPC for PyAudioGaming.
-
-Enables apps (such as music players or audio editors) to:
-1. Register file extensions (e.g. ``.mp3``, ``.ogg``, ``.wav``) with the OS so pressing Enter /
-   double-clicking a file launches your app directly (Windows HKCU Registry without Admin,
-   Linux ``.desktop`` entry, and Android/macOS manifest snippets).
-2. Read the file path or Android ``content://`` URI passed on launch (and resolve Android
-   ``content://`` URIs to a readable local file for BASS ``sound.stream()``).
-3. Enforce a **Single Instance** lock so opening a second file forwards its path to the
-   already-running app window instead of spawning duplicate windows!
-"""
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# File association registration, launch URI reader, and single-instance IPC.
+# Supports Windows, Linux, macOS, Android, and iOS.
 
 import ctypes
 import hashlib

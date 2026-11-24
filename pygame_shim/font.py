@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
-"""pygame.font shim backed by Android Paint + Typeface."""
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# pygame.font shim backed by native Paint and Typeface.
+# Supports Android and iOS.
+
 import math
-from .surface import Surface, to_android_color
+from .surface import Surface, to_android_color, to_jfloat
 from . import _android_bridge
 
 _INITIALIZED = False
@@ -37,9 +40,11 @@ class Font:
         self._bold = bool(bold)
         self._italic = bool(italic)
         self._paint = None
+        self._cache = {}
+        self._cache_order = []
         if _Paint is not None:
             p = _Paint(_Paint.ANTI_ALIAS_FLAG)
-            p.setTextSize(float(self._size))
+            p.setTextSize(to_jfloat(self._size))
             if _Typeface is not None:
                 style = _Typeface.NORMAL
                 if self._bold and self._italic:
@@ -71,6 +76,12 @@ class Font:
 
     def render(self, text, antialias, color, background=None):
         s = str(text)
+        col_key = tuple(color) if isinstance(color, (list, tuple)) else color
+        bg_key = tuple(background) if isinstance(background, (list, tuple)) else background
+        ckey = (s, bool(antialias), col_key, bg_key)
+        cached = self._cache.get(ckey)
+        if cached is not None:
+            return cached
         w, h = self.size(s)
         surf = Surface((max(1, w + 2), max(1, h + 2)))
         if background is not None:
@@ -80,7 +91,17 @@ class Font:
             self._paint.setColor(to_android_color(color))
             fm = self._paint.getFontMetrics()
             baseline = -fm.ascent
-            surf._canvas.drawText(s, 1.0, float(baseline), self._paint)
+            surf._canvas.drawText(s, to_jfloat(1.0), to_jfloat(baseline), self._paint)
+        self._cache[ckey] = surf
+        self._cache_order.append(ckey)
+        if len(self._cache_order) > 128:
+            old_k = self._cache_order.pop(0)
+            old_s = self._cache.pop(old_k, None)
+            if old_s is not None and getattr(old_s, "_bitmap", None) is not None:
+                try:
+                    old_s._bitmap.recycle()
+                except Exception:
+                    pass
         return surf
 
 

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Pure-Python pygame.Rect implementation."""
-
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# Pure-Python pygame.Rect geometry implementation.
+# Supports Android and iOS.
 
 class Rect:
     __slots__ = ("x", "y", "width", "height")
@@ -101,17 +102,33 @@ class Rect:
     def topleft(self):
         return (self.x, self.y)
 
+    @topleft.setter
+    def topleft(self, val):
+        self.x, self.y = int(val[0]), int(val[1])
+
     @property
     def topright(self):
         return (self.right, self.y)
+
+    @topright.setter
+    def topright(self, val):
+        self.right, self.y = int(val[0]), int(val[1])
 
     @property
     def bottomleft(self):
         return (self.x, self.bottom)
 
+    @bottomleft.setter
+    def bottomleft(self, val):
+        self.x, self.bottom = int(val[0]), int(val[1])
+
     @property
     def bottomright(self):
         return (self.right, self.bottom)
+
+    @bottomright.setter
+    def bottomright(self, val):
+        self.right, self.bottom = int(val[0]), int(val[1])
 
     @property
     def size(self):
@@ -127,9 +144,22 @@ class Rect:
     def move(self, dx, dy):
         return Rect(self.x + int(dx), self.y + int(dy), self.width, self.height)
 
+    def move_ip(self, dx, dy):
+        self.x += int(dx); self.y += int(dy)
+
     def inflate(self, dx, dy):
         dx, dy = int(dx), int(dy)
         return Rect(self.x - dx // 2, self.y - dy // 2, self.width + dx, self.height + dy)
+
+    def inflate_ip(self, dx, dy):
+        dx, dy = int(dx), int(dy)
+        self.x -= dx // 2; self.y -= dy // 2; self.width += dx; self.height += dy
+
+    def clip(self, other):
+        o = other if isinstance(other, Rect) else Rect(other)
+        x1, y1 = max(self.x, o.x), max(self.y, o.y)
+        x2, y2 = min(self.right, o.right), min(self.bottom, o.bottom)
+        return Rect(x1, y1, max(0, x2 - x1), max(0, y2 - y1))
 
     def collidepoint(self, *args):
         if len(args) == 1:

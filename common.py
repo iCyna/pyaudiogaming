@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-# copyright 2025 belong ihcyna (Labubu)<phucnggo29@gmail.com>.
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# Common system utilities, process execution, and directory helpers.
+# Supports Windows, Linux, macOS, Android, and iOS.
 
 import os
 import sys

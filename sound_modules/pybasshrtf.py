@@ -1,3 +1,6 @@
 # -*- coding: utf-8 -*-
-# Alias module for pybass_hrtf so both `import pybasshrtf` and `import pybass_hrtf` work seamlessly.
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# Compatibility alias module re-exporting pybass_hrtf.
+# Supports Windows, Linux, macOS, Android, and iOS.
+
 from .pybass_hrtf import *

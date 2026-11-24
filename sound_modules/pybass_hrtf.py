@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-# BASS_HRTF python wrapper v5.0
-# copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# BASS_HRTF v5.0 ctypes wrapper for Steam Audio 3D spatialization and acoustic FX.
+# Supports Windows, Linux, macOS, Android, and iOS.
 
 __version__ = '0.5.0'
 __author__ = 'ihcyna (Labubu) <phucnggo29@gmail.com>'

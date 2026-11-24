@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-# app build tool (Unified Windows, Android Ios, Linux, Macos BeeWare Builder)
-# copyright 2025 belong ihcyna (Labubu)<phucnggo29@gmail.com>.
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# Unified application build and packaging tool (PyInstaller & BeeWare).
+# Supports Windows, Linux, macOS, Android, and iOS.
 
 import os
 import sys
@@ -9,10 +10,13 @@ import shutil
 import glob
 import ast
 import concurrent.futures
+import fnmatch
 import hashlib
+import importlib.util
 import struct
 import sysconfig
 import subprocess
+import tempfile
 import time
 import zipfile
 import zlib
@@ -72,7 +76,7 @@ _LOW_PRIORITY_FLAGS = 0x00004000 if os.name == "nt" else 0  # BELOW_NORMAL_PRIOR
 
 
 def _normalize_error_mode(error_mode=1):
-	"""Normalize error_mode: 0 = export traceback to file, 1 = show GUI error dialog, 2 = hide/silent."""
+	"""Normalize error_mode: 0 = export traceback to file, 1 = show GUI error dialog (default), 2 = hide/silent."""
 	if error_mode is None:
 		return 1
 	s = str(error_mode).strip().lower()
@@ -81,6 +85,286 @@ def _normalize_error_mode(error_mode=1):
 	if s in ("2", "hide", "hidden", "silent", "none", "off"):
 		return 2
 	return 1
+
+
+DEFAULT_USER_CONFIG_PATTERNS = (
+	"account", "account/*",
+	"data/options.dat", "data/char.dat", "data/*.dat", "data/*.sav",
+	"idref*", "*.dat", "*.sav", "*.cfg",
+	"config.json", "settings.json", "user_config.*",
+	"logOperate.script", "error.log", "pyag_error.log",
+)
+
+
+def _normalize_preserve_patterns(extra_patterns=None):
+	patterns = list(DEFAULT_USER_CONFIG_PATTERNS)
+	if extra_patterns:
+		raw = [extra_patterns] if isinstance(extra_patterns, str) else list(extra_patterns)
+		for pat in raw:
+			p = str(pat).strip().replace("\\", "/").lstrip("/")
+			if p and p not in patterns:
+				patterns.append(p)
+	return tuple(patterns)
+
+
+def _is_preserved_user_path(rel_posix, patterns):
+	norm = str(rel_posix).replace("\\", "/").lstrip("/")
+	if not norm:
+		return False
+	fname = norm.rsplit("/", 1)[-1]
+	parts = norm.split("/")
+	for pat in patterns:
+		pat_clean = pat.rstrip("/")
+		if fnmatch.fnmatch(norm, pat) or fnmatch.fnmatch(fname, pat):
+			return True
+		if any(fnmatch.fnmatch(seg, pat_clean) for seg in parts[:-1]):
+			return True
+	return False
+
+
+def _replace_data_preserving_config(src, dst, preserve_patterns=None, ignore_fn=None):
+	"""Manifest-based non-destructive sync: cleans stale shipped files from previous build
+	and copies new data while NEVER deleting user-created files/folders or overwriting user configs."""
+	import json
+	src_p, dst_p = Path(src), Path(dst)
+	if not src_p.exists():
+		raise FileNotFoundError(f"Data source not found: {src_p}")
+	if src_p.is_file():
+		dst_p.parent.mkdir(parents=True, exist_ok=True)
+		if dst_p.is_dir():
+			shutil.rmtree(dst_p)
+		elif dst_p.exists():
+			dst_p.unlink()
+		shutil.copy2(src_p, dst_p)
+		return 0
+
+	patterns = _normalize_preserve_patterns(preserve_patterns)
+	dst_p.mkdir(parents=True, exist_ok=True)
+	manifest_file = dst_p / ".pyag_manifest.json"
+	old_shipped = set()
+	if manifest_file.is_file():
+		try:
+			old_shipped = set(json.loads(manifest_file.read_text(encoding="utf-8")))
+		except Exception:
+			old_shipped = set()
+
+	new_shipped = set()
+	preserved_cnt = 0
+	for root_dir, dir_names, file_names in os.walk(src_p):
+		if ignore_fn is not None:
+			ignored = set(ignore_fn(root_dir, list(dir_names) + list(file_names)))
+			dir_names[:] = [d for d in dir_names if d not in ignored]
+			file_names = [fn for fn in file_names if fn not in ignored]
+		for fn in file_names:
+			fp = Path(root_dir) / fn
+			rel_posix = fp.relative_to(src_p).as_posix()
+			new_shipped.add(rel_posix)
+			out_p = dst_p / rel_posix
+			if out_p.is_file() and _is_preserved_user_path(rel_posix, patterns):
+				preserved_cnt += 1
+				continue
+			out_p.parent.mkdir(parents=True, exist_ok=True)
+			shutil.copy2(fp, out_p)
+
+	for stale_rel in sorted(old_shipped - new_shipped, reverse=True):
+		stale_p = dst_p / stale_rel
+		if stale_p.is_file() and not _is_preserved_user_path(stale_rel, patterns):
+			try:
+				stale_p.unlink()
+			except OSError:
+				pass
+		par = stale_p.parent
+		while par != dst_p and par.is_dir():
+			try:
+				if any(par.iterdir()):
+					break
+				par.rmdir()
+			except OSError:
+				break
+			par = par.parent
+
+	try:
+		manifest_file.write_text(json.dumps(sorted(new_shipped)), encoding="utf-8")
+	except Exception:
+		pass
+	return preserved_cnt
+
+
+def _collect_project_py_files(entry_path):
+	"""Collect entry script and project .py files for syntax/import preflight."""
+	entry_p = Path(entry_path).resolve()
+	app_root = entry_p.parent
+	skip_dirs = set(EXCLUDE_DIRS) | {"pyaudiogaming", "server", "lib", "include", "scripts", "tests", "tools", "res", "share"}
+	py_files = []
+	seen = set()
+
+	def _add_file(fp):
+		rp = fp.resolve()
+		if rp not in seen and rp.is_file():
+			seen.add(rp)
+			py_files.append(rp)
+
+	_add_file(entry_p)
+	for item in sorted(app_root.iterdir()):
+		if item.is_file() and item.suffix == ".py":
+			low = item.name.lower()
+			if low not in EXCLUDE_BUILD_FILES and not low.startswith(("compile", "#", "@")):
+				_add_file(item)
+		elif item.is_dir():
+			low = item.name.lower()
+			if low in skip_dirs or low.startswith((".", "#", "@", "venv")):
+				continue
+			if (item / "pyvenv.cfg").exists() or (item / "Lib" / "site-packages").exists():
+				continue
+			for sub_py in sorted(item.rglob("*.py")):
+				if "__pycache__" in sub_py.parts:
+					continue
+				_add_file(sub_py)
+	return app_root, py_files
+
+
+def _scan_ast_imports(tree):
+	"""Return (required_mods, optional_mods) top-level module names from an AST."""
+	required, optional = set(), set()
+
+	def _record(node, is_opt):
+		target = optional if is_opt else required
+		if isinstance(node, ast.Import):
+			for alias in node.names:
+				top = (alias.name or "").split(".")[0]
+				if top:
+					target.add(top)
+		elif isinstance(node, ast.ImportFrom):
+			if node.level == 0 and node.module:
+				top = node.module.split(".")[0]
+				if top:
+					target.add(top)
+
+	def _walk(node, in_try=False):
+		if isinstance(node, ast.Try):
+			for stmt in node.body:
+				_walk(stmt, in_try=True)
+			for handler in node.handlers:
+				for stmt in handler.body:
+					_walk(stmt, in_try=in_try)
+			for stmt in node.orelse:
+				_walk(stmt, in_try=in_try)
+			for stmt in node.finalbody:
+				_walk(stmt, in_try=in_try)
+			return
+		if isinstance(node, (ast.Import, ast.ImportFrom)):
+			_record(node, in_try)
+			return
+		for child in ast.iter_child_nodes(node):
+			_walk(child, in_try=in_try)
+
+	_walk(tree, in_try=False)
+	return required - optional, optional
+
+
+def preflight_check(project, data=(), target_os=None, extra_reqs=(), test_run=False, test_timeout=5.0):
+	"""Verify syntax, detect missing modules, check data paths, and optionally smoke-test the project."""
+	entry = Path(str(project) + ".py").resolve() if not str(project).endswith(".py") else Path(str(project)).resolve()
+	if not entry.is_file():
+		raise ValueError(f"[Preflight] Entry script does not exist: {entry}")
+
+	app_root, py_files = _collect_project_py_files(entry)
+	print(f"[Preflight] Checking syntax & imports across {len(py_files)} Python files...")
+
+	syntax_errors = []
+	required_imports = {}
+	local_mods = {"pyaudiogaming"}
+	for fp in py_files:
+		rel = fp.relative_to(app_root)
+		local_mods.add(rel.parts[0] if len(rel.parts) > 1 else fp.stem)
+	if (ROOT / "pygame_shim").is_dir() and str(target_os or "").lower() in ("android", "ios", "web"):
+		local_mods.add("pygame")
+
+	for fp in py_files:
+		try:
+			src = fp.read_text(encoding="utf-8-sig", errors="strict")
+		except UnicodeDecodeError:
+			src = fp.read_text(encoding="utf-8-sig", errors="replace")
+		try:
+			tree = ast.parse(src, filename=str(fp))
+			compile(tree, str(fp), "exec")
+		except SyntaxError as exc:
+			line_txt = (exc.text or "").strip()
+			syntax_errors.append(f"  - {fp.name}:{exc.lineno}:{exc.offset or 0} -> {exc.msg}: {line_txt}")
+			continue
+		req_mods, opt_mods = _scan_ast_imports(tree)
+		for mod in req_mods:
+			required_imports.setdefault(mod, []).append(fp.name)
+
+	if syntax_errors:
+		raise RuntimeError("[Preflight] Syntax errors detected! Build aborted:\n" + "\n".join(syntax_errors))
+	print(f"[Preflight] Syntax check passed ({len(py_files)} files OK).")
+
+	stdlib_names = set(getattr(sys, "stdlib_module_names", ())) | set(sys.builtin_module_names)
+	extra_req_names = {re.split(r"[=<>!~\[]", str(r).strip().lower())[0].replace("-", "_") for r in (extra_reqs or ()) if r}
+	req_aliases = {"pycryptodome": "Crypto", "pillow": "PIL", "pyyaml": "yaml", "beautifulsoup4": "bs4"}
+	for rk, rv in req_aliases.items():
+		if rk in extra_req_names:
+			extra_req_names.add(rv.lower())
+
+	missing_mods = {}
+	old_sys_path = list(sys.path)
+	if str(app_root) not in sys.path:
+		sys.path.insert(0, str(app_root))
+	try:
+		for mod, refs in sorted(required_imports.items()):
+			if mod in stdlib_names or mod in local_mods or mod.lower() in extra_req_names:
+				continue
+			try:
+				spec = importlib.util.find_spec(mod)
+			except Exception:
+				spec = None
+			if spec is None:
+				missing_mods[mod] = sorted(set(refs))
+	finally:
+		sys.path[:] = old_sys_path
+
+	if missing_mods:
+		details = "\n".join(f"  - '{m}' (imported by: {', '.join(files[:4])})" for m, files in missing_mods.items())
+		print(f"[Preflight] Warning: Unresolved top-level modules detected:\n{details}")
+	else:
+		print("[Preflight] Module detection passed (all required imports resolved).")
+
+	missing_data = []
+	for item in (data or ()):
+		cand = Path(item) if Path(item).is_absolute() else (app_root / item)
+		if not cand.exists():
+			missing_data.append(str(item))
+	if missing_data:
+		print(f"[Preflight] Warning: Missing data path(s): {', '.join(missing_data)}")
+
+	if test_run:
+		py_exe = _find_real_python()
+		timeout_val = max(2.0, float(test_timeout or 5.0))
+		print(f"[Preflight] Running project smoke test ({entry.name}, timeout={timeout_val:.0f}s)...")
+		proc = subprocess.Popen(
+			[py_exe, str(entry)],
+			cwd=str(app_root),
+			stdout=subprocess.PIPE,
+			stderr=subprocess.PIPE,
+			text=True,
+			encoding="utf-8",
+			errors="replace",
+		)
+		try:
+			out_txt, err_txt = proc.communicate(timeout=timeout_val)
+			if proc.returncode != 0:
+				msg = (err_txt or out_txt or "").strip()
+				raise RuntimeError(f"[Preflight] Project smoke test crashed (exit code {proc.returncode}):\n{msg}")
+			print("[Preflight] Smoke test exited cleanly (exit code 0).")
+		except subprocess.TimeoutExpired:
+			proc.terminate()
+			try:
+				proc.wait(timeout=2.0)
+			except subprocess.TimeoutExpired:
+				proc.kill()
+			print(f"[Preflight] Smoke test passed (running stably for {timeout_val:.0f}s with no startup crash).")
+	return True
 
 
 def _resolve_worker_count(workers=None):
@@ -1288,7 +1572,7 @@ def prepare_android(project, name, data=(), arch=None, extra_reqs=(), workers=No
 		if item.name.lower() not in EXCLUDE_BUILD_FILES and not item.name.lower().startswith("compile"):
 			shutil.copy2(item, package / item.name)
 
-	for folder in ("sound_modules", "accessible_output2", "include", "utils"):
+	for folder in ("sound_modules", "g2access", "include", "utils"):
 		src_folder = ROOT / folder
 		if src_folder.is_dir():
 			ignore_fn = shutil.ignore_patterns(
@@ -1402,40 +1686,88 @@ def _shutdown_android_app():
         pass
 
 
+def _log_android_usb_debug(tb):
+    try:
+        from java import jclass
+        Log = jclass("android.util.Log")
+        for _ln in str(tb).splitlines():
+            Log.e("PyAudioGaming", _ln[:3500])
+    except Exception:
+        pass
+    try:
+        sys.stderr.write("[PyAudioGaming ERROR]\n" + str(tb) + "\n")
+        sys.stderr.flush()
+    except Exception:
+        pass
+
+
+def _show_android_fallback_dialog(title, tb):
+    try:
+        from java import jclass, dynamic_proxy
+        act = None
+        try:
+            act = getattr(jclass("org.beeware.android.MainActivity"), "singletonThis", None)
+        except Exception:
+            act = None
+        if act is None:
+            return False
+        AlertDialogBuilder = jclass("android.app.AlertDialog$Builder")
+        ScrollView = jclass("android.widget.ScrollView")
+        TextView = jclass("android.widget.TextView")
+        DialogOnClick = jclass("android.content.DialogInterface$OnClickListener")
+        Runnable = jclass("java.lang.Runnable")
+
+        class _CloseClick(dynamic_proxy(DialogOnClick)):
+            def onClick(self, dlg, which):
+                _shutdown_android_app()
+
+        class _ShowRun(dynamic_proxy(Runnable)):
+            def run(self):
+                sv = ScrollView(act)
+                tv = TextView(act)
+                tv.setText(str(tb))
+                tv.setTextIsSelectable(True)
+                tv.setPadding(32, 24, 32, 24)
+                sv.addView(tv)
+                b = AlertDialogBuilder(act)
+                b.setTitle(str(title))
+                b.setView(sv)
+                b.setCancelable(False)
+                b.setPositiveButton("Close", _CloseClick())
+                b.show()
+
+        act.runOnUiThread(_ShowRun())
+        return True
+    except Exception:
+        return False
+
+
 def _show_android_error(title, tb):
     try:
         import pygame
         if hasattr(pygame, "_android_bridge") and hasattr(pygame._android_bridge, "show_error_dialog"):
             if pygame._android_bridge.show_error_dialog(title, tb):
-                return
+                return True
     except Exception:
         pass
+    if _show_android_fallback_dialog(title, tb):
+        return True
     _show_android_status(title + ":\n" + tb, is_error=True)
+    return False
 
 
-def _format_masked_traceback(exc_type, exc_val, exc_tb):
-    import hashlib
-    lines = []
-    tb = exc_tb
-    last_code = "0x00000000"
-    while tb is not None:
-        fr = tb.tb_frame
-        fn = fr.f_code.co_filename or ""
-        h = hashlib.sha256(fn.encode("utf-8", errors="ignore")).hexdigest()[:8].upper()
-        last_code = f"0x{h}"
-        lines.append(f"  at {last_code}: line {tb.tb_lineno}")
-        tb = tb.tb_next
-    ename = getattr(exc_type, "__name__", "Exception")
-    emsg = str(exc_val)
-    header = f"Runtime Error [{last_code}]"
-    tail = f"{ename}: {emsg}" if emsg else ename
-    return header + "\n" + "\n".join(lines) + "\n" + tail
+_REPORTED_ERRORS = set()
 
 
-def _handle_android_exception(exc_info):
-    tb = _format_masked_traceback(*exc_info)
+def _handle_android_exception(exc_info, prefix=""):
+    tb = prefix + "".join(traceback.format_exception(*exc_info))
+    sig = tb.strip()
+    if sig in _REPORTED_ERRORS:
+        return
+    _REPORTED_ERRORS.add(sig)
     _em = """ + str(err_mode) + r"""
-    if _em == 0:
+    if _em != 2:
+        _log_android_usb_debug(tb)
         try:
             _base = os.environ.get("HOME") or os.path.expanduser("~") or _APP_DIR
             _log_path = os.path.join(_base, "error.log")
@@ -1443,10 +1775,34 @@ def _handle_android_exception(exc_info):
                 _ef.write(tb + "\n")
         except Exception:
             pass
-    elif _em == 1:
-        print(tb)
+    if _em == 1:
         _show_android_error("Application Error", tb)
     # _em == 2: hidden/silent exit
+
+
+def _install_android_hooks():
+    import faulthandler
+    if """ + str(err_mode) + r""" != 2:
+        try:
+            _base = os.environ.get("HOME") or os.path.expanduser("~") or _APP_DIR
+            faulthandler.enable(file=open(os.path.join(_base, "pyag_crash.log"), "a+", encoding="utf-8", errors="replace"), all_threads=True)
+        except Exception:
+            pass
+    def _sys_hook(et, ev, etb):
+        if issubclass(et, (SystemExit, KeyboardInterrupt)):
+            return
+        _handle_android_exception((et, ev, etb))
+    def _thr_hook(args):
+        if issubclass(args.exc_type, (SystemExit, KeyboardInterrupt)):
+            return
+        tname = getattr(args.thread, "name", "Thread")
+        _handle_android_exception((args.exc_type, args.exc_value, args.exc_traceback), prefix=f"[Thread: {tname}]\n")
+    sys.excepthook = _sys_hook
+    if hasattr(threading, "excepthook"):
+        threading.excepthook = _thr_hook
+
+
+_install_android_hooks()
 
 
 def _run_entry():
@@ -1698,8 +2054,9 @@ def _prepare_beeware_native_libs(package_dir, target_os, arch=None):
 						shutil.copy2(os.path.join(root_dir, fname), t_sub / fname)
 
 
-def prepare_beeware(project, name, target_os, data=(), arch=None, extra_reqs=()):
+def prepare_beeware(project, name, target_os, data=(), arch=None, extra_reqs=(), error_mode=1):
 	"""Chuẩn bị workspace Briefcase hoàn chỉnh cho iOS, macOS, Linux, Windows hoặc Web."""
+	err_mode = _normalize_error_mode(error_mode)
 	target_os = target_os.lower().strip()
 	if target_os not in _BEEWARE_TARGET_MAP:
 		raise ValueError(f"Unsupported BeeWare target platform: {target_os}")
@@ -1724,7 +2081,7 @@ def prepare_beeware(project, name, target_os, data=(), arch=None, extra_reqs=())
 			shutil.copy2(item, package / item.name)
 
 	ignore_bin = DESKTOP_BIN_PATTERNS if target_os in ("ios", "web") else ("*.pdb", "*.lib", "*.exp", "*.obj", "*.bat", "*.cmd")
-	for folder in ("sound_modules", "accessible_output2", "include", "utils"):
+	for folder in ("sound_modules", "g2access", "include", "utils"):
 		src_folder = ROOT / folder
 		if src_folder.is_dir():
 			ignore_fn = shutil.ignore_patterns(
@@ -1805,9 +2162,11 @@ def prepare_beeware(project, name, target_os, data=(), arch=None, extra_reqs=())
 
 	# 4. Generate __init__.py & __main__.py bootstrap
 	_save_text("# Auto-generated package init\n", app_src / "__init__.py")
-	bootstrap_code = """# -*- coding: utf-8 -*-
+	safe_bw_title = str(name).replace("\\", "\\\\").replace('"', '\\"').replace("'", "\\'")
+	bootstrap_code = f"""# -*- coding: utf-8 -*-
 import os
 import runpy
+import subprocess
 import sys
 import traceback
 
@@ -1820,13 +2179,96 @@ try:
 except Exception:
     pass
 
+
+def _show_gui_error(title, msg):
+    if sys.platform == "win32":
+        try:
+            import ctypes
+            ctypes.windll.user32.MessageBoxW(0, str(msg), str(title), 0x10)
+            return True
+        except Exception:
+            pass
+    elif sys.platform == "darwin":
+        try:
+            esc = str(msg).replace("\\\\", "\\\\\\\\").replace('"', '\\\\"')[:1800]
+            subprocess.run(["osascript", "-e", f'display dialog "{{esc}}" with title "{{title}}" buttons {{"OK"}} default button "OK" with icon stop'], check=False)
+            return True
+        except Exception:
+            pass
+    else:
+        for cmd in (["zenity", "--error", "--title", str(title), "--text", str(msg)[:2000]], ["kdialog", "--error", str(msg)[:2000], "--title", str(title)]):
+            try:
+                if subprocess.run(cmd, check=False).returncode == 0:
+                    return True
+            except Exception:
+                pass
+    try:
+        import tkinter as tk
+        from tkinter import messagebox
+        root = tk.Tk()
+        root.withdraw()
+        messagebox.showerror(str(title), str(msg))
+        root.destroy()
+        return True
+    except Exception:
+        return False
+
+
+_ERR_MODE = {err_mode}
+_REPORTED = set()
+
+
+def _report_bw_error(tb_text):
+    sig = str(tb_text).strip()
+    if _ERR_MODE == 2 or sig in _REPORTED:
+        return
+    _REPORTED.add(sig)
+    try:
+        sys.stderr.write(tb_text + "\\n")
+        sys.stderr.flush()
+    except Exception:
+        pass
+    try:
+        _base = os.environ.get("HOME") or os.path.expanduser("~") or _APP_DIR
+        with open(os.path.join(_base, "error.log"), "w", encoding="utf-8", errors="replace") as _ef:
+            _ef.write(tb_text + "\\n")
+    except Exception:
+        pass
+    if _ERR_MODE == 1:
+        _show_gui_error("{safe_bw_title} - Error", tb_text)
+
+
+def _install_bw_hooks():
+    import faulthandler, threading
+    if _ERR_MODE != 2:
+        try:
+            _base = os.environ.get("HOME") or os.path.expanduser("~") or _APP_DIR
+            faulthandler.enable(file=open(os.path.join(_base, "pyag_crash.log"), "a+", encoding="utf-8", errors="replace"), all_threads=True)
+        except Exception:
+            pass
+    def _sys_hook(et, ev, etb):
+        if issubclass(et, (SystemExit, KeyboardInterrupt)):
+            return
+        _report_bw_error("".join(traceback.format_exception(et, ev, etb)))
+    def _thr_hook(args):
+        if issubclass(args.exc_type, (SystemExit, KeyboardInterrupt)):
+            return
+        tname = getattr(args.thread, "name", "Thread")
+        _report_bw_error(f"[Thread: {{tname}}]\\n" + "".join(traceback.format_exception(args.exc_type, args.exc_value, args.exc_traceback)))
+    sys.excepthook = _sys_hook
+    if hasattr(threading, "excepthook"):
+        threading.excepthook = _thr_hook
+
+
+_install_bw_hooks()
 try:
     runpy.run_module("_pyag_entry", run_name="__main__", alter_sys=True)
 except SystemExit:
     raise
 except Exception:
-    traceback.print_exc()
-    raise
+    _report_bw_error(traceback.format_exc())
+    if _ERR_MODE != 2:
+        raise
 """
 	_save_text(bootstrap_code, app_src / "__main__.py")
 	_save_text("MIT License\n", workspace / "LICENSE")
@@ -1892,11 +2334,11 @@ requires = [
 	return workspace, slug, app_root
 
 
-def build_beeware(project, name, target_os, data=(), arch=None, args=(), prepare_only=False, rename_file=None, out_dir=None):
+def build_beeware(project, name, target_os, data=(), arch=None, args=(), prepare_only=False, rename_file=None, out_dir=None, error_mode=1):
 	"""Build ứng dụng qua BeeWare (Briefcase) cho iOS, macOS, Linux, Windows hoặc Web."""
 	target_os = target_os.lower().strip()
 	if target_os == "android":
-		return build_android(project, name, data=data, arch=arch, args=args, prepare_only=prepare_only, rename_file=rename_file, out_dir=out_dir)
+		return build_android(project, name, data=data, arch=arch, args=args, prepare_only=prepare_only, rename_file=rename_file, out_dir=out_dir, error_mode=error_mode)
 
 	bw_plat = _BEEWARE_TARGET_MAP.get(target_os)
 	if not bw_plat:
@@ -1908,7 +2350,7 @@ def build_beeware(project, name, target_os, data=(), arch=None, args=(), prepare
 	use_docker = "--docker" in (args or ()) or "--use-docker" in (args or ())
 
 	workspace, slug, app_root = prepare_beeware(
-		project, name, target_os, data=data, arch=arch, extra_reqs=extra_reqs
+		project, name, target_os, data=data, arch=arch, extra_reqs=extra_reqs, error_mode=error_mode
 	)
 	print(f"[BeeWare:{bw_plat}] Workspace prepared: {workspace}")
 
@@ -2641,67 +3083,131 @@ def _build_g2rt_runtime_zip(out_zip_path, app_root, arch=None):
 	stdlib_zip_tmp = out_zip_path.parent / f"python{py_tag}.zip"
 
 	print(f"[G2RT] Step 1/5: Packing embedded runtime (Python {sys.version_info.major}.{sys.version_info.minor})...")
+
+	def _has_native_ext(folder_path):
+		for _r, _ds, _fs in os.walk(folder_path):
+			_ds[:] = [d for d in _ds if d != "__pycache__"]
+			for _fn in _fs:
+				if _fn.lower().endswith((".pyd", ".dll", ".so")):
+					return True
+		return False
+
+	# Collect pure-Python site-packages directly into pythonXY.zip (zero disk extraction on first run!)
+	loose_entries = []  # list of (arc_rel_posix, file_path)
+	pure_py_site_files = []  # list of (arc_rel_posix, file_path)
+	if site_dir.is_dir():
+		for top_item in sorted(site_dir.iterdir(), key=lambda p: p.name.lower()):
+			tname = top_item.name
+			tlow = tname.lower()
+			if tlow in skip_site or tlow.endswith((".dist-info", ".egg-info", "tests", "test")):
+				continue
+			if top_item.is_file():
+				if tlow.endswith((".pyc", ".pyo", ".pdb", ".lib", ".a", ".chm")):
+					continue
+				if tlow.startswith(("cython", "pyinstaller", "nuitka", "briefcase")):
+					continue
+				if tlow.endswith(".py"):
+					pure_py_site_files.append((tname, top_item))
+				else:
+					loose_entries.append((f"site-packages/{tname}", top_item))
+			elif top_item.is_dir():
+				is_pure = not _has_native_ext(top_item)
+				for root, dirs, files in os.walk(top_item):
+					rel_root = Path(root).relative_to(site_dir)
+					dirs[:] = [d for d in dirs if d != "__pycache__" and not d.lower().endswith((".dist-info", ".egg-info"))]
+					for fn in files:
+						low = fn.lower()
+						if low.endswith((".pyc", ".pyo", ".pdb", ".lib", ".a", ".chm")):
+							continue
+						fp = Path(root) / fn
+						rel_posix = (rel_root / fn).as_posix()
+						if is_pure and low.endswith(".py"):
+							pure_py_site_files.append((rel_posix, fp))
+						else:
+							loose_entries.append((f"site-packages/{rel_posix}", fp))
+
+	# Pack pyaudiogaming pure-Python modules into pythonXY.zip (skipping docs/include/android/lib bloat)
+	skip_pyag_dirs = {"__pycache__", "android", "toolchain", "projects", ".git", "lib", "docs", "include", "g2rt", "pygame_shim"}
+	for root, dirs, files in os.walk(ROOT):
+		rel_root = Path(root).relative_to(ROOT)
+		dirs[:] = [d for d in dirs if d not in skip_pyag_dirs]
+		for fn in files:
+			low = fn.lower()
+			if low.startswith("compile") or low in EXCLUDE_BUILD_FILES or low.endswith((".pyc", ".pyo", ".pdb", ".lib", ".chm")):
+				continue
+			fp = Path(root) / fn
+			rel_posix = f"pyaudiogaming/{(rel_root / fn).as_posix()}" if rel_root != Path(".") else f"pyaudiogaming/{fn}"
+			if low.endswith(".py"):
+				pure_py_site_files.append((rel_posix, fp))
+			else:
+				loose_entries.append((f"site-packages/{rel_posix}", fp))
+
 	with zipfile.ZipFile(stdlib_zip_tmp, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=1) as zstd:
+		seen_zip = set()
 		for root, dirs, files in os.walk(stdlib_dir):
 			rel_root = Path(root).relative_to(stdlib_dir)
 			dirs[:] = [d for d in dirs if d not in skip_stdlib and not d.endswith(".dist-info")]
 			for fn in files:
 				if fn.endswith((".pyc", ".pyo", ".pdb", ".lib")):
 					continue
-				fp = Path(root) / fn
-				zstd.write(fp, (rel_root / fn).as_posix())
+				arc = (rel_root / fn).as_posix()
+				if arc not in seen_zip:
+					seen_zip.add(arc)
+					zstd.write(Path(root) / fn, arc)
+		for arc, fp in pure_py_site_files:
+			if arc not in seen_zip:
+				seen_zip.add(arc)
+				zstd.write(fp, arc)
 
-	with zipfile.ZipFile(out_zip_path, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=1) as zf:
-		for dll_name in (py_dll_name, "python3.dll", "vcruntime140.dll", "vcruntime140_1.dll", "libffi-8.dll", "libcrypto-3.dll", "libssl-3.dll", "sqlite3.dll"):
-			for cand_dir in (py_base, py_env, py_base / "DLLs"):
-				cand = cand_dir / dll_name
-				if cand.is_file():
-					zf.write(cand, dll_name)
-					break
+	# Build flat G2PK multi-file archive for zero-temp-file, multi-threaded C extraction on first run
+	pack_items = []  # list of (rel_posix, file_path)
+	for dll_name in (py_dll_name, "python3.dll", "vcruntime140.dll", "vcruntime140_1.dll", "libffi-8.dll", "libcrypto-3.dll", "libssl-3.dll", "sqlite3.dll"):
+		for cand_dir in (py_base, py_env, py_base / "DLLs"):
+			cand = cand_dir / dll_name
+			if cand.is_file():
+				pack_items.append((dll_name, cand))
+				break
+	pack_items.append((f"python{py_tag}.zip", stdlib_zip_tmp))
 
-		zf.write(stdlib_zip_tmp, f"python{py_tag}.zip")
-
-		dlls_dir = py_base / "DLLs"
-		if dlls_dir.is_dir():
-			for item in dlls_dir.iterdir():
-				if item.is_file() and item.suffix.lower() in (".pyd", ".dll"):
-					if item.name.lower().startswith(("_tkinter", "tcl", "tk")):
-						continue
-					zf.write(item, f"DLLs/{item.name}")
-
-		if site_dir.is_dir():
-			for root, dirs, files in os.walk(site_dir):
-				rel_root = Path(root).relative_to(site_dir)
-				if rel_root == Path("."):
-					dirs[:] = [
-						d for d in dirs
-						if d.lower() not in skip_site
-						and not d.lower().endswith((".dist-info", ".egg-info", "tests", "test"))
-					]
-				else:
-					dirs[:] = [d for d in dirs if d != "__pycache__"]
-				for fn in files:
-					low = fn.lower()
-					if low.endswith((".pyc", ".pyo", ".pdb", ".lib", ".a", ".chm")):
-						continue
-					if rel_root == Path(".") and low.startswith(("cython", "pyinstaller", "nuitka", "briefcase")):
-						continue
-					fp = Path(root) / fn
-					zf.write(fp, f"site-packages/{(rel_root / fn).as_posix()}")
-
-		# Nhúng pyaudiogaming (code Python của thư viện; còn các DLL audio như BASS / Steam Audio sẽ copy ra thư mục lib/ ngang hàng res/)
-		for root, dirs, files in os.walk(ROOT):
-			rel_root = Path(root).relative_to(ROOT)
-			dirs[:] = [
-				d for d in dirs
-				if d not in ("__pycache__", "android", "toolchain", "projects", ".git", "lib")
-			]
-			for fn in files:
-				low = fn.lower()
-				if low.startswith("compile") or low in EXCLUDE_BUILD_FILES or low.endswith((".pyc", ".pyo", ".pdb", ".lib")):
+	dlls_dir = py_base / "DLLs"
+	if dlls_dir.is_dir():
+		for item in dlls_dir.iterdir():
+			if item.is_file() and item.suffix.lower() in (".pyd", ".dll"):
+				if item.name.lower().startswith(("_tkinter", "tcl", "tk")):
 					continue
-				fp = Path(root) / fn
-				zf.write(fp, f"site-packages/pyaudiogaming/{(rel_root / fn).as_posix()}")
+				pack_items.append((f"DLLs/{item.name}", item))
+
+	pack_items.extend(loose_entries)
+
+	# G2PK binary layout: "G2PK" (4B) + count (u32) + entries[path_len(u16) + path_utf8 + data_off(u64) + data_size(u64)] + raw payloads
+	hdr_size = 8
+	meta_rows = []
+	for rel_p, fp in pack_items:
+		pb = rel_p.replace("\\", "/").encode("utf-8")
+		sz = fp.stat().st_size
+		meta_rows.append((pb, fp, sz))
+		hdr_size += 2 + len(pb) + 16
+
+	data_cursor = hdr_size
+	hdr_buf = bytearray(b"G2PK" + struct.pack("<I", len(meta_rows)))
+	for pb, fp, sz in meta_rows:
+		hdr_buf.extend(struct.pack("<H", len(pb)))
+		hdr_buf.extend(pb)
+		hdr_buf.extend(struct.pack("<QQ", data_cursor, sz))
+		data_cursor += sz
+
+	hasher = hashlib.sha256()
+	with open(out_zip_path, "wb") as f_out:
+		f_out.write(hdr_buf)
+		hasher.update(hdr_buf)
+		for _pb, fp, _sz in meta_rows:
+			with open(fp, "rb") as f_in:
+				while True:
+					ch = f_in.read(1024 * 1024)
+					if not ch:
+						break
+					f_out.write(ch)
+					hasher.update(ch)
 
 	try:
 		if stdlib_zip_tmp.exists():
@@ -2709,11 +3215,12 @@ def _build_g2rt_runtime_zip(out_zip_path, app_root, arch=None):
 	except OSError:
 		pass
 
-	rt_hash = hashlib.sha256(out_zip_path.read_bytes()).hexdigest()[:12]
+	rt_hash = hasher.hexdigest()[:12]
+	print(f"[G2RT]   Packed {len(pure_py_site_files)} pure-Python files into python{py_tag}.zip + {len(meta_rows)} fast-extract files.")
 	return py_dll, py_tag, rt_hash
 
 
-def build_g2rt_windows(project, name, data=(), arch=None, args=(), rename_file=None, out_dir=None, workers=None, error_mode=1):
+def build_g2rt_windows(project, name, data=(), arch=None, args=(), rename_file=None, out_dir=None, workers=None, error_mode=1, preserve_user_files=None):
 	"""Build Windows: 1 file <name>.exe (embedded runtime) + 1 file g2rt.dll (all Cython modules + ChaCha20 vault)."""
 	err_mode = _normalize_error_mode(error_mode)
 	safe_title = str(name).replace("\\", "\\\\").replace('"', '\\"').replace("'", "\\'")
@@ -3117,35 +3624,57 @@ int g2rt_run(const wchar_t *exe_path, const wchar_t *app_dir, const wchar_t *rt_
         "            spec.submodule_search_locations = [os.path.dirname(os.path.join(_app_dir, e[1]))]\\n"
         "        return spec\\n"
         "sys.meta_path.insert(0, _G2Finder())\\n"
+        "import threading, faulthandler\\n"
+        "_g2_em = {err_mode}\\n"
+        "_g2_seen = set()\\n"
+        "_g2_lock = threading.Lock()\\n"
+        "def _g2_report(_tb):\\n"
+        "    if _g2_em == 2: return\\n"
+        "    _sig = str(_tb).strip()\\n"
+        "    with _g2_lock:\\n"
+        "        if _sig in _g2_seen: return\\n"
+        "        _g2_seen.add(_sig)\\n"
+        "    try:\\n"
+        "        with open(os.path.join(_app_dir, 'error.log'), 'w', encoding='utf-8', errors='replace') as _ef:\\n"
+        "            _ef.write(_tb + '\\n')\\n"
+        "    except Exception:\\n"
+        "        pass\\n"
+        "    try:\\n"
+        "        sys.stderr.write(_tb + '\\n')\\n"
+        "        sys.stderr.flush()\\n"
+        "    except Exception:\\n"
+        "        pass\\n"
+        "    try:\\n"
+        "        ctypes.windll.kernel32.OutputDebugStringW('[PyAudioGaming ERROR]\\n' + _tb)\\n"
+        "    except Exception:\\n"
+        "        pass\\n"
+        "    if _g2_em == 1:\\n"
+        "        try:\\n"
+        "            ctypes.windll.user32.MessageBoxW(0, _tb, '{safe_title} - Error', 0x10)\\n"
+        "        except Exception:\\n"
+        "            pass\\n"
+        "if _g2_em != 2:\\n"
+        "    try:\\n"
+        "        _g2_fh = open(os.path.join(_app_dir, 'pyag_crash.log'), 'a+', encoding='utf-8', errors='replace')\\n"
+        "        faulthandler.enable(file=_g2_fh, all_threads=True)\\n"
+        "    except Exception:\\n"
+        "        pass\\n"
+        "def _g2_sys_hook(_et, _ev, _etb):\\n"
+        "    if issubclass(_et, (SystemExit, KeyboardInterrupt)): return\\n"
+        "    _g2_report(''.join(traceback.format_exception(_et, _ev, _etb)))\\n"
+        "def _g2_thr_hook(_a):\\n"
+        "    if issubclass(_a.exc_type, (SystemExit, KeyboardInterrupt)): return\\n"
+        "    _tn = getattr(_a.thread, 'name', 'Thread')\\n"
+        "    _g2_report(f'[Thread: {{_tn}}]\\n' + ''.join(traceback.format_exception(_a.exc_type, _a.exc_value, _a.exc_traceback)))\\n"
+        "sys.excepthook = _g2_sys_hook\\n"
+        "if hasattr(threading, 'excepthook'):\\n"
+        "    threading.excepthook = _g2_thr_hook\\n"
         "try:\\n"
         "    runpy.run_module('{entry_mod}', run_name='__main__', alter_sys=True)\\n"
         "except SystemExit:\\n"
         "    pass\\n"
         "except Exception:\\n"
-        "    import hashlib\\n"
-        "    _et, _ev, _etb = sys.exc_info()\\n"
-        "    _flines = []\\n"
-        "    _lcode = '0x00000000'\\n"
-        "    while _etb is not None:\\n"
-        "        _cfn = _etb.tb_frame.f_code.co_filename or ''\\n"
-        "        _lcode = '0x' + hashlib.sha256(_cfn.encode('utf-8', errors='ignore')).hexdigest()[:8].upper()\\n"
-        "        _flines.append(f'  at {{_lcode}}: line {{_etb.tb_lineno}}')\\n"
-        "        _etb = _etb.tb_next\\n"
-        "    _en = getattr(_et, '__name__', 'Exception')\\n"
-        "    _em_txt = str(_ev)\\n"
-        "    _tb = f'Runtime Error [{{_lcode}}]\\n' + '\\n'.join(_flines) + '\\n' + (f'{{_en}}: {{_em_txt}}' if _em_txt else _en)\\n"
-        "    _em = {err_mode}\\n"
-        "    if _em == 0:\\n"
-        "        try:\\n"
-        "            with open(os.path.join(_app_dir, 'error.log'), 'w', encoding='utf-8', errors='replace') as _ef:\\n"
-        "                _ef.write(_tb + '\\n')\\n"
-        "        except Exception:\\n"
-        "            pass\\n"
-        "    elif _em == 1:\\n"
-        "        try:\\n"
-        "            ctypes.windll.user32.MessageBoxW(0, _tb, '{safe_title} - Error', 0x10)\\n"
-        "        except Exception:\\n"
-        "            pass\\n"
+        "    _g2_report(traceback.format_exc())\\n"
         "    sys.exit(1)\\n";
 
     int rc = PyRun_SimpleString(boot_py);
@@ -3184,6 +3713,8 @@ int g2rt_run(const wchar_t *exe_path, const wchar_t *app_dir, const wchar_t *rt_
 	launcher_c = f"""#include <windows.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
+#include <wchar.h>
 
 typedef int (*g2rt_run_fn)(const wchar_t*, const wchar_t*, const wchar_t*, int, wchar_t**);
 
@@ -3222,56 +3753,164 @@ static void cleanup_old_runtimes(const wchar_t *base_dir, const wchar_t *prefix,
     FindClose(hFind);
 }}
 
-static int extract_overlay(const wchar_t *exe_path, uint64_t offset, uint64_t size, uint32_t xkey, const wchar_t *rt_dir) {{
-    wchar_t tmp_dir[MAX_PATH], tmp_zip[MAX_PATH];
-    GetTempPathW(MAX_PATH, tmp_dir);
-    swprintf(tmp_zip, MAX_PATH, L"%lsg2rt_rt_%lu.zip", tmp_dir, (unsigned long)GetCurrentProcessId());
+typedef struct {{
+    wchar_t full_path[MAX_PATH];
+    uint64_t data_off;
+    uint64_t data_size;
+}} G2Entry;
 
+typedef struct {{
+    const unsigned char *base;
+    uint64_t total_size;
+    unsigned char kbytes[4];
+    G2Entry *entries;
+    LONG count;
+    volatile LONG next_idx;
+}} G2ExtractCtx;
+
+static void ensure_parent_dirs(const wchar_t *full_path) {{
+    wchar_t tmp[MAX_PATH];
+    wcsncpy(tmp, full_path, MAX_PATH - 1);
+    tmp[MAX_PATH - 1] = 0;
+    for (wchar_t *p = tmp; *p; ++p) {{
+        if (*p == L'\\\\' && p > tmp + 2) {{
+            *p = 0;
+            CreateDirectoryW(tmp, NULL);
+            *p = L'\\\\';
+        }}
+    }}
+}}
+
+static void xor_read(unsigned char *dst, const unsigned char *base, uint64_t pos, size_t len, const unsigned char kbytes[4]) {{
+    for (size_t i = 0; i < len; ++i) {{
+        dst[i] = base[pos + i] ^ kbytes[(pos + i) & 3u];
+    }}
+}}
+
+static DWORD WINAPI extract_worker(LPVOID arg) {{
+    G2ExtractCtx *ctx = (G2ExtractCtx *)arg;
+    unsigned char buf[65536];
+    for (;;) {{
+        LONG idx = InterlockedIncrement(&ctx->next_idx) - 1;
+        if (idx >= ctx->count) break;
+        const G2Entry *e = &ctx->entries[idx];
+        HANDLE hOut = CreateFileW(e->full_path, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+        if (hOut == INVALID_HANDLE_VALUE) continue;
+        uint64_t rem = e->data_size;
+        uint64_t cur = e->data_off;
+        while (rem > 0) {{
+            DWORD chunk = (rem > sizeof(buf)) ? (DWORD)sizeof(buf) : (DWORD)rem;
+            if (cur + chunk > ctx->total_size) break;
+            xor_read(buf, ctx->base, cur, chunk, ctx->kbytes);
+            DWORD wr = 0;
+            WriteFile(hOut, buf, chunk, &wr, NULL);
+            cur += chunk;
+            rem -= chunk;
+        }}
+        CloseHandle(hOut);
+    }}
+    return 0;
+}}
+
+static int extract_overlay(const wchar_t *exe_path, uint64_t offset, uint64_t size, uint32_t xkey, const wchar_t *rt_dir) {{
+    if (size < 8) return 0;
     HANDLE hIn = CreateFileW(exe_path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if (hIn == INVALID_HANDLE_VALUE) return 0;
-    LARGE_INTEGER li; li.QuadPart = (LONGLONG)offset;
-    SetFilePointerEx(hIn, li, NULL, FILE_BEGIN);
+    HANDLE hMap = CreateFileMappingW(hIn, NULL, PAGE_READONLY, 0, 0, NULL);
+    if (!hMap) {{ CloseHandle(hIn); return 0; }}
+    const unsigned char *view = (const unsigned char *)MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0);
+    if (!view) {{ CloseHandle(hMap); CloseHandle(hIn); return 0; }}
 
-    HANDLE hOut = CreateFileW(tmp_zip, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-    if (hOut == INVALID_HANDLE_VALUE) {{ CloseHandle(hIn); return 0; }}
-
-    unsigned char buf[65536];
+    const unsigned char *base = view + offset;
     unsigned char kbytes[4] = {{
         (unsigned char)(xkey & 0xFFu),
         (unsigned char)((xkey >> 8) & 0xFFu),
         (unsigned char)((xkey >> 16) & 0xFFu),
         (unsigned char)((xkey >> 24) & 0xFFu)
     }};
-    uint64_t rem = size;
-    uint64_t pos = 0;
-    while (rem > 0) {{
-        DWORD to_read = (rem > sizeof(buf)) ? (DWORD)sizeof(buf) : (DWORD)rem;
-        DWORD rd = 0, wr = 0;
-        if (!ReadFile(hIn, buf, to_read, &rd, NULL) || rd == 0) break;
-        for (DWORD i = 0; i < rd; i++) {{
-            buf[i] ^= kbytes[(pos + i) & 3u];
-        }}
-        WriteFile(hOut, buf, rd, &wr, NULL);
-        rem -= rd;
-        pos += rd;
+
+    unsigned char hdr8[8];
+    xor_read(hdr8, base, 0, 8, kbytes);
+    if (memcmp(hdr8, "G2PK", 4) != 0) {{
+        UnmapViewOfFile(view); CloseHandle(hMap); CloseHandle(hIn);
+        return 0;
     }}
-    CloseHandle(hIn);
-    CloseHandle(hOut);
+    uint32_t count = 0;
+    memcpy(&count, hdr8 + 4, 4);
+    if (count == 0 || count > 200000) {{
+        UnmapViewOfFile(view); CloseHandle(hMap); CloseHandle(hIn);
+        return 0;
+    }}
 
     CreateDirectoryW(rt_dir, NULL);
-    wchar_t cmd[2048];
-    swprintf(cmd, 2048, L"tar.exe -xf \\"%ls\\" -C \\"%ls\\"", tmp_zip, rt_dir);
-    STARTUPINFOW si; PROCESS_INFORMATION pi;
-    ZeroMemory(&si, sizeof(si)); si.cb = sizeof(si);
-    ZeroMemory(&pi, sizeof(pi));
-    BOOL ok = CreateProcessW(NULL, cmd, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
-    if (ok) {{
-        WaitForSingleObject(pi.hProcess, INFINITE);
-        CloseHandle(pi.hProcess);
-        CloseHandle(pi.hThread);
+    G2Entry *entries = (G2Entry *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, (SIZE_T)count * sizeof(G2Entry));
+    if (!entries) {{
+        UnmapViewOfFile(view); CloseHandle(hMap); CloseHandle(hIn);
+        return 0;
     }}
-    DeleteFileW(tmp_zip);
-    return ok ? 1 : 0;
+
+    uint64_t pos = 8;
+    char p_utf8[1024];
+    wchar_t p_wide[MAX_PATH];
+    uint32_t valid_count = 0;
+    for (uint32_t i = 0; i < count && pos + 2 <= size; ++i) {{
+        unsigned char len2[2];
+        xor_read(len2, base, pos, 2, kbytes); pos += 2;
+        uint16_t plen = (uint16_t)(len2[0] | ((uint16_t)len2[1] << 8));
+        if (plen == 0 || plen >= sizeof(p_utf8) || pos + plen + 16 > size) break;
+        xor_read((unsigned char *)p_utf8, base, pos, plen, kbytes); pos += plen;
+        p_utf8[plen] = 0;
+        unsigned char offsz[16];
+        xor_read(offsz, base, pos, 16, kbytes); pos += 16;
+        uint64_t doff = 0, dsz = 0;
+        memcpy(&doff, offsz, 8);
+        memcpy(&dsz, offsz + 8, 8);
+
+        int wlen = MultiByteToWideChar(CP_UTF8, 0, p_utf8, -1, p_wide, MAX_PATH);
+        if (wlen <= 0) continue;
+        for (int k = 0; p_wide[k]; ++k) {{
+            if (p_wide[k] == L'/') p_wide[k] = L'\\\\';
+        }}
+        swprintf(entries[valid_count].full_path, MAX_PATH, L"%ls\\\\%ls", rt_dir, p_wide);
+        ensure_parent_dirs(entries[valid_count].full_path);
+        entries[valid_count].data_off = doff;
+        entries[valid_count].data_size = dsz;
+        valid_count++;
+    }}
+
+    G2ExtractCtx ctx;
+    ctx.base = base;
+    ctx.total_size = size;
+    memcpy(ctx.kbytes, kbytes, 4);
+    ctx.entries = entries;
+    ctx.count = (LONG)valid_count;
+    ctx.next_idx = 0;
+
+    SYSTEM_INFO sysinfo;
+    GetSystemInfo(&sysinfo);
+    DWORD n_workers = sysinfo.dwNumberOfProcessors;
+    if (n_workers < 2) n_workers = 2;
+    if (n_workers > 8) n_workers = 8;
+    if (n_workers > valid_count) n_workers = valid_count ? valid_count : 1;
+
+    HANDLE threads[8];
+    DWORD started = 0;
+    for (DWORD t = 0; t < n_workers; ++t) {{
+        HANDLE hT = CreateThread(NULL, 0, extract_worker, &ctx, 0, NULL);
+        if (hT) threads[started++] = hT;
+    }}
+    if (started > 0) {{
+        WaitForMultipleObjects(started, threads, TRUE, INFINITE);
+        for (DWORD t = 0; t < started; ++t) CloseHandle(threads[t]);
+    }} else {{
+        extract_worker(&ctx);
+    }}
+
+    HeapFree(GetProcessHeap(), 0, entries);
+    UnmapViewOfFile(view);
+    CloseHandle(hMap);
+    CloseHandle(hIn);
+    return 1;
 }}
 
 int wmain(int argc, wchar_t **argv) {{
@@ -3372,11 +4011,9 @@ int wmain(int argc, wchar_t **argv) {{
 	for elem in (data or ()):
 		if os.path.exists(elem):
 			dest_elem = target_dist / elem
-			if os.path.isdir(elem):
-				shutil.copytree(elem, dest_elem, dirs_exist_ok=True)
-			else:
-				dest_elem.parent.mkdir(parents=True, exist_ok=True)
-				shutil.copy2(elem, dest_elem)
+			kept = _replace_data_preserving_config(elem, dest_elem, preserve_patterns=preserve_user_files)
+			if kept:
+				print(f"[G2RT] Updated '{elem}' (cleaned old dir, preserved {kept} user config file(s)).")
 
 	shutil.rmtree(work_dir, ignore_errors=True)
 	elapsed = time.time() - t_start
@@ -3388,7 +4025,7 @@ int wmain(int argc, wchar_t **argv) {{
 	return True
 
 
-def build(PROJECT=None, PROJECT_FULL_NAME=None, args_compile=[], data=[], rename_file=None, packet=False, zstandard=True, mode="pyinstaller", platforms=None, arch=None, log=False, workers=None, error_mode=1, use_g2rt_tk=True):
+def build(PROJECT=None, PROJECT_FULL_NAME=None, args_compile=[], data=[], rename_file=None, packet=False, zstandard=True, mode="pyinstaller", platforms=None, arch=None, log=False, workers=None, error_mode=1, use_g2rt_tk=True, check=True, test_run=False, preserve_user_files=None):
 	if PROJECT is None and PROJECT_FULL_NAME is None:
 		print("Error: you should fill full project or file name you want compile!")
 		sys.exit(1)
@@ -3401,6 +4038,15 @@ def build(PROJECT=None, PROJECT_FULL_NAME=None, args_compile=[], data=[], rename
 		use_g2rt_tk = use_g2rt_tk.strip().lower() not in ("0", "false", "no", "off", "none", "")
 	else:
 		use_g2rt_tk = bool(use_g2rt_tk)
+	if isinstance(check, str):
+		check = check.strip().lower() not in ("0", "false", "no", "off", "none", "")
+	else:
+		check = bool(check)
+	if isinstance(test_run, str):
+		test_run = test_run.strip().lower() in ("1", "true", "yes", "on")
+	else:
+		test_run = bool(test_run)
+	error_mode = _normalize_error_mode(error_mode)
 
 	if not isinstance(args_compile, list):
 		args_compile = [str(args_compile)] if args_compile else []
@@ -3419,6 +4065,15 @@ def build(PROJECT=None, PROJECT_FULL_NAME=None, args_compile=[], data=[], rename
 		target_platforms = [sys_checker.get_platform()["os"]]
 
 	with _BuildLogContext(log, default_name=PROJECT_FULL_NAME or PROJECT):
+		if check and "--no-check" not in sys.argv:
+			extra_reqs = [a for a in args_compile if not str(a).startswith("-")]
+			preflight_check(
+				PROJECT,
+				data=data,
+				target_os=target_platforms[0] if target_platforms else None,
+				extra_reqs=extra_reqs,
+				test_run=test_run or ("--test-run" in sys.argv),
+			)
 		for target_os in target_platforms:
 			if len(target_platforms) > 1:
 				current_full_name = f"{PROJECT_FULL_NAME}_{target_os}"
@@ -3478,7 +4133,8 @@ def build(PROJECT=None, PROJECT_FULL_NAME=None, args_compile=[], data=[], rename
 					rename_file=rename_file,
 					out_dir=copydir,
 					workers=workers,
-					error_mode=error_mode
+					error_mode=error_mode,
+					preserve_user_files=preserve_user_files
 				)
 				if packet:
 					dopackage(PROJECT, current_full_name, target_os)
@@ -3497,7 +4153,8 @@ def build(PROJECT=None, PROJECT_FULL_NAME=None, args_compile=[], data=[], rename
 					args=args_compile,
 					prepare_only="--skip-compile" in sys.argv,
 					rename_file=rename_file,
-					out_dir=copydir
+					out_dir=copydir,
+					error_mode=error_mode
 				)
 				if packet:
 					dopackage(PROJECT, current_full_name, target_os)
@@ -3519,13 +4176,11 @@ def build(PROJECT=None, PROJECT_FULL_NAME=None, args_compile=[], data=[], rename
 				if data:
 					for elem in data:
 						if os.path.exists(elem):
-							print(f"Copying data: {elem}...")
+							print(f"Updating data: {elem}...")
 							dest_elem = os.path.join(copydir, elem)
-							if os.path.isdir(elem):
-								shutil.copytree(elem, dest_elem, dirs_exist_ok=True)
-							else:
-								os.makedirs(os.path.dirname(dest_elem), exist_ok=True)
-								shutil.copy2(elem, dest_elem)
+							kept = _replace_data_preserving_config(elem, dest_elem, preserve_patterns=preserve_user_files)
+							if kept:
+								print(f"  -> Cleaned old '{elem}', preserved {kept} user config file(s).")
 			except Exception as e:
 				print(f"Warning while copying libraries/data: {e}")
 
@@ -3555,6 +4210,8 @@ def create_template(filename="build.txt", legacy=False):
 			"workers = auto\n"
 			"error_mode = 1\n"
 			"use_g2rt_tk = true\n"
+			"check = true\n"
+			"test_run = false\n"
 		)
 	else:
 		content = (
@@ -3677,89 +4334,45 @@ def interactive_make():
 	build(**config)
 
 
-def work(config_file):
-	# Nếu đang ở trong tiến trình con của BeeWare/Android build thì thoát êm ngay, không báo lỗi build.txt
-	if os.environ.get("PYAG_BUILDING_ANDROID") == "1" or os.environ.get("PYAG_BUILDING_BEEWARE") == "1" or "briefcase" in " ".join(sys.argv).lower():
-		return
-
+def _parse_config_file(config_file):
 	f = File(password="", encode=False, aes=False)
 	if not f.check(config_file):
-		# Nếu bị gọi nhầm từ thư mục workspace của BeeWare/Android thì bỏ qua, không sys.exit(1)
-		cwd_lower = os.getcwd().lower()
-		if "android" in cwd_lower or "beeware" in cwd_lower or "projects" in cwd_lower:
-			return
-		print(f"Error: Config file '{config_file}' not found!")
-		return
-
+		return None, None
 	text = f.load(config_file, mode="r+", type="txt")
 	if not text:
-		return
-
+		return None, None
 	lines = []
 	for line in text.splitlines():
 		s = line.strip()
 		if not s or s.startswith(("#", "//", "!", "@")):
 			continue
 		lines.append(s)
-
 	if not lines:
-		print("Error: Empty configuration file!")
-		return
-
+		return None, None
 	is_kv = any("=" in line and not line.startswith("[") for line in lines)
-
 	if is_kv:
 		config = {
-			"PROJECT": None,
-			"PROJECT_FULL_NAME": None,
-			"args_compile": [],
-			"data": [],
-			"rename_file": None,
-			"packet": False,
-			"zstandard": True,
-			"mode": "pyinstaller",
-			"platforms": None,
-			"arch": None,
-			"log": False,
-			"workers": None,
-			"error_mode": 1,
-			"use_g2rt_tk": True
+			"PROJECT": None, "PROJECT_FULL_NAME": None, "args_compile": [], "data": [],
+			"rename_file": None, "packet": False, "zstandard": True, "mode": "pyinstaller",
+			"platforms": None, "arch": None, "log": False, "workers": None,
+			"error_mode": 1, "use_g2rt_tk": True, "check": True, "test_run": False,
+			"preserve_user_files": None
 		}
 		key_map = {
-			"project": "PROJECT",
-			"file": "PROJECT",
-			"project_full_name": "PROJECT_FULL_NAME",
-			"full_name": "PROJECT_FULL_NAME",
-			"args_compile": "args_compile",
-			"args": "args_compile",
-			"data": "data",
-			"rename_file": "rename_file",
-			"rename": "rename_file",
-			"packet": "packet",
-			"zstandard": "zstandard",
-			"mode": "mode",
-			"tool": "mode",
-			"tools": "mode",
-			"platform": "platforms",
-			"platforms": "platforms",
-			"os": "platforms",
-			"arch": "arch",
-			"log": "log",
-			"logfile": "log",
-			"log_file": "log",
-			"workers": "workers",
-			"jobs": "workers",
-			"cpu": "workers",
-			"cpu_limit": "workers",
-			"threads": "workers",
-			"error_mode": "error_mode",
-			"error": "error_mode",
-			"errors": "error_mode",
-			"traceback": "error_mode",
-			"show_error": "error_mode",
-			"use_g2rt_tk": "use_g2rt_tk",
-			"g2rt_tk": "use_g2rt_tk",
-			"use_g2rt_toolkit": "use_g2rt_tk"
+			"project": "PROJECT", "file": "PROJECT",
+			"project_full_name": "PROJECT_FULL_NAME", "full_name": "PROJECT_FULL_NAME",
+			"args_compile": "args_compile", "args": "args_compile",
+			"data": "data", "rename_file": "rename_file", "rename": "rename_file",
+			"packet": "packet", "zstandard": "zstandard",
+			"mode": "mode", "tool": "mode", "tools": "mode",
+			"platform": "platforms", "platforms": "platforms", "os": "platforms",
+			"arch": "arch", "log": "log", "logfile": "log", "log_file": "log",
+			"workers": "workers", "jobs": "workers", "cpu": "workers", "cpu_limit": "workers", "threads": "workers",
+			"error_mode": "error_mode", "error": "error_mode", "errors": "error_mode", "traceback": "error_mode", "show_error": "error_mode",
+			"use_g2rt_tk": "use_g2rt_tk", "g2rt_tk": "use_g2rt_tk", "use_g2rt_toolkit": "use_g2rt_tk",
+			"check": "check", "preflight": "check", "verify": "check",
+			"test_run": "test_run", "smoke_test": "test_run", "dry_run": "test_run",
+			"preserve_user_files": "preserve_user_files", "preserve_config": "preserve_user_files", "keep_files": "preserve_user_files"
 		}
 		for line in lines:
 			if "=" not in line:
@@ -3767,17 +4380,54 @@ def work(config_file):
 			k, v = line.split("=", 1)
 			if "#" in v and not ("'" in v or '"' in v):
 				v = v.split("#", 1)[0]
-			k = k.strip().lower()
-			val = parse_val(v)
+			k, val = k.strip().lower(), parse_val(v)
 			if k in key_map:
 				config[key_map[k]] = val
-		build(**config)
-	else:
-		if len(lines) < 6:
-			print("Error: not true type of compile building config pyaudiogaming needs!")
+		return "kv", config
+	if len(lines) < 6:
+		return "invalid", None
+	return "legacy", [parse_val(line) for line in lines]
+
+
+def work(config_file):
+	# Nếu đang ở trong tiến trình con của BeeWare/Android build thì thoát êm ngay, không báo lỗi build.txt
+	if os.environ.get("PYAG_BUILDING_ANDROID") == "1" or os.environ.get("PYAG_BUILDING_BEEWARE") == "1" or "briefcase" in " ".join(sys.argv).lower():
+		return
+
+	kind, parsed = _parse_config_file(config_file)
+	if kind is None:
+		cwd_lower = os.getcwd().lower()
+		if "android" in cwd_lower or "beeware" in cwd_lower or "projects" in cwd_lower:
 			return
-		parsed_args = [parse_val(line) for line in lines]
-		build(*parsed_args)
+		print(f"Error: Config file '{config_file}' not found or empty!")
+		return
+	if kind == "invalid":
+		print("Error: not true type of compile building config pyaudiogaming needs!")
+		return
+	if kind == "kv":
+		build(**parsed)
+	else:
+		build(*parsed)
+
+
+def _run_preflight_cli(target, test_run=False):
+	cand = target
+	if not cand.endswith(".txt") and os.path.exists(cand + ".txt"):
+		cand += ".txt"
+	if os.path.isfile(cand) and cand.endswith(".txt"):
+		kind, parsed = _parse_config_file(os.path.abspath(cand))
+		if kind == "kv":
+			proj = parsed["PROJECT"] or parsed["PROJECT_FULL_NAME"]
+			data = parsed.get("data") or []
+			plats = parsed.get("platforms")
+			t_os = plats[0] if isinstance(plats, list) and plats else plats
+			reqs = [a for a in (parsed.get("args_compile") or []) if not str(a).startswith("-")]
+			preflight_check(proj, data=data, target_os=t_os, extra_reqs=reqs, test_run=test_run)
+			return
+		elif kind == "legacy" and parsed:
+			preflight_check(parsed[0], data=parsed[3] if len(parsed) > 3 else [], test_run=test_run)
+			return
+	preflight_check(target, test_run=test_run)
 
 
 if __name__ == "__main__":
@@ -3795,6 +4445,9 @@ if __name__ == "__main__":
 
 	if user_input.lower() == "make":
 		interactive_make()
+	elif user_input.lower() in ("check", "test"):
+		target_arg = sys.argv[2] if len(sys.argv) > 2 else "build.txt"
+		_run_preflight_cli(target_arg, test_run=(user_input.lower() == "test"))
 	elif user_input.lower() == "create":
 		target_file = sys.argv[2] if len(sys.argv) > 2 else "build.txt"
 		if "." not in target_file:

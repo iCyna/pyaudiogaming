@@ -20,6 +20,14 @@
           "doc": ""
         },
         {
+          "name": "speech",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
           "name": "init",
           "kind": "method",
           "signature": "x, y, ttl, vv=0, show_vv=False, author=''",
@@ -57,6 +65,42 @@
           ],
           "returns": "any",
           "doc": ""
+        },
+        {
+          "name": "set_fullscreen",
+          "kind": "method",
+          "signature": "enabled=True",
+          "params": [
+            {
+              "name": "enabled",
+              "type": "any",
+              "default": "True"
+            }
+          ],
+          "returns": "any",
+          "doc": "Toggle true edge-to-edge fullscreen and system edge-gesture exclusion (dynamic, non-hardcoded)."
+        },
+        {
+          "name": "get_fullscreen",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_gesture_mode",
+          "kind": "method",
+          "signature": "mode='game'",
+          "params": [
+            {
+              "name": "mode",
+              "type": "any",
+              "default": "'game'"
+            }
+          ],
+          "returns": "any",
+          "doc": "Set gesture mode: 'game' (continuous sliding movement) or 'ui' (TalkBack explore + flick only)."
         },
         {
           "name": "touchPos",
@@ -232,6 +276,58 @@
           ],
           "returns": "any",
           "doc": "Kiểm tra chạm đúp (chuẩn TalkBack/VoiceOver để kích hoạt)."
+        },
+        {
+          "name": "tap_pos",
+          "kind": "method",
+          "signature": "fingers=1, count=1, zone=None",
+          "params": [
+            {
+              "name": "fingers",
+              "type": "any",
+              "default": "1"
+            },
+            {
+              "name": "count",
+              "type": "any",
+              "default": "1"
+            },
+            {
+              "name": "zone",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": "Return normalized (x, y) position of the matching tap event, or None."
+        },
+        {
+          "name": "explore_pos",
+          "kind": "method",
+          "signature": "zone=None",
+          "params": [
+            {
+              "name": "zone",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": "Return latest normalized (x, y) position during 1-finger Explore-by-Touch, or None."
+        },
+        {
+          "name": "explore_end_pos",
+          "kind": "method",
+          "signature": "zone=None",
+          "params": [
+            {
+              "name": "zone",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": "Return normalized (x, y) position when 1-finger Explore-by-Touch ends, or None."
         },
         {
           "name": "long_press",

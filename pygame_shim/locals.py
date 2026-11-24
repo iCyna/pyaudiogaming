@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Pygame constants shim for Android BeeWare backend."""
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# pygame.locals keycode and display constants shim.
+# Supports Android and iOS.
 
-# Display flags
 FULLSCREEN = 0x80000000
 DOUBLEBUF = 0x40000000
 HWSURFACE = 0x00000001
@@ -33,6 +34,11 @@ FINGERDOWN = 1792
 FINGERUP = 1793
 FINGERMOTION = 1794
 MULTIGESTURE = 2050
+JOYAXISMOTION = 1536
+JOYBALLMOTION = 1537
+JOYHATMOTION = 1538
+JOYBUTTONDOWN = 1539
+JOYBUTTONUP = 1540
 WINDOWSHOWN = 32774
 WINDOWHIDDEN = 32775
 WINDOWEXPOSED = 32776

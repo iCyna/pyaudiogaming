@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-#buffer storage local functions of pyaudiogaming
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# Shared runtime buffers and handle registries for PyAudioGaming.
+# Supports Windows, Linux, macOS, Android, and iOS.
 
 name_window = ""
 names_window=[]

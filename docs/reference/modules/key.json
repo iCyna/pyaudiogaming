@@ -1,0 +1,74 @@
+{
+  "module": "key",
+  "classes": [],
+  "functions": [
+    {
+      "name": "token",
+      "kind": "function",
+      "signature": "min=4, max=12",
+      "params": [
+        {
+          "name": "min",
+          "type": "any",
+          "default": "4"
+        },
+        {
+          "name": "max",
+          "type": "any",
+          "default": "12"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "code",
+      "kind": "function",
+      "signature": "name",
+      "params": [
+        {
+          "name": "name",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "chord",
+      "kind": "function",
+      "signature": "name",
+      "params": [
+        {
+          "name": "name",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "match",
+      "kind": "function",
+      "signature": "mod, mask",
+      "params": [
+        {
+          "name": "mod",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "mask",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": ""
+    }
+  ],
+  "title": "key — Keyboard Mapping & Chord Parser",
+  "summary": "Complete key-name to pygame keycode lookup table (<code>ksum</code>) and shortcut chord parser (<code>chord('ctrl+shift+s')</code>)."
+}

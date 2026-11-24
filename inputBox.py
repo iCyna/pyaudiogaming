@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Cross-platform native dialogs (Windows, macOS, Linux, Android, iOS, Web) with accessible SDL (vb) fallbacks."""
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# Native input, message, and file dialogs with accessible SDL fallbacks.
+# Supports Windows, Linux, macOS, Android, iOS, and Web.
+
 import ctypes
 import os
 import shutil

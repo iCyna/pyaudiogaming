@@ -1,4 +1,7 @@
-"""BASS_MPC wrapper"""
+# -*- coding: utf-8 -*-
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# BASS_MPC ctypes wrapper for Musepack (.mpc) audio decoding.
+# Supports Windows, Linux, and macOS.
 
 import ctypes
 from . import pybass

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-# BASS_VST python wrapper
-# copyright 2026 belong ihcyna (Labubu)<phucnggo29@gmail.com>.[cite: 1]
-# some ideas adapted from standard pybass wrappers.[cite: 1]
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# BASS_VST ctypes wrapper for VST instruments and DSP effect plugins.
+# Supports Windows and macOS.
 
 __version__ = '0.1' 
 __author__ = 'ihcyna (Labubu) <phucnggo29@gmail.com>' 

@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-# Sound system multifunctional
 # Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# Multifunctional audio engine: playback, 3D/HRTF, FX, tempo/tone, recording, and streaming.
+# Supports Windows, Linux, macOS, Android, and iOS.
 
-import math, os, time, ctypes, importlib
+import array, math, os, struct, threading, time, ctypes, importlib
 from .sound_modules import control, pybass as bass, pybassmix as bassmix, pybass_fx as bass_fx
 from . import system, utils, buffer
 from .sound_fx import *
@@ -13,6 +14,7 @@ class _OptionalAddon:
 	def __getattr__(self, attr): return getattr(importlib.import_module(".sound_modules." + self.name, __package__), attr)
 
 pybassvst, pybassmidi, pybassenc = _OptionalAddon("pybassvst"), _OptionalAddon("pybassmidi"), _OptionalAddon("pybassenc")
+pybassloud, pytags, pybasswasapi = _OptionalAddon("pybassloud"), _OptionalAddon("pytags"), _OptionalAddon("pybasswasapi")
 _hrtf, _hrtf_sample_rate, _hrtf_frame_size, _oneshot_pool = None, None, 512, []
 _global_sound, _focused = False, True
 
@@ -36,22 +38,54 @@ ATTR_MAP = {
 	"tempo": BASS_ATTRIB_TEMPO, "tone": BASS_ATTRIB_TEMPO_PITCH, "tempo_freq": BASS_ATTRIB_TEMPO_FREQ
 }
 
+_hrtf_lock = threading.Lock()
+_hrtf_prewarm_started = False
+
+
+def is_hrtf_ready():
+	"""Return True if Steam Audio HRTF is already initialized (non-blocking)."""
+	return _hrtf_sample_rate is not None
+
+
 def _initialize_hrtf(sample_rate=None, frame_size=None):
-	# Initialize native HRTF addon on demand
+	# Initialize native HRTF addon on demand (thread-safe for background prewarm)
 	global _hrtf, _hrtf_sample_rate, _hrtf_frame_size
-	if _hrtf is None:
-		from .sound_modules import pybass_hrtf
-		_hrtf = pybass_hrtf
-	if frame_size is not None:
-		_hrtf_frame_size = max(64, min(2048, int(frame_size)))
-		_hrtf.BASS_HRTF_SetFrameSize(_hrtf_frame_size)
-	if sample_rate is None:
-		sample_rate = getattr(buffer.hAudiobuffers.get("output"), "frequency", 44100)
-	if _hrtf_sample_rate is None:
-		if not _hrtf.BASS_HRTF_InitEx(int(sample_rate), os.fsencode(system.get_path("bass")), os.fsencode(system.get_path("phonon")), None, 0x040500, frameSize=_hrtf_frame_size):
-			raise RuntimeError("BASS_HRTF_Init failed; check bass_hrtf and phonon libraries")
-		_hrtf_sample_rate = int(sample_rate)
+	if _hrtf is not None and _hrtf_sample_rate is not None and frame_size is None:
+		return _hrtf
+	with _hrtf_lock:
+		if _hrtf is None:
+			from .sound_modules import pybass_hrtf
+			_hrtf = pybass_hrtf
+		if frame_size is not None:
+			_hrtf_frame_size = max(64, min(2048, int(frame_size)))
+			_hrtf.BASS_HRTF_SetFrameSize(_hrtf_frame_size)
+		if sample_rate is None:
+			sample_rate = getattr(buffer.hAudiobuffers.get("output"), "frequency", 44100)
+		if _hrtf_sample_rate is None:
+			if not _hrtf.BASS_HRTF_InitEx(int(sample_rate), os.fsencode(system.get_path("bass")), os.fsencode(system.get_path("phonon")), None, 0x040500, frameSize=_hrtf_frame_size):
+				raise RuntimeError("BASS_HRTF_Init failed; check bass_hrtf and phonon libraries")
+			_hrtf_sample_rate = int(sample_rate)
 	return _hrtf
+
+
+def prewarm_hrtf_async(sample_rate=None, delay=0.0):
+	"""Pre-initialize Steam Audio HRTF on a background thread so startup & first 3D sound never stall."""
+	global _hrtf_prewarm_started
+	if _hrtf_sample_rate is not None or _hrtf_prewarm_started:
+		return
+	_hrtf_prewarm_started = True
+	def _bg():
+		try:
+			_initialize_hrtf(sample_rate=sample_rate)
+		except Exception:
+			pass
+	if delay and delay > 0.0:
+		t = threading.Timer(float(delay), _bg)
+		t.daemon = True
+		t.name = "PyAGHRTFPrewarm"
+		t.start()
+	else:
+		threading.Thread(target=_bg, name="PyAGHRTFPrewarm", daemon=True).start()
 
 def set_hrtf_frame_size(frame_size=512):
 	global _hrtf_frame_size
@@ -246,7 +280,9 @@ def output(period=10, bbuffer=500, ThreeD=False, sample_rate=44100, dev=-1, fram
 	out = OutputManager(device=dev, frequency=sample_rate, period=period, bbuffer=bbuffer, **kwargs)
 	buffer.hAudiobuffers["output"], buffer.hfxbuffers["basic"] = out, Basic()
 	set_focus(_focused)
-	if ThreeD or hrtf: _initialize_hrtf(sample_rate, frame_size=frame_size)
+	if ThreeD or hrtf:
+		# Defer HRTF prewarm until after startup window & module imports settle (avoids Windows DLL Loader Lock stall)
+		prewarm_hrtf_async(sample_rate, delay=1.2)
 	return out
 
 def input(device=-1):
@@ -277,10 +313,12 @@ class SoundBase:
 		self.handle, self.dedata, self.parent_mixer, self.store_entry = None, None, None, None
 		self.active_fx_handles, self.active_steam_fx, self._fx_param_cache = {}, {}, {}
 		self.mono, self.freq, self.chans, self.paused = False, 44100, 2, False
-		self._is_decode, self._is_live_push, self._is_music, self._frame_size = False, False, False, None
+		self._is_decode, self._is_live_push, self._is_music, self._is_url, self._frame_size = False, False, False, False, None
 		self._pitch_shift_fx, self._tone_semitones, self._hrtf_stream, self._hrtf_dsp, self._3d = None, 0.0, False, 0, None
+		self._tempo_handle, self._reverse_handle, self._loudness_handle, self._encode_handle, self._encode_proc = None, None, None, None, None
+		self._sync_handles = {}
 		self.user_volume_offset, self.user_pan_offset, self.user_pitch_offset = 0.0, 0.0, 0.0
-		self._last_vol, self._last_pan, self._last_pitch, self._last_hrtf_args = None, None, None, None
+		self._last_vol, self._last_pan, self._last_pitch, self._last_tempo, self._last_tone, self._last_hrtf_args = None, None, None, 100.0, 100.0, None
 		self._fade_state, self._slide3d_key, self._slide3d_start, self._slide3d_info = {}, None, 0.0, None
 
 	@property
@@ -453,15 +491,29 @@ class SoundBase:
 				cur_v = self._last_pitch if self._last_pitch is not None else float(self.pitch or 100.0)
 				v = (target_v / 100.0) * float(self.freq)
 				self._last_pitch = target_v if ft_ms == 0 else None
+			elif nt == "tempo":
+				cur_v = float(self._last_tempo if self._last_tempo is not None else 100.0)
+				target_v = max(0.0, target_v)
+				v = max(-95.0, min(5000.0, target_v - 100.0))
+				self._last_tempo = target_v if ft_ms == 0 else None
+			elif nt == "tone":
+				cur_v = float(self._last_tone if self._last_tone is not None else 100.0)
+				target_v = max(0.0, target_v)
+				v = self._tone_percent_to_semitones(target_v)
+				self._last_tone = target_v if ft_ms == 0 else None
 			else:
 				cur_v, v = target_v, target_v
+			slide_target = self._tempo_handle if (nt in ("tempo", "tone") and self._tempo_handle) else self.handle
+			if nt == "tone" and not self._tempo_handle:
+				self.set_tone(target_v)
+				return
 			if ft_ms > 0:
 				if nt in self._fade_state: cur_v = self.get_faded_value(nt, cur_v)
 				self._fade_state[nt] = (float(cur_v), float(target_v), time.monotonic(), ft_ms / 1000.0)
-				bass.BASS_ChannelSlideAttribute(self.handle, attr, ctypes.c_float(v), ft_ms)
+				bass.BASS_ChannelSlideAttribute(slide_target, attr, ctypes.c_float(v), ft_ms)
 			else:
 				self._fade_state.pop(nt, None)
-				bass.BASS_ChannelSetAttribute(self.handle, attr, ctypes.c_float(v))
+				bass.BASS_ChannelSetAttribute(slide_target, attr, ctypes.c_float(v))
 
 	def fadeout(self, fadetime, value=0, type="volume"):
 		if self.handle:
@@ -689,6 +741,344 @@ class SoundBase:
 		elif mode == 3:
 			hrtf_lib.BASS_HRTF_EnableVirtualSurround(raw, 1, int(surround_layout))
 		return bool(hrtf_lib.BASS_HRTF_SetPanningMode(raw, mode))
+
+	def set_hrtf_distance_limits(self, min_dist=1.0, max_dist=50.0, rolloff=0.12, blend_step=0.25):
+		if not self._ensure_hrtf_attached(): return False
+		return bool(_initialize_hrtf().BASS_HRTF_SetNodeDistanceLimits(self._get_raw_channel_handle(), float(min_dist), float(max_dist), float(rolloff), float(blend_step)))
+
+	def set_hrtf_source_radius(self, radius=0.0):
+		if not self._ensure_hrtf_attached(): return False
+		return bool(_initialize_hrtf().BASS_HRTF_SetSourceRadius(self._get_raw_channel_handle(), float(radius)))
+
+	def set_hrtf_air_absorption_bands(self, low=1.0, mid=1.0, high=1.0):
+		if not self._ensure_hrtf_attached(): return False
+		return bool(_initialize_hrtf().BASS_HRTF_SetAirAbsorptionBands(self._get_raw_channel_handle(), float(low), float(mid), float(high)))
+
+	def set_hrtf_spatial_blend(self, blend=1.0):
+		if not self._ensure_hrtf_attached(): return False
+		return bool(_initialize_hrtf().BASS_HRTF_SetSpatialBlend(self._get_raw_channel_handle(), max(0.0, min(1.0, float(blend)))))
+
+	def set_hrtf_stereo_input(self, enabled=True):
+		if not self._ensure_hrtf_attached(): return False
+		return bool(_initialize_hrtf().BASS_HRTF_SetStereoInput(self._get_raw_channel_handle(), 1 if enabled else 0))
+
+	def slide_hrtf_position(self, x, y, z, time_ms=250.0):
+		if not self._ensure_hrtf_attached(): return False
+		return bool(_initialize_hrtf().BASS_HRTF_SlidePosition(self._get_raw_channel_handle(), float(x), float(y), float(z), float(time_ms)))
+
+	def slide_hrtf_attribute(self, attr, target, time_ms=250.0):
+		if not self._ensure_hrtf_attached(): return False
+		hrtf_lib = _initialize_hrtf()
+		if isinstance(attr, str):
+			a_map = {
+				"occlusion": hrtf_lib.BASS_HRTF_ATTR_OCCLUSION,
+				"max_blend": hrtf_lib.BASS_HRTF_ATTR_MAX_BLEND,
+				"blend": hrtf_lib.BASS_HRTF_ATTR_MAX_BLEND,
+				"gain": hrtf_lib.BASS_HRTF_ATTR_GAIN,
+				"air_absorption": hrtf_lib.BASS_HRTF_ATTR_AIR_ABSORB,
+				"air": hrtf_lib.BASS_HRTF_ATTR_AIR_ABSORB,
+				"reverb_wet": hrtf_lib.BASS_HRTF_ATTR_REVERB_WET,
+				"wet": hrtf_lib.BASS_HRTF_ATTR_REVERB_WET,
+			}
+			attr = a_map.get(attr.strip().lower(), hrtf_lib.BASS_HRTF_ATTR_GAIN)
+		return bool(hrtf_lib.BASS_HRTF_SlideAttribute(self._get_raw_channel_handle(), int(attr), float(target), float(time_ms)))
+
+	def set_hrtf_world_position(self, x, y, z, bilinear=True):
+		if not self._ensure_hrtf_attached(): return False
+		return bool(_initialize_hrtf().BASS_HRTF_SetWorldPosition(self._get_raw_channel_handle(), float(x), float(y), float(z), 1 if bilinear else 0))
+
+	def set_hrtf_live_stream_mode(self, enabled=True, low_latency_flush=True):
+		if not self._ensure_hrtf_attached(): return False
+		return bool(_initialize_hrtf().BASS_HRTF_SetLiveStreamMode(self._get_raw_channel_handle(), 1 if enabled else 0, 1 if low_latency_flush else 0))
+
+	def reset_hrtf(self):
+		raw = self._get_raw_channel_handle()
+		return bool(raw and _hrtf and _hrtf.BASS_HRTF_Reset(raw))
+
+	def set_steam_direct_enabled(self, enabled=True):
+		if not self._ensure_hrtf_attached(): return False
+		return bool(_initialize_hrtf().BASS_HRTF_EnablePhysicalFilter(self._get_raw_channel_handle(), 1 if enabled else 0))
+
+	def set_steam_reflection_enabled(self, enabled=True):
+		if not self._ensure_hrtf_attached(): return False
+		return bool(_initialize_hrtf().BASS_HRTF_EnableReflectionEffect(self._get_raw_channel_handle(), 1 if enabled else 0))
+
+	def set_steam_path_enabled(self, enabled=True):
+		if not self._ensure_hrtf_attached(): return False
+		return bool(_initialize_hrtf().BASS_HRTF_EnablePathEffect(self._get_raw_channel_handle(), 1 if enabled else 0))
+
+	# --- Tempo (speed without pitch) & Tone (pitch without speed), 0..100+ scale (100 = normal) ---
+	@staticmethod
+	def _tone_percent_to_semitones(value):
+		v = max(0.0, float(value))
+		if v <= 0.0:
+			return -60.0
+		return max(-60.0, min(60.0, 12.0 * math.log2(max(0.03125, v / 100.0))))
+
+	@staticmethod
+	def _semitones_to_tone_percent(semitones):
+		return 100.0 * (2.0 ** (float(semitones) / 12.0))
+
+	@property
+	def tempo(self):
+		"""Playback speed percentage without changing pitch (100 = normal, 50 = half, 200 = 2x)."""
+		if not self.handle: return 100.0
+		if "tempo" in self._fade_state: return self.get_faded_value("tempo", self._last_tempo or 100.0)
+		target = self._tempo_handle or self.handle
+		val = ctypes.c_float(0.0)
+		if bass.BASS_ChannelGetAttribute(target, BASS_ATTRIB_TEMPO, ctypes.byref(val)):
+			self._last_tempo = val.value + 100.0
+		return float(self._last_tempo if self._last_tempo is not None else 100.0)
+
+	@tempo.setter
+	def tempo(self, value):
+		self.set_tempo(value)
+
+	def set_tempo(self, value):
+		"""Set playback speed percentage (0..100+, 100 = normal) without changing pitch (requires tempo=True stream)."""
+		if not self.handle: return False
+		v = max(0.0, float(value))
+		target = self._tempo_handle or self.handle
+		bass_pct = max(-95.0, min(5000.0, v - 100.0))
+		self._last_tempo = v
+		self._fade_state.pop("tempo", None)
+		return bool(bass.BASS_ChannelSetAttribute(target, BASS_ATTRIB_TEMPO, ctypes.c_float(bass_pct)))
+
+	def get_tempo(self):
+		return self.tempo
+
+	@property
+	def tone(self):
+		"""Pitch percentage without changing speed (100 = normal, 50 = -1 octave, 200 = +1 octave)."""
+		if not self.handle: return 100.0
+		if "tone" in self._fade_state: return self.get_faded_value("tone", self._last_tone or 100.0)
+		if self._tempo_handle:
+			val = ctypes.c_float(0.0)
+			if bass.BASS_ChannelGetAttribute(self._tempo_handle, BASS_ATTRIB_TEMPO_PITCH, ctypes.byref(val)):
+				self._tone_semitones = val.value
+				self._last_tone = self._semitones_to_tone_percent(val.value)
+		return float(self._last_tone if self._last_tone is not None else 100.0)
+
+	@tone.setter
+	def tone(self, value):
+		self.set_tone(value)
+
+	def set_tone(self, value):
+		"""Set pitch percentage (0..100+, 100 = normal) without changing playback speed."""
+		if not self.handle: return False
+		v = max(0.0, float(value))
+		semis = self._tone_percent_to_semitones(v)
+		self._last_tone = v
+		self._tone_semitones = semis
+		self._fade_state.pop("tone", None)
+		if self._tempo_handle:
+			return bool(bass.BASS_ChannelSetAttribute(self._tempo_handle, BASS_ATTRIB_TEMPO_PITCH, ctypes.c_float(semis)))
+		# Fallback on non-tempo streams: use BASS_FX_BFX_PITCHSHIFT DSP (pitch without speed change)
+		if abs(semis) < 0.01:
+			if self._pitch_shift_fx:
+				try: bass.BASS_ChannelRemoveFX(self.handle, self._pitch_shift_fx)
+				except Exception: pass
+				self._pitch_shift_fx = None
+			return True
+		if not self._pitch_shift_fx:
+			self._pitch_shift_fx = bass.BASS_ChannelSetFX(self.handle, BASS_FX_BFX_PITCHSHIFT, 0)
+		if not self._pitch_shift_fx:
+			return False
+		p = BASS_BFX_PITCHSHIFT()
+		p.fPitchShift = 1.0
+		p.fSemitones = float(max(-24.0, min(24.0, semis)))
+		p.lFFTsize = 1024
+		p.lOsamp = 8
+		p.lChannel = BASS_BFX_CHANALL
+		return bool(bass.BASS_FXSetParameters(self._pitch_shift_fx, ctypes.byref(p)))
+
+	def get_tone(self):
+		return self.tone
+
+	def set_reverse_direction(self, reverse=True):
+		"""Switch playback direction on a reverse=True stream (-1 = reverse, +1 = forward)."""
+		target = self._reverse_handle or self.handle
+		if not target: return False
+		attr = getattr(bass_fx, "BASS_ATTRIB_REVERSE_DIR", 0x11000)
+		return bool(bass.BASS_ChannelSetAttribute(target, attr, ctypes.c_float(-1.0 if reverse else 1.0)))
+
+	def get_bpm(self, start_sec=0.0, end_sec=None, min_bpm=45, max_bpm=230):
+		"""Detect BPM of a decode stream via BASS_FX_BPM_DecodeGet."""
+		ch = self._get_raw_source_handle()
+		if not ch: return 0.0
+		if end_sec is None:
+			dur = self.get_length()
+			end_sec = max(1.0, (dur / 1000.0) if dur > 0 else 30.0)
+		minmax = (int(max_bpm) << 16) | (int(min_bpm) & 0xFFFF)
+		try:
+			return float(bass_fx.BASS_FX_BPM_DecodeGet(ch, float(start_sec), float(end_sec), minmax, 0, None, None))
+		except Exception:
+			return 0.0
+
+	# --- Tags / Metadata (pytags + BASS_ChannelGetTags including URL ICY/META) ---
+	def get_tags(self, fmt=None):
+		"""Read audio tags via TAGS (ID3/OGG/FLAC/MP4/WMA/MOD) or URL StreamTitle metadata."""
+		ch = self._get_raw_source_handle() or self._get_raw_channel_handle()
+		if not ch: return "" if fmt else {}
+		if fmt is not None:
+			try:
+				res = pytags.TAGS_Read(ch, str(fmt).encode("utf-8"))
+				return res.decode("utf-8", errors="replace") if res else ""
+			except Exception:
+				return ""
+		info = {}
+		try:
+			for key, token in (("title", "%TITL"), ("artist", "%ARTI"), ("album", "%ALBM"), ("year", "%YEAR"), ("track", "%TRCK"), ("genre", "%GNRE"), ("comment", "%CMNT")):
+				val = pytags.TAGS_Read(ch, token.encode("utf-8"))
+				if val:
+					txt = val.decode("utf-8", errors="replace").strip()
+					if txt: info[key] = txt
+		except Exception:
+			pass
+		# Also check shoutcast/icecast META for URL streams
+		try:
+			meta_ptr = bass.BASS_ChannelGetTags(ch, bass.BASS_TAG_META)
+			if meta_ptr:
+				raw_meta = ctypes.cast(meta_ptr, ctypes.c_char_p).value
+				if raw_meta:
+					info["stream_meta"] = raw_meta.decode("utf-8", errors="replace")
+		except Exception:
+			pass
+		return info
+
+	# --- Loudness Measurement (pybassloud: ITU-R BS.1770 / EBU R128) ---
+	def start_loudness(self, flags=None, priority=0):
+		if not self.handle: return False
+		self.stop_loudness()
+		if flags is None:
+			flags = pybassloud.BASS_LOUDNESS_INTEGRATED | pybassloud.BASS_LOUDNESS_CURRENT | pybassloud.BASS_LOUDNESS_PEAK | pybassloud.BASS_LOUDNESS_TRUEPEAK | pybassloud.BASS_LOUDNESS_RANGE
+		h = pybassloud.BASS_Loudness_Start(self.handle, int(flags), int(priority))
+		if h:
+			self._loudness_handle = int(h)
+			return True
+		return False
+
+	def get_loudness(self, mode="integrated"):
+		if not self._loudness_handle: return None
+		m_map = {
+			"current": pybassloud.BASS_LOUDNESS_CURRENT,
+			"integrated": pybassloud.BASS_LOUDNESS_INTEGRATED,
+			"range": pybassloud.BASS_LOUDNESS_RANGE,
+			"peak": pybassloud.BASS_LOUDNESS_PEAK,
+			"truepeak": pybassloud.BASS_LOUDNESS_TRUEPEAK,
+		}
+		m_flag = m_map.get(str(mode).lower(), int(mode) if isinstance(mode, int) else pybassloud.BASS_LOUDNESS_INTEGRATED)
+		val = ctypes.c_float(0.0)
+		if pybassloud.BASS_Loudness_GetLevel(self._loudness_handle, m_flag, ctypes.byref(val)):
+			return float(val.value)
+		return None
+
+	def stop_loudness(self):
+		if self._loudness_handle:
+			try: pybassloud.BASS_Loudness_Stop(self._loudness_handle)
+			except Exception: pass
+			self._loudness_handle = None
+
+	# --- Native Encoding (pybassenc: WAV / MP3 / OGG / FLAC / OPUS) ---
+	def start_encode(self, output_path=None, fmt="wav", options="", flags=0, callback=None):
+		if not self.handle: return False
+		self.stop_encode()
+		fmt_l = str(fmt or "wav").strip().lower()
+		opt_b = str(options or "").encode("utf-8")
+		c_proc = None
+		if callable(callback):
+			enc_cb_type = getattr(pybassenc, "ENCODEPROC", ctypes.CFUNCTYPE(None, ctypes.c_uint32, ctypes.c_uint32, ctypes.c_void_p, ctypes.c_uint32, ctypes.c_void_p))
+			def _enc_cb(handle, channel, buf_ptr, length, user):
+				if buf_ptr and length > 0:
+					try: callback(ctypes.string_at(buf_ptr, int(length)))
+					except Exception: pass
+			c_proc = enc_cb_type(_enc_cb)
+		out_b = os.fsencode(os.fspath(output_path)) if output_path else None
+		h = 0
+		if fmt_l == "mp3":
+			h = pybassenc.BASS_Encode_MP3_StartFile(self.handle, opt_b, int(flags), out_b) if out_b else pybassenc.BASS_Encode_MP3_Start(self.handle, opt_b, int(flags), c_proc, None)
+		elif fmt_l == "ogg":
+			h = pybassenc.BASS_Encode_OGG_StartFile(self.handle, opt_b, int(flags), out_b) if out_b else pybassenc.BASS_Encode_OGG_Start(self.handle, opt_b, int(flags), c_proc, None)
+		elif fmt_l == "flac":
+			h = pybassenc.BASS_Encode_FLAC_StartFile(self.handle, opt_b, int(flags), out_b) if out_b else pybassenc.BASS_Encode_FLAC_Start(self.handle, opt_b, int(flags), c_proc, None)
+		elif fmt_l == "opus":
+			h = pybassenc.BASS_Encode_OPUS_StartFile(self.handle, opt_b, int(flags), out_b) if out_b else pybassenc.BASS_Encode_OPUS_Start(self.handle, opt_b, int(flags), c_proc, None)
+		else:
+			pcm_flags = int(flags) | (getattr(pybassenc, "BASS_ENCODE_PCM", 64) if fmt_l == "wav" else 0)
+			h = pybassenc.BASS_Encode_Start(self.handle, str(output_path or options or ""), pcm_flags, c_proc, None)
+		if h:
+			self._encode_handle = int(h)
+			self._encode_proc = c_proc
+			return True
+		return False
+
+	def set_encode_paused(self, paused=True):
+		return bool(self._encode_handle and pybassenc.BASS_Encode_SetPaused(self._encode_handle, 1 if paused else 0))
+
+	def stop_encode(self):
+		if self._encode_handle:
+			try: pybassenc.BASS_Encode_Stop(self._encode_handle)
+			except Exception: pass
+			self._encode_handle = None
+			self._encode_proc = None
+
+	# --- Event-Driven Sync Callbacks (BASS_ChannelSetSync) ---
+	def on_sync(self, sync_type, callback, param=0, onetime=False):
+		if not self.handle or not callable(callback): return 0
+		s_map = {
+			"pos": bass.BASS_SYNC_POS,
+			"end": bass.BASS_SYNC_END,
+			"meta": bass.BASS_SYNC_META,
+			"slide": bass.BASS_SYNC_SLIDE,
+			"stall": bass.BASS_SYNC_STALL,
+			"download": bass.BASS_SYNC_DOWNLOAD,
+			"free": bass.BASS_SYNC_FREE,
+		}
+		st = s_map.get(str(sync_type).lower(), int(sync_type) if isinstance(sync_type, int) else bass.BASS_SYNC_END)
+		if onetime:
+			st |= getattr(bass, "BASS_SYNC_ONETIME", 0x80000000)
+		def _cb(handle, channel, data, user):
+			try: callback(handle, channel, data)
+			except Exception: pass
+		c_cb = bass.SYNCPROC(_cb)
+		hsync = bass.BASS_ChannelSetSync(self.handle, st, int(param), c_cb, None)
+		if hsync:
+			self._sync_handles[int(hsync)] = c_cb
+			return int(hsync)
+		return 0
+
+	def remove_sync(self, hsync):
+		if not self.handle or not hsync: return False
+		self._sync_handles.pop(int(hsync), None)
+		return bool(bass.BASS_ChannelRemoveSync(self.handle, int(hsync)))
+
+	def clear_syncs(self):
+		if self.handle:
+			for hsync in list(self._sync_handles.keys()):
+				try: bass.BASS_ChannelRemoveSync(self.handle, hsync)
+				except Exception: pass
+		self._sync_handles.clear()
+
+	# --- BASSmix Matrix & Split Streams ---
+	def set_matrix(self, matrix):
+		"""Set BASSmix channel mixing matrix (2D list of floats or flat list of floats)."""
+		if not self.handle or not matrix: return False
+		flat = [float(x) for row in matrix for x in (row if isinstance(row, (list, tuple)) else (row,))]
+		arr = (ctypes.c_float * len(flat))(*flat)
+		return bool(bassmix.BASS_Mixer_ChannelSetMatrix(self.handle, arr))
+
+	def split(self, flags=0, chanmap=None):
+		"""Create a BASS_Split_StreamCreate clone from a decode stream."""
+		ch = self._get_raw_source_handle()
+		if not ch: return None
+		cmap = (ctypes.c_int * (len(chanmap) + 1))(*[int(c) for c in chanmap], -1) if chanmap else None
+		sp = bassmix.BASS_Split_StreamCreate(ch, int(flags), cmap)
+		if not sp: return None
+		child = sound()
+		child.handle = sp
+		child.freq, child.chans = self.freq, self.chans
+		child.store_entry = control.register_hstream(sp)
+		return child
 
 	def get_data(self, frame_size=None, data_type="raw"):
 		# Always read from the processed output handle (self.handle) when HRTF stream or DSP is active!
@@ -924,7 +1314,8 @@ class SoundBase:
 		s_mode = str(mode or "loop").lower()
 		s_key = (fx, fy, fz, tx, ty, tz, dur_ms, s_mode)
 		now = time.monotonic()
-		if self._slide3d_key != s_key:
+		is_new_slide = (self._slide3d_key != s_key)
+		if is_new_slide:
 			self._slide3d_key = s_key
 			self._slide3d_start = now
 		el_ms = max(0.0, (now - self._slide3d_start) * 1000.0)
@@ -951,6 +1342,17 @@ class SoundBase:
 			start_pan=start_pan, start_volume=start_volume, start_pitch=start_pitch,
 			soft=soft, mix_pan_with_hrtf=mix_pan_with_hrtf, bilinear=bilinear
 		)
+		# Native C-level HRTF position slide (smoothly interpolates even for one-shot slide3d without per-frame polling)
+		if (soft or self._hrtf_stream or self._hrtf_dsp) and s_mode in ("once", "group_event"):
+			rem_ms = max(0.0, float(dur_ms) - el_ms)
+			if rem_ms > 0.0 and (is_new_slide or el_ms < float(dur_ms)):
+				dx_t, dy_t, dz_t = self._compute_rotated_delta(listener_x, listener_y, listener_z, tx, ty, tz, rotation)
+				raw = self._get_raw_channel_handle()
+				if raw:
+					try:
+						_initialize_hrtf().BASS_HRTF_SlidePosition(raw, float(dx_t), float(dy_t), float(dz_t), float(rem_ms))
+					except Exception:
+						pass
 		return (cx, cy, cz)
 
 	def update_slide3d(self, listener_x, listener_y, listener_z, rotation=0):
@@ -983,6 +1385,41 @@ class vst(SoundBase):
 		if ThreeD: self._ensure_hrtf_attached()
 		return True
 
+	def attach_dsp(self, target_sound, dll_path, flags=0, priority=0):
+		ch = target_sound._get_raw_channel_handle() if hasattr(target_sound, "_get_raw_channel_handle") else int(target_sound or 0)
+		if not ch: return False
+		c_path, u_fl = control.encode_path(dll_path)
+		h = pybassvst.BASS_VST_ChannelSetDSP(ch, c_path, int(flags) | u_fl, int(priority))
+		if h:
+			self._target_channel = ch
+			self.vst_handle = int(h)
+			return True
+		return False
+
+	def set_vst_param(self, index, value):
+		return bool(self.vst_handle and pybassvst.BASS_VST_SetParam(self.vst_handle, int(index), float(value)))
+
+	def get_vst_param(self, index):
+		return float(pybassvst.BASS_VST_GetParam(self.vst_handle, int(index))) if self.vst_handle else 0.0
+
+	def get_vst_param_count(self):
+		return int(pybassvst.BASS_VST_GetParamCount(self.vst_handle)) if self.vst_handle else 0
+
+	def set_vst_program(self, index):
+		return bool(self.vst_handle and pybassvst.BASS_VST_SetProgram(self.vst_handle, int(index)))
+
+	def get_vst_program(self):
+		return int(pybassvst.BASS_VST_GetProgram(self.vst_handle)) if self.vst_handle else 0
+
+	def get_vst_program_count(self):
+		return int(pybassvst.BASS_VST_GetProgramCount(self.vst_handle)) if self.vst_handle else 0
+
+	def set_vst_bypass(self, bypass=True):
+		return bool(self.vst_handle and pybassvst.BASS_VST_SetBypass(self.vst_handle, 1 if bypass else 0))
+
+	def get_vst_bypass(self):
+		return bool(self.vst_handle and pybassvst.BASS_VST_GetBypass(self.vst_handle))
+
 	def play(self):
 		if self.handle: bass.BASS_ChannelPlay(self.handle, False)
 
@@ -991,9 +1428,16 @@ class vst(SoundBase):
 
 	def close(self):
 		try:
+			self.clear_syncs()
+			self.stop_loudness()
+			self.stop_encode()
 			self.remove_all_fx()
 			self.detach_hrtf_dsp()
-			if self.vst_handle: pybassvst.BASS_VST_ChannelFree(self.vst_handle); self.vst_handle = None
+			if self.vst_handle and self._target_channel:
+				pybassvst.BASS_VST_ChannelRemoveDSP(self._target_channel, self.vst_handle)
+				self.vst_handle, self._target_channel = None, None
+			elif self.vst_handle:
+				pybassvst.BASS_VST_ChannelFree(self.vst_handle); self.vst_handle = None
 			if self.handle: bass.BASS_StreamFree(self.handle); self.handle = None
 			if self.store_entry: control.unregister_hstream(self.store_entry); self.store_entry = None
 			buffer.hSound_poolbuffers.pop(self.sound_token, None)
@@ -1081,12 +1525,284 @@ class mixer(SoundBase):
 		except Exception: pass
 
 
+_IMA_INDEX_TABLE = (-1, -1, -1, -1, 2, 4, 6, 8, -1, -1, -1, -1, 2, 4, 6, 8)
+_IMA_STEP_TABLE = (
+	7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 19, 21, 23, 25, 28, 31,
+	34, 37, 41, 45, 50, 55, 60, 66, 73, 80, 88, 97, 107, 118, 130, 143,
+	157, 173, 190, 209, 230, 253, 279, 307, 337, 371, 408, 449, 494, 544, 598, 658,
+	724, 796, 876, 963, 1060, 1166, 1282, 1411, 1552, 1707, 1878, 2066, 2272, 2499, 2749, 3024,
+	3327, 3660, 4026, 4428, 4871, 5358, 5894, 6484, 7132, 7845, 8630, 9493, 10442, 11487, 12635, 13899,
+	15289, 16818, 18500, 20350, 22385, 24623, 27086, 29794, 32767,
+)
+
+
+def scale_pcm16(pcm_bytes, gain=1.0):
+	"""Apply linear gain to signed 16-bit little-endian PCM bytes."""
+	g = float(gain)
+	if not pcm_bytes or abs(g - 1.0) < 1e-3:
+		return bytes(pcm_bytes)
+	samples = array.array("h")
+	samples.frombytes(pcm_bytes[:len(pcm_bytes) - (len(pcm_bytes) & 1)])
+	if g <= 0.0:
+		return b"\x00" * (len(samples) * 2)
+	for idx in range(len(samples)):
+		v = int(samples[idx] * g)
+		if v > 32767:
+			v = 32767
+		elif v < -32768:
+			v = -32768
+		samples[idx] = v
+	return samples.tobytes()
+
+
+def encode_audio_frame(pcm_bytes):
+	"""Encode 16-bit mono PCM bytes into a self-contained 4:1 IMA-ADPCM frame."""
+	if not pcm_bytes or len(pcm_bytes) < 2:
+		return b""
+	samples = array.array("h")
+	samples.frombytes(pcm_bytes[:len(pcm_bytes) - (len(pcm_bytes) & 1)])
+	n = len(samples)
+	if n == 0:
+		return b""
+	pred = int(samples[0])
+	idx = 0
+	if n > 1:
+		d0 = abs(int(samples[1]) - pred)
+		while idx < 88 and _IMA_STEP_TABLE[idx] < d0:
+			idx += 1
+	out = bytearray(4 + ((n - 1 + 1) // 2))
+	struct.pack_into("<hBB", out, 0, pred, idx, (n - 1) & 1)
+	step_tbl = _IMA_STEP_TABLE
+	idx_tbl = _IMA_INDEX_TABLE
+	pos = 4
+	high_nib = False
+	cur_byte = 0
+	for s_i in range(1, n):
+		step = step_tbl[idx]
+		diff = int(samples[s_i]) - pred
+		nib = 0
+		if diff < 0:
+			nib = 8
+			diff = -diff
+		vpdiff = step >> 3
+		if diff >= step:
+			nib |= 4
+			diff -= step
+			vpdiff += step
+		step >>= 1
+		if diff >= step:
+			nib |= 2
+			diff -= step
+			vpdiff += step
+		step >>= 1
+		if diff >= step:
+			nib |= 1
+			vpdiff += step
+		if nib & 8:
+			pred -= vpdiff
+		else:
+			pred += vpdiff
+		if pred > 32767:
+			pred = 32767
+		elif pred < -32768:
+			pred = -32768
+		idx += idx_tbl[nib]
+		if idx < 0:
+			idx = 0
+		elif idx > 88:
+			idx = 88
+		if high_nib:
+			out[pos] = cur_byte | (nib << 4)
+			pos += 1
+			high_nib = False
+		else:
+			cur_byte = nib
+			high_nib = True
+	if high_nib:
+		out[pos] = cur_byte
+	return bytes(out)
+
+
+def decode_audio_frame(encoded_bytes):
+	"""Decode a self-contained 4:1 IMA-ADPCM frame back into 16-bit mono PCM bytes."""
+	if not encoded_bytes or len(encoded_bytes) < 4:
+		return b""
+	pred, idx, odd_flag = struct.unpack_from("<hBB", encoded_bytes, 0)
+	if idx > 88:
+		idx = 88
+	data = encoded_bytes[4:]
+	total_nibs = len(data) * 2 - (1 if odd_flag else 0)
+	samples = array.array("h", [pred])
+	step_tbl = _IMA_STEP_TABLE
+	idx_tbl = _IMA_INDEX_TABLE
+	for n_i in range(total_nibs):
+		b = data[n_i >> 1]
+		nib = (b >> 4) if (n_i & 1) else (b & 0x0F)
+		step = step_tbl[idx]
+		vpdiff = step >> 3
+		if nib & 4:
+			vpdiff += step
+		if nib & 2:
+			vpdiff += step >> 1
+		if nib & 1:
+			vpdiff += step >> 2
+		if nib & 8:
+			pred -= vpdiff
+		else:
+			pred += vpdiff
+		if pred > 32767:
+			pred = 32767
+		elif pred < -32768:
+			pred = -32768
+		idx += idx_tbl[nib]
+		if idx < 0:
+			idx = 0
+		elif idx > 88:
+			idx = 88
+		samples.append(pred)
+	return samples.tobytes()
+
+
 class record(SoundBase):
 	def __init__(self):
 		super().__init__()
 		self.sound_token, self.encoder_token = utils.token(max=25), utils.token(max=25)
 		buffer.hrecordthreadbuffers[self.sound_token] = self
 		self.encoder, self._sample_data, self._c_proc, self._memory_ref = None, bytearray(), None, None
+		self._gain = 1.0
+		self._rec_running = False
+		self._android_rec = None
+		self._android_ns = None
+		self._android_aec = None
+		self._android_thread = None
+
+	def set_gain(self, gain):
+		self._gain = max(0.0, min(4.0, float(gain)))
+
+	def _request_android_mic_perm(self):
+		try:
+			from java import jclass
+			from .pygame_shim import _android_bridge
+			act = _android_bridge.get_activity()
+			if act is None:
+				return False
+			perm = "android.permission.RECORD_AUDIO"
+			if hasattr(act, "checkSelfPermission") and int(act.checkSelfPermission(perm)) == 0:
+				return True
+			if hasattr(act, "requestPermissions"):
+				act.requestPermissions([perm], 7001)
+			return True
+		except Exception:
+			return False
+
+	def _start_android_noise_suppressed(self, freq, chans, period_ms, callback):
+		try:
+			from java import jclass, jarray, jbyte
+			self._request_android_mic_perm()
+			AudioRecord = jclass("android.media.AudioRecord")
+			AudioFormat = jclass("android.media.AudioFormat")
+			AudioSource = jclass("android.media.MediaRecorder$AudioSource")
+			ch_cfg = AudioFormat.CHANNEL_IN_MONO if chans == 1 else AudioFormat.CHANNEL_IN_STEREO
+			enc = AudioFormat.ENCODING_PCM_16BIT
+			min_buf = int(AudioRecord.getMinBufferSize(int(freq), ch_cfg, enc))
+			frame_bytes = max(320, int(freq * chans * 2 * (period_ms / 1000.0)))
+			buf_sz = max(min_buf * 2, frame_bytes * 4)
+			rec = AudioRecord(AudioSource.VOICE_COMMUNICATION, int(freq), ch_cfg, enc, buf_sz)
+			if int(rec.getState()) != int(AudioRecord.STATE_INITIALIZED):
+				rec.release()
+				return False
+			sid = int(rec.getAudioSessionId())
+			try:
+				NoiseSuppressor = jclass("android.media.audiofx.NoiseSuppressor")
+				if NoiseSuppressor.isAvailable():
+					ns = NoiseSuppressor.create(sid)
+					if ns is not None:
+						ns.setEnabled(True)
+						self._android_ns = ns
+			except Exception:
+				pass
+			try:
+				AEC = jclass("android.media.audiofx.AcousticEchoCanceler")
+				if AEC.isAvailable():
+					aec = AEC.create(sid)
+					if aec is not None:
+						aec.setEnabled(True)
+						self._android_aec = aec
+			except Exception:
+				pass
+			rec.startRecording()
+			self._android_rec = rec
+			self._rec_running = True
+
+			def _loop():
+				jbuf = jarray(jbyte)(frame_bytes)
+				while self._rec_running and self._android_rec is not None:
+					try:
+						nread = int(rec.read(jbuf, 0, frame_bytes))
+						if nread > 0:
+							try:
+								raw = memoryview(jbuf).cast("B")[:nread].tobytes()
+							except Exception:
+								raw = bytes(b & 0xFF for b in jbuf[:nread])
+							if abs(self._gain - 1.0) >= 1e-3:
+								raw = scale_pcm16(raw, self._gain)
+							if callable(callback):
+								callback(raw)
+							else:
+								self._sample_data.extend(raw)
+					except Exception:
+						break
+
+			self._android_thread = threading.Thread(target=_loop, name="PyAGAndroidRecord", daemon=True)
+			self._android_thread.start()
+			return True
+		except Exception:
+			return False
+
+	def start(self, freq=24000, chans=1, period_ms=20, callback=None, device=-1, gain=1.0, noise_suppress=False):
+		"""Start live microphone recording (16-bit PCM). Pure audio capture via BASS_RecordStart (or Android NoiseSuppressor)."""
+		self.stop()
+		self.freq, self.chans = int(freq), int(chans)
+		self.set_gain(gain)
+		is_android = (system.get_platform()["os"] == "android")
+		if is_android:
+			self._request_android_mic_perm()
+			if noise_suppress and self._start_android_noise_suppressed(self.freq, self.chans, int(period_ms), callback):
+				return True
+
+		if not bass.BASS_RecordInit(int(device)) and bass.BASS_ErrorGetCode() != 14:
+			raise RuntimeError(f"Cannot initialize recording device {device}: BASS error {bass.BASS_ErrorGetCode()}")
+		if int(device) != -1:
+			try:
+				bass.BASS_RecordSetDevice(int(device))
+			except Exception:
+				pass
+
+		def _rec_cb(handle, buf_ptr, length, user):
+			if not self._rec_running:
+				return False
+			if buf_ptr and length > 0:
+				raw = ctypes.string_at(buf_ptr, int(length))
+				if abs(self._gain - 1.0) >= 1e-3:
+					raw = scale_pcm16(raw, self._gain)
+				if callable(callback):
+					try:
+						callback(raw)
+					except Exception:
+						pass
+				else:
+					self._sample_data.extend(raw)
+			return True
+
+		self._c_proc = RECORDPROC_TYPE(_rec_cb)
+		self._rec_running = True
+		rec_flags = (max(5, min(200, int(period_ms))) << 16)
+		self.handle = bass.BASS_RecordStart(self.freq, self.chans, rec_flags, self._c_proc, None)
+		if not self.handle:
+			self._rec_running = False
+			self._c_proc = None
+			raise RuntimeError(f"Cannot start recording: BASS error {bass.BASS_ErrorGetCode()}")
+		return True
 
 	def stream(self, filename, draw=False, mono=False, ThreeD=False, decode=False, autofree=False, use_dsp_hrtf=True, preload=True, frame_size=None, **kwargs):
 		if self.handle: self.close()
@@ -1109,6 +1825,15 @@ class record(SoundBase):
 		else:
 			c_path, u_fl = control.encode_path(filename)
 			self.handle = bass.BASS_StreamCreateFile(False, c_path, 0, 0, fl | u_fl | control.BASS_ASYNCFILE)
+		if not self.handle and bass.BASS_ErrorGetCode() == 41 and not control.loaded_plugins:
+			control.load_codec_plugins()
+			if not draw and filename and utils.is_url(filename):
+				self.handle = bass.BASS_StreamCreateURL(str(filename).strip().encode("utf-8"), 0, fl | getattr(bass, "BASS_STREAM_STATUS", 0x800000), None, None)
+			elif mem_src is not None:
+				self.handle = bass.BASS_StreamCreateFile(True, mem_src[0], 0, mem_src[1], fl)
+			else:
+				c_path, u_fl = control.encode_path(filename)
+				self.handle = bass.BASS_StreamCreateFile(False, c_path, 0, 0, fl | u_fl | control.BASS_ASYNCFILE)
 		if not self.handle:
 			err = bass.BASS_ErrorGetCode(); self.close()
 			raise RuntimeError(f"Cannot open stream {filename!r}: BASS error {err}")
@@ -1143,10 +1868,36 @@ class record(SoundBase):
 		if res == 0xFFFFFFFF: raise RuntimeError(f"Cannot push stream data: BASS error {bass.BASS_ErrorGetCode()}")
 		return res
 
+	def read_pcm(self, num_bytes=960):
+		"""Read decoded PCM bytes from a decode=True stream (returns b'' on EOF)."""
+		if not self.handle: return b""
+		n = max(2, int(num_bytes))
+		buf = ctypes.create_string_buffer(n)
+		got = bass.BASS_ChannelGetData(self.handle, buf, n)
+		if got in (0, 0xFFFFFFFF) or got < 0:
+			return b""
+		return buf.raw[:int(got)]
+
 	def get_sample(self): return bytes(self._sample_data)
 	def clear_sample(self): self._sample_data = bytearray()
 
 	def stop(self):
+		self._rec_running = False
+		if self._android_rec is not None:
+			try:
+				self._android_rec.stop()
+				self._android_rec.release()
+			except Exception:
+				pass
+			self._android_rec = None
+		if self._android_ns is not None:
+			try: self._android_ns.release()
+			except Exception: pass
+			self._android_ns = None
+		if self._android_aec is not None:
+			try: self._android_aec.release()
+			except Exception: pass
+			self._android_aec = None
 		if self.encoder: pybassenc.BASS_Encode_Stop(self.encoder); self.encoder = None
 		if self.handle: bass.BASS_ChannelStop(self.handle); self.handle = None
 		if self.dedata: bass.BASS_ChannelStop(self.dedata); self.dedata = None
@@ -1154,6 +1905,7 @@ class record(SoundBase):
 
 	def close(self):
 		try:
+			self.stop()
 			self.remove_all_fx()
 			self.detach_hrtf_dsp()
 			if self.store_entry: control.unregister_hstream(self.store_entry); self.store_entry = None
@@ -1178,12 +1930,42 @@ class musical(SoundBase):
 		if f_handle: pybassmidi.BASS_MIDI_FontLoad(f_handle, -1, -1); self.fonts_storage.append(f_handle)
 		return f_handle
 
+	def create_realtime(self, channels=16, flags=0, ThreeD=False, decode=False, use_dsp_hrtf=True, **kwargs):
+		if self.handle: self.close()
+		self._is_decode = bool(decode)
+		source_decode = bool(decode) or (ThreeD and not use_dsp_hrtf)
+		self.handle = pybassmidi.BASS_MIDI_StreamCreate(int(channels), control.parse_flags(flags, ThreeD=ThreeD, decode=source_decode, **kwargs), int(self.freq))
+		if self.handle:
+			self.store_entry = control.register_hstream(self.handle)
+			if ThreeD:
+				if use_dsp_hrtf: self.attach_hrtf_dsp()
+				else: self._attach_hrtf(decode=decode)
+			return True
+		return False
+
+	def send_event(self, chan, event, param):
+		ch = self._get_raw_source_handle() or self._get_raw_channel_handle()
+		return bool(ch and pybassmidi.BASS_MIDI_StreamEvent(ch, int(chan), int(event), int(param)))
+
+	def note_on(self, chan, note, velocity=100):
+		ev = getattr(pybassmidi, "MIDI_EVENT_NOTE", 1)
+		param = (max(0, min(127, int(velocity))) << 8) | (max(0, min(127, int(note))) & 0x7F)
+		return self.send_event(chan, ev, param)
+
+	def note_off(self, chan, note):
+		return self.note_on(chan, note, 0)
+
 	def stream(self, filename, mono=False, ThreeD=False, decode=False, use_dsp_hrtf=True, **kwargs):
 		if self.handle: self.close()
 		self._is_decode = bool(decode)
 		source_decode = bool(decode) or (ThreeD and not use_dsp_hrtf)
-		c_path, u_fl = control.encode_path(filename)
-		self.handle = pybassmidi.BASS_MIDI_StreamCreateFile(False, c_path, 0, 0, control.parse_flags(u_fl, mono=False if (ThreeD and use_dsp_hrtf) else mono, ThreeD=ThreeD, decode=source_decode, **kwargs), int(self.freq))
+		fl = control.parse_flags(0, mono=False if (ThreeD and use_dsp_hrtf) else mono, ThreeD=ThreeD, decode=source_decode, **kwargs)
+		if filename and utils.is_url(filename):
+			self._is_url = True
+			self.handle = pybassmidi.BASS_MIDI_StreamCreateURL(str(filename).strip().encode("utf-8"), 0, fl, None, None, int(self.freq))
+		else:
+			c_path, u_fl = control.encode_path(filename)
+			self.handle = pybassmidi.BASS_MIDI_StreamCreateFile(False, c_path, 0, 0, fl | u_fl, int(self.freq))
 		if self.handle:
 			self.store_entry = control.register_hstream(self.handle)
 			if ThreeD:
@@ -1219,18 +2001,20 @@ class sound(SoundBase):
 		buffer.hSound_poolbuffers[self.sound_token] = self
 		self.preload_ref, self._sample_handle, self._sample_cached, self._memory_ref = None, None, False, None
 
-	def stream(self, filename="", draw=False, mono=False, ThreeD=False, decode=False, autofree=False, use_dsp_hrtf=False, preload=False, frame_size=None, **kwargs):
-		# Zero-stutter direct streaming using zero-copy preload/mmap, BASS_ASYNCFILE, Push Stream, or HMUSIC fallback
+	def stream(self, filename="", draw=False, mono=False, ThreeD=False, decode=False, autofree=False, use_dsp_hrtf=False, preload=False, frame_size=None, tempo=False, reverse=False, **kwargs):
+		# Zero-stutter direct streaming using URL (BASS_StreamCreateURL), zero-copy preload/mmap, BASS_ASYNCFILE, Push Stream, Tempo/Reverse, or HMUSIC fallback
 		if self.handle: self.close()
 		buffer.hSound_poolbuffers[self.sound_token] = self
 		if frame_size is not None:
 			self._frame_size = max(64, min(2048, int(frame_size)))
 		if isinstance(filename, os.PathLike): filename = os.fspath(filename)
-		self.filename, self.mono, self._is_decode, self._is_live_push = filename, mono, bool(decode), bool(draw)
+		is_url = (not draw) and bool(filename) and utils.is_url(filename)
+		self.filename, self.mono, self._is_decode, self._is_live_push, self._is_url = filename, mono, bool(decode), bool(draw), is_url
 
 		# If draw=True (real-time voice chat push stream) and mono=True, use HRTF Stream Mode so 1-ch push data renders to 2-ch stereo HRTF
 		need_hrtf_stream = ThreeD and (not use_dsp_hrtf or (draw and mono))
-		source_decode = bool(decode) or need_hrtf_stream
+		need_fx_wrap = bool(tempo) or bool(reverse)
+		source_decode = bool(decode) or need_hrtf_stream or need_fx_wrap
 		if ThreeD and not draw:
 			kwargs.setdefault("float", True)
 
@@ -1241,10 +2025,14 @@ class sound(SoundBase):
 			autofree=(autofree and not source_decode),
 			**kwargs
 		)
-		mem_src = None if draw else control.resolve_memory_source(filename)
+		mem_src = None if (draw or is_url) else control.resolve_memory_source(filename)
 		if draw:
 			chans = 1 if (mono or need_hrtf_stream) else 2
 			self.handle = bass.BASS_StreamCreate(int(self.freq), chans, fl, STREAMPROC_PUSH, None)
+		elif is_url:
+			url_bytes = str(filename).strip().encode("utf-8")
+			url_fl = fl | getattr(bass, "BASS_STREAM_STATUS", 0x800000)
+			self.handle = bass.BASS_StreamCreateURL(url_bytes, 0, url_fl, None, None)
 		elif mem_src is not None:
 			ptr, length, self._memory_ref = mem_src
 			self.handle = bass.BASS_StreamCreateFile(True, ptr, 0, length, fl)
@@ -1269,9 +2057,36 @@ class sound(SoundBase):
 					m_fl = fl | u_fl | bass.BASS_MUSIC_PRESCAN | bass.BASS_MUSIC_POSRESETEX | bass.BASS_MUSIC_RAMP
 					self.handle = bass.BASS_MusicLoad(False, c_path, 0, 0, m_fl, int(self.freq))
 					if self.handle: self._is_music = True
+		if not self.handle and bass.BASS_ErrorGetCode() == 41 and not control.loaded_plugins:
+			control.load_codec_plugins()
+			if not draw and filename and utils.is_url(filename):
+				self.handle = bass.BASS_StreamCreateURL(str(filename).strip().encode("utf-8"), 0, fl | getattr(bass, "BASS_STREAM_STATUS", 0x800000), None, None)
+			elif mem_src is not None:
+				self.handle = bass.BASS_StreamCreateFile(True, mem_src[0], 0, mem_src[1], fl)
+			else:
+				c_path, u_fl = control.encode_path(filename)
+				self.handle = bass.BASS_StreamCreateFile(False, c_path, 0, 0, fl | u_fl | control.BASS_ASYNCFILE)
 		if not self.handle:
 			err = bass.BASS_ErrorGetCode(); self.close()
 			raise RuntimeError(f"Cannot open stream {filename!r}: BASS error {err}")
+		# Optional BASS_FX Reverse & Tempo wrappers (preserving decode flag for downstream HRTF if needed)
+		fx_free_src = getattr(bass_fx, "BASS_FX_FREESOURCE", 0x10000)
+		if reverse:
+			rev_dec = control.BASS_STREAM_DECODE if (tempo or decode or need_hrtf_stream) else 0
+			rev_h = bass_fx.BASS_FX_ReverseCreate(self.handle, 2.0, fx_free_src | rev_dec)
+			if not rev_h:
+				err = bass.BASS_ErrorGetCode(); self.close()
+				raise RuntimeError(f"Cannot create reverse stream: BASS error {err}")
+			self.handle = rev_h
+			self._reverse_handle = rev_h
+		if tempo:
+			tmp_dec = control.BASS_STREAM_DECODE if (decode or need_hrtf_stream) else 0
+			tmp_h = bass_fx.BASS_FX_TempoCreate(self.handle, fx_free_src | tmp_dec)
+			if not tmp_h:
+				err = bass.BASS_ErrorGetCode(); self.close()
+				raise RuntimeError(f"Cannot create tempo stream: BASS error {err}")
+			self.handle = tmp_h
+			self._tempo_handle = tmp_h
 		ci = bass.BASS_CHANNELINFO()
 		if bass.BASS_ChannelGetInfo(self.handle, ctypes.byref(ci)):
 			self.freq, self.chans = ci.freq, ci.chans
@@ -1424,6 +2239,13 @@ class sound(SoundBase):
 
 	def close(self):
 		# Safe single-pass resource cleanup preventing double-free crashes
+		self.clear_syncs()
+		self.stop_loudness()
+		self.stop_encode()
+		if self._pitch_shift_fx and self.handle:
+			try: bass.BASS_ChannelRemoveFX(self.handle, self._pitch_shift_fx)
+			except Exception: pass
+		self._pitch_shift_fx = None
 		self.remove_all_fx()
 		self.detach_hrtf_dsp()
 		if self.store_entry: control.unregister_hstream(self.store_entry); self.store_entry = None
@@ -1446,8 +2268,9 @@ class sound(SoundBase):
 		if self.preload_ref: control.sound_preload_release(self.preload_ref); self.preload_ref = None
 		control.sound_preloads_clean()
 		self.handle, self.dedata, self._sample_handle, self._memory_ref = None, None, None, None
-		self._sample_cached, self._hrtf_stream, self._is_music, self._is_decode, self._is_live_push, self.paused = False, False, False, False, False, False
-		self._last_vol, self._last_pan, self._last_pitch, self._last_hrtf_args = None, None, None, None
+		self._tempo_handle, self._reverse_handle = None, None
+		self._sample_cached, self._hrtf_stream, self._is_music, self._is_decode, self._is_live_push, self._is_url, self.paused = False, False, False, False, False, False, False
+		self._last_vol, self._last_pan, self._last_pitch, self._last_tempo, self._last_tone, self._last_hrtf_args = None, None, None, 100.0, 100.0, None
 		self._fade_state.clear(); self._slide3d_key, self._slide3d_info = None, None
 		self.active_fx_handles.clear(); self.active_steam_fx.clear(); self._fx_param_cache.clear()
 		buffer.hSound_poolbuffers.pop(self.sound_token, None)
@@ -1459,6 +2282,16 @@ class sound(SoundBase):
 		res = bass.BASS_StreamPutData(target, raw_data, len(raw_data))
 		if res == 0xFFFFFFFF: raise RuntimeError(f"Cannot push stream data: BASS error {bass.BASS_ErrorGetCode()}")
 		return res
+
+	def read_pcm(self, num_bytes=960):
+		"""Read decoded PCM bytes from a decode=True stream (returns b'' on EOF)."""
+		if not self.handle: return b""
+		n = max(2, int(num_bytes))
+		buf = ctypes.create_string_buffer(n)
+		got = bass.BASS_ChannelGetData(self.handle, buf, n)
+		if got in (0, 0xFFFFFFFF) or got < 0:
+			return b""
+		return buf.raw[:int(got)]
 
 
 class music(sound):
@@ -1484,3 +2317,49 @@ def playsingle(filename, volume=100, pitch=100, pan=0, mono=False, ThreeD=False,
 	s.volume, s.pitch, s.pan = volume, pitch, pan
 	s.play(); _oneshot_pool.append(s)
 	return s
+
+
+class WasapiManager:
+	"""Windows WASAPI low-latency output & loopback capture wrapper (pybasswasapi)."""
+	@staticmethod
+	def devices():
+		if not control._IS_WIN: return []
+		res, idx = [], 0
+		info = pybasswasapi.BASS_WASAPI_DEVICEINFO()
+		while pybasswasapi.BASS_WASAPI_GetDeviceInfo(idx, ctypes.byref(info)):
+			if info.flags & getattr(pybasswasapi, "BASS_DEVICE_ENABLED", 1):
+				res.append({
+					"index": idx,
+					"name": (info.name or b"").decode("mbcs", errors="replace").strip(),
+					"id": (info.id or b"").decode("mbcs", errors="replace"),
+					"flags": int(info.flags),
+					"is_input": bool(info.flags & getattr(pybasswasapi, "BASS_DEVICE_INPUT", 16)),
+					"is_loopback": bool(info.flags & getattr(pybasswasapi, "BASS_DEVICE_LOOPBACK", 8)),
+					"freq": int(info.mixfreq),
+					"chans": int(info.mixchans),
+				})
+			idx += 1
+		return res
+
+	@staticmethod
+	def init(device=-1, freq=0, chans=0, flags=0, buffer_sec=0.05, period_sec=0.0, proc=None, user=None):
+		if not control._IS_WIN: return False
+		return bool(pybasswasapi.BASS_WASAPI_Init(int(device), int(freq), int(chans), int(flags), float(buffer_sec), float(period_sec), proc, user))
+
+	@staticmethod
+	def start(): return bool(control._IS_WIN and pybasswasapi.BASS_WASAPI_Start())
+
+	@staticmethod
+	def stop(reset=False): return bool(control._IS_WIN and pybasswasapi.BASS_WASAPI_Stop(1 if reset else 0))
+
+	@staticmethod
+	def free(): return bool(control._IS_WIN and pybasswasapi.BASS_WASAPI_Free())
+
+	@staticmethod
+	def get_volume(mode=0): return float(pybasswasapi.BASS_WASAPI_GetVolume(int(mode))) if control._IS_WIN else 0.0
+
+	@staticmethod
+	def set_volume(volume, mode=0): return bool(control._IS_WIN and pybasswasapi.BASS_WASAPI_SetVolume(int(mode), float(volume)))
+
+	@staticmethod
+	def set_mute(mute=True, mode=0): return bool(control._IS_WIN and pybasswasapi.BASS_WASAPI_SetMute(int(mode), 1 if mute else 0))

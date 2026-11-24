@@ -1,7 +1,8 @@
 ﻿Module,Owner,Kind,Symbol,Parameters,Returns,Description
 file,File,constructor,File.__init__,"password: str, encode: bool=False, aes: bool=False",any,
+file,File,property,File.cipher,,any,
 file,File,method,File.generate_key,password: str,bytes,Tạo key từ mật khẩu bằng cách băm SHA-256.
-file,File,method,File.dokey,key: bytes,Fernet,Tạo đối tượng Fernet từ key.
+file,File,method,File.dokey,key: bytes,any,Tạo đối tượng Fernet từ key.
 file,File,method,File.aes_encrypt,data: bytes,bytes,Mã hóa dữ liệu bằng AES.
 file,File,method,File.aes_decrypt,data: bytes,bytes,Giải mã dữ liệu bằng AES.
 file,File,method,File.open,"file_path, mode",any,

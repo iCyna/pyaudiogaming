@@ -41,8 +41,9 @@ data = f.load("save.dat", mode="rb+", type="json")</code></pre>
   <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
   <tbody>
     <tr><td><span class="badge">constructor</span><code>__init__(password: str, encode: bool=False, aes: bool=False)</code></td><td><code>password</code> (str, default: <code>required</code>)<br><code>encode</code> (bool, default: <code>False</code>)<br><code>aes</code> (bool, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">property</span><code>cipher()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">method</span><code>generate_key(password: str)</code></td><td><code>password</code> (str, default: <code>required</code>)</td><td><code>bytes</code></td><td>Tạo key từ mật khẩu bằng cách băm SHA-256.</td></tr>
-    <tr><td><span class="badge">method</span><code>dokey(key: bytes)</code></td><td><code>key</code> (bytes, default: <code>required</code>)</td><td><code>Fernet</code></td><td>Tạo đối tượng Fernet từ key.</td></tr>
+    <tr><td><span class="badge">method</span><code>dokey(key: bytes)</code></td><td><code>key</code> (bytes, default: <code>required</code>)</td><td><code>any</code></td><td>Tạo đối tượng Fernet từ key.</td></tr>
     <tr><td><span class="badge">method</span><code>aes_encrypt(data: bytes)</code></td><td><code>data</code> (bytes, default: <code>required</code>)</td><td><code>bytes</code></td><td>Mã hóa dữ liệu bằng AES.</td></tr>
     <tr><td><span class="badge">method</span><code>aes_decrypt(data: bytes)</code></td><td><code>data</code> (bytes, default: <code>required</code>)</td><td><code>bytes</code></td><td>Giải mã dữ liệu bằng AES.</td></tr>
     <tr><td><span class="badge">method</span><code>open(file_path, mode)</code></td><td><code>file_path</code> (any, default: <code>required</code>)<br><code>mode</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>

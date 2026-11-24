@@ -1,11 +1,32 @@
 # -*- coding: utf-8 -*-
-"""SDL keyboard, mouse and touch input on every platform."""
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# Main game window loop with keyboard, mouse, touch, and speech integration.
+# Supports Windows, Linux, macOS, Android, and iOS.
+
 import math
 from collections import deque
 import pygame
-from . import buffer, system, key, speech, sound_pool
-from .sound_modules import control
+from . import buffer, system, key
 from .timer import Timer
+
+_sound_pool_mod = None
+_control_mod = None
+
+
+def _get_sound_pool():
+    global _sound_pool_mod
+    if _sound_pool_mod is None:
+        from . import sound_pool as _sp
+        _sound_pool_mod = _sp
+    return _sound_pool_mod
+
+
+def _get_control():
+    global _control_mod
+    if _control_mod is None:
+        from .sound_modules import control as _ctrl
+        _control_mod = _ctrl
+    return _control_mod
 
 ZONES = {
     "left": (0.0, 0.0, 0.5, 1.0),
@@ -17,23 +38,31 @@ ZONES = {
     "top-right": (0.5, 0.0, 1.0, 0.5),
     "bottom-left": (0.0, 0.5, 0.5, 1.0),
     "bottom-right": (0.5, 0.5, 1.0, 1.0),
-    # 3-zone gameplay layout (top 20% system/info bar, bottom 80% split left/right)
-    "top-bar": (0.0, 0.0, 1.0, 0.20),
-    "top-left-bar": (0.0, 0.0, 0.5, 0.20),
-    "top-right-bar": (0.5, 0.0, 1.0, 0.20),
-    "left-play": (0.0, 0.20, 0.5, 1.0),
-    "right-play": (0.5, 0.20, 1.0, 1.0),
+    # 3-tier vertical gameplay layout (top 15% system/info, middle 45% target/action, bottom 40% full-width movement)
+    "top-bar": (0.0, 0.0, 1.0, 0.15),
+    "top-left-bar": (0.0, 0.0, 0.5, 0.15),
+    "top-right-bar": (0.5, 0.0, 1.0, 0.15),
+    "mid-play": (0.0, 0.15, 1.0, 0.60),
+    "bottom-play": (0.0, 0.60, 1.0, 1.0),
+    "right-play": (0.0, 0.15, 1.0, 0.60),
+    "left-play": (0.0, 0.60, 1.0, 1.0),
 }
-SWIPE_THRESHOLD = 0.07
-LONG_PRESS_MS = 450
+TOUCH_SLOP = 0.035
+DOUBLE_TAP_SLOP = 0.14
+DOUBLE_TAP_TIMEOUT_MS = 360
+SWIPE_THRESHOLD = 0.08
+SWIPE_MAX_DURATION_MS = 650
+SWIPE_MIN_VELOCITY = 0.15
+EXPLORE_HOLD_MS = 320
+LONG_PRESS_MS = 550
 
 
 class WindowBase:
     def __init__(self, platform=None):
-        self.platform = platform or ("mobile" if system.get_platform()["os"] in ("android", "ios") else "pc")
+        self._os = system.get_platform()["os"]
+        self.platform = platform or ("mobile" if self._os in ("android", "ios") else "pc")
         buffer.platform = self.platform
-        pygame.display.init()
-        self.speech = speech.Speech()
+        self._speech = None
         self.clock, self.fp = pygame.time.Clock(), 60
         self.frame_callback = self.exit_callback = self.lost_focus_callback = None
         self.events, self.touches = [], {}
@@ -45,27 +74,69 @@ class WindowBase:
         self._slide_events, self._sliding_events = [], []
         self._taps, self.pinch, self.turn = 0, 0.0, 0.0
         self._tap_events = []
+        self._explore_events = []
         self._long_press_events = []
+        self._pending_tap = None
         self._tap_batch_fingers = 0
         self._tap_batch_pos = (0.5, 0.5)
+        self._tap_batch_synthetic = False
         self._tap_streak = 0
         self._tap_streak_fingers = 0
         self._tap_timer = Timer()
         self._gesture_max_fingers = 0
         self._focused = True
+        self._fullscreen = True
+        self.gesture_mode = "game"
         self.mods = 0
 
+    @property
+    def speech(self):
+        if self._speech is None:
+            from . import speech as _speech_mod
+            self._speech = _speech_mod.Speech()
+        return self._speech
+
+    @speech.setter
+    def speech(self, value):
+        self._speech = value
+
     def init(self, x, y, ttl, vv=0, show_vv=False, author=""):
+        if not pygame.display.get_init():
+            pygame.display.init()
         self.screen = pygame.display.set_mode((max(1, int(x)), max(1, int(y))), pygame.NOFRAME)
         pygame.display.set_caption(f"{ttl} {vv}" if show_vv else ttl)
         buffer.name_window, buffer.version, buffer.author, buffer.frame = ttl, vv, author, self
         self._focus(bool(pygame.key.get_focused()))
         return True
 
+    def set_fullscreen(self, enabled=True):
+        """Toggle true edge-to-edge fullscreen and system edge-gesture exclusion (dynamic, non-hardcoded)."""
+        self._fullscreen = bool(enabled)
+        try:
+            from .pygame_shim import _android_bridge, _ios_bridge
+            if _android_bridge.is_android_java_available():
+                _android_bridge.set_fullscreen(self._fullscreen)
+            elif _ios_bridge.is_ios_available():
+                _ios_bridge.set_fullscreen(self._fullscreen)
+        except Exception:
+            pass
+        return self._fullscreen
+
+    def get_fullscreen(self):
+        return bool(self._fullscreen)
+
+    def set_gesture_mode(self, mode="game"):
+        """Set gesture mode: 'game' (continuous sliding movement) or 'ui' (TalkBack explore + flick only)."""
+        self.gesture_mode = "ui" if str(mode).lower() == "ui" else "game"
+        return self.gesture_mode
+
     def _focus(self, focused):
         changed = focused != self._focused
         self._focused = focused
-        sound_pool.set_focus(focused)
+        import sys as _sys
+        sp = _sound_pool_mod or _sys.modules.get("pyaudiogaming.sound_pool")
+        if sp is not None:
+            sp.set_focus(focused)
         if changed and not focused:
             self.keys.clear()
             self._pressed.clear(); self._released.clear()
@@ -106,11 +177,58 @@ class WindowBase:
         self.completed_slides.clear(); self.active_slidings.clear()
         self._slide_events.clear(); self._sliding_events.clear()
         self._tap_events.clear()
+        self._explore_events.clear()
         self._long_press_events.clear()
         self.wheel, self._taps, self.pinch, self.turn = (0, 0), 0, 0.0, 0.0
         self.events = pygame.event.get()
         pending = deque(self.events)
         frame_released_slides = {}
+
+        def _flush_pending_tap():
+            if self._pending_tap is not None:
+                pt = self._pending_tap
+                self._pending_tap = None
+                self._taps = pt["count"]
+                self._tap_events.append({
+                    "fingers": pt["fingers"],
+                    "count": pt["count"],
+                    "pos": pt["pos"],
+                })
+
+        def _commit_tap_batch():
+            if self._tap_batch_fingers <= 0 or self.touches:
+                return
+            if frame_released_slides:
+                self._tap_batch_fingers = 0
+                self._pending_tap = None
+                return
+            fingers = max(self._tap_batch_fingers, self._gesture_max_fingers)
+            tap_pos = self._tap_batch_pos
+            is_syn = self._tap_batch_synthetic
+            self._tap_batch_fingers = 0
+            self._tap_batch_synthetic = False
+            self._gesture_max_fingers = 0
+            if fingers == 1:
+                if self._pending_tap is not None and self._pending_tap["fingers"] == 1 and self._pending_tap["timer"].elapsed <= DOUBLE_TAP_TIMEOUT_MS:
+                    new_count = self._pending_tap["count"] + 1
+                    self._pending_tap = None
+                    self._taps = new_count
+                    self._tap_events.append({"fingers": 1, "count": new_count, "pos": tap_pos})
+                elif is_syn:
+                    self._taps = 1
+                    self._tap_events.append({"fingers": 1, "count": 1, "pos": tap_pos})
+                else:
+                    self._pending_tap = {"fingers": 1, "count": 1, "pos": tap_pos, "timer": Timer()}
+            else:
+                self._pending_tap = None
+                if self._tap_timer.elapsed <= DOUBLE_TAP_TIMEOUT_MS and self._tap_streak_fingers == fingers:
+                    self._tap_streak += 1
+                else:
+                    self._tap_streak = 1
+                    self._tap_streak_fingers = fingers
+                self._tap_timer.restart()
+                self._taps = self._tap_streak
+                self._tap_events.append({"fingers": fingers, "count": self._tap_streak, "pos": tap_pos})
 
         while pending:
             event = pending.popleft()
@@ -142,48 +260,76 @@ class WindowBase:
             elif event.type == pygame.MOUSEWHEEL:
                 self.wheel = (self.wheel[0] + event.x, self.wheel[1] + event.y)
             elif event.type == pygame.FINGERDOWN:
-                self.touches[event.finger_id] = {"start": (event.x, event.y), "current": (event.x, event.y), "timer": Timer(), "moved": False, "long_fired": False}
+                if len(self.touches) == 0 and self._pending_tap is not None and self._pending_tap["fingers"] == 1:
+                    p_dist = math.hypot(event.x - self._pending_tap["pos"][0], event.y - self._pending_tap["pos"][1])
+                    if self._pending_tap["timer"].elapsed > DOUBLE_TAP_TIMEOUT_MS or p_dist > DOUBLE_TAP_SLOP:
+                        _flush_pending_tap()
+                self.touches[event.finger_id] = {
+                    "start": (event.x, event.y),
+                    "current": (event.x, event.y),
+                    "timer": Timer(),
+                    "moved": False,
+                    "sliding": False,
+                    "exploring": False,
+                    "long_fired": False,
+                    "synthetic": bool(getattr(event, "synthetic", False)),
+                }
                 self._gesture_max_fingers = max(self._gesture_max_fingers, len(self.touches))
             elif event.type in (pygame.FINGERMOTION, pygame.FINGERUP):
                 touch = self.touches.get(event.finger_id)
                 if touch:
                     touch["current"] = (event.x, event.y)
                     dx, dy = event.x - touch["start"][0], event.y - touch["start"][1]
+                    dist = math.hypot(dx, dy)
+                    axis_dist = max(abs(dx), abs(dy))
                     direction = ("right" if dx > 0 else "left") if abs(dx) > abs(dy) else ("down" if dy > 0 else "up")
-                    if max(abs(dx), abs(dy)) > SWIPE_THRESHOLD:
+                    elapsed_ms = touch["timer"].elapsed
+                    vel = dist / max(0.001, elapsed_ms / 1000.0)
+                    if dist > TOUCH_SLOP:
                         touch["moved"] = True
-                        if event.type == pygame.FINGERUP:
+                        self._pending_tap = None
+                    if event.type == pygame.FINGERMOTION:
+                        allow_slide = (self.gesture_mode == "game")
+                        if allow_slide and axis_dist >= SWIPE_THRESHOLD and not touch["exploring"] and (touch["sliding"] or elapsed_ms < EXPLORE_HOLD_MS):
+                            touch["sliding"] = True
+                            self.active_slidings.append(direction)
+                        elif len(self.touches) == 1 and touch["moved"] and not touch["sliding"]:
+                            if touch["exploring"] or elapsed_ms >= EXPLORE_HOLD_MS:
+                                touch["exploring"] = True
+                                self._explore_events.append({"phase": "move", "pos": (event.x, event.y), "fingers": 1})
+                    else:
+                        if axis_dist >= SWIPE_THRESHOLD and elapsed_ms <= SWIPE_MAX_DURATION_MS:
+                            touch["moved"] = True
+                            self._pending_tap = None
                             self.completed_slides.append(direction)
                             info = frame_released_slides.setdefault(direction, {"count": 0, "start": touch["start"]})
                             info["count"] += 1
-                        else:
-                            self.active_slidings.append(direction)
-                    elif event.type == pygame.FINGERUP and not touch["moved"] and not touch["long_fired"] and touch["timer"].elapsed < LONG_PRESS_MS:
-                        self._tap_batch_fingers += 1
-                        self._tap_batch_pos = touch["start"]
-                    if event.type == pygame.FINGERUP:
+                        elif touch["exploring"]:
+                            self._explore_events.append({"phase": "end", "pos": (event.x, event.y), "fingers": 1})
+                        elif touch["sliding"]:
+                            self._pending_tap = None
+                        elif not touch["moved"] and not touch["long_fired"] and elapsed_ms < LONG_PRESS_MS:
+                            self._tap_batch_fingers += 1
+                            self._tap_batch_pos = touch["start"]
+                            self._tap_batch_synthetic = bool(touch.get("synthetic", False))
+                        elif touch["moved"] and len(self.touches) == 1:
+                            self._explore_events.append({"phase": "end", "pos": (event.x, event.y), "fingers": 1})
                         self.touches.pop(event.finger_id, None)
+                        if self._tap_batch_fingers > 0 and not self.touches:
+                            _commit_tap_batch()
             elif event.type == pygame.MULTIGESTURE:
                 self.pinch += event.pinched
                 self.turn += event.rotated
 
-        # Khi toàn bộ ngón tay đã nhấc lên sau cú chạm -> Chốt số ngón chạm và tính chuỗi chạm liên tiếp (double/triple tap)
-        if self._tap_batch_fingers > 0 and not self.touches:
-            fingers = max(self._tap_batch_fingers, self._gesture_max_fingers)
-            if self._tap_timer.elapsed <= 350 and self._tap_streak_fingers == fingers:
-                self._tap_streak += 1
-            else:
-                self._tap_streak = 1
-                self._tap_streak_fingers = fingers
-            self._tap_timer.restart()
-            self._taps = self._tap_streak
-            self._tap_events.append({
-                "fingers": fingers,
-                "count": self._tap_streak,
-                "pos": self._tap_batch_pos
-            })
+        # TalkBack TouchExplorer tap resolution:
+        # 1-finger tap waits DOUBLE_TAP_TIMEOUT_MS so Tap 1 of a double-tap NEVER misfires as a single-tap read!
+        if frame_released_slides:
             self._tap_batch_fingers = 0
-            self._gesture_max_fingers = 0
+            self._pending_tap = None
+        _commit_tap_batch()
+
+        if not self.touches and self._pending_tap is not None and self._pending_tap["timer"].elapsed >= DOUBLE_TAP_TIMEOUT_MS:
+            _flush_pending_tap()
 
         # Chốt các cú vuốt nhấc tay (swipe / keySlide) kèm số ngón và tọa độ bắt đầu
         for direction, info in frame_released_slides.items():
@@ -194,10 +340,12 @@ class WindowBase:
 
         # Duy trì trạng thái vuốt giữ (swiping / keySliding) và phát hiện nhấn giữ tại chỗ (long_press)
         held_dirs = {}
+        allow_held_slide = (self.gesture_mode == "game")
         for touch in self.touches.values():
             dx, dy = (touch["current"][i] - touch["start"][i] for i in (0, 1))
-            if max(abs(dx), abs(dy)) > SWIPE_THRESHOLD:
+            if allow_held_slide and (touch.get("sliding") or max(abs(dx), abs(dy)) >= SWIPE_THRESHOLD) and not touch.get("exploring"):
                 touch["moved"] = True
+                touch["sliding"] = True
                 direction = ("right" if dx > 0 else "left") if abs(dx) > abs(dy) else ("down" if dy > 0 else "up")
                 if direction not in self.active_slidings:
                     self.active_slidings.append(direction)
@@ -205,6 +353,7 @@ class WindowBase:
                 info["count"] += 1
             elif not touch["moved"] and not touch["long_fired"] and touch["timer"].elapsed >= LONG_PRESS_MS:
                 touch["long_fired"] = True
+                self._pending_tap = None
                 self._long_press_events.append({
                     "fingers": max(len(self.touches), self._gesture_max_fingers),
                     "pos": touch["start"]
@@ -226,13 +375,16 @@ class WindowBase:
 
     def clear_input(self):
         """Discard stale text/key/touch input while preserving quit and focus events."""
-        pygame.event.clear([pygame.KEYDOWN, pygame.KEYUP, pygame.TEXTINPUT, pygame.TEXTEDITING])
+        pygame.event.clear([pygame.KEYDOWN, pygame.KEYUP, pygame.TEXTINPUT, pygame.TEXTEDITING, pygame.FINGERDOWN, pygame.FINGERMOTION, pygame.FINGERUP, pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP])
         self.keys.clear()
         self.previousKeys.clear()
         self._pressed.clear(); self._released.clear(); self._repeat.clear()
-        self._tap_events.clear(); self._slide_events.clear(); self._sliding_events.clear(); self._long_press_events.clear()
+        self.touches.clear()
+        self._tap_events.clear(); self._explore_events.clear(); self._slide_events.clear(); self._sliding_events.clear(); self._long_press_events.clear()
         self.completed_slides.clear(); self.active_slidings.clear()
-        self._taps = 0
+        self._pending_tap = None
+        self._tap_batch_synthetic = False
+        self._taps = self._tap_streak = self._tap_streak_fingers = self._tap_batch_fingers = self._gesture_max_fingers = 0
         self.mods = 0
         self.events = []
 
@@ -294,6 +446,27 @@ class WindowBase:
     def double_tap(self, fingers=1, zone=None):
         """Kiểm tra chạm đúp (chuẩn TalkBack/VoiceOver để kích hoạt)."""
         return bool(self.tap(fingers=fingers, count=2, zone=zone))
+
+    def tap_pos(self, fingers=1, count=1, zone=None):
+        """Return normalized (x, y) position of the matching tap event, or None."""
+        for ev in self._tap_events:
+            if (fingers is None or ev["fingers"] == fingers) and ev["count"] == count and self._match_zone(ev["pos"], zone):
+                return ev["pos"]
+        return None
+
+    def explore_pos(self, zone=None):
+        """Return latest normalized (x, y) position during 1-finger Explore-by-Touch, or None."""
+        for ev in reversed(self._explore_events):
+            if ev["phase"] == "move" and self._match_zone(ev["pos"], zone):
+                return ev["pos"]
+        return None
+
+    def explore_end_pos(self, zone=None):
+        """Return normalized (x, y) position when 1-finger Explore-by-Touch ends, or None."""
+        for ev in reversed(self._explore_events):
+            if ev["phase"] == "end" and self._match_zone(ev["pos"], zone):
+                return ev["pos"]
+        return None
 
     def long_press(self, fingers=1, zone=None):
         """Kiểm tra nhấn giữ tại chỗ trên màn hình (không trượt)."""
@@ -359,11 +532,13 @@ class WindowBase:
 
         # 1. Giả lập chạm (Tap: hỗ trợ nhiều ngón `fingers` và chạm nhiều lần `count`)
         if t_str == "tap":
-            for _ in range(max(1, int(count))):
+            cnt = max(1, int(count))
+            syn_flag = (cnt == 1)
+            for tap_i in range(cnt):
                 for f in range(max(1, int(fingers))):
-                    pygame.event.post(pygame.event.Event(pygame.FINGERDOWN, {"finger_id": f, "x": sx, "y": sy, "dx": 0.0, "dy": 0.0}))
+                    pygame.event.post(pygame.event.Event(pygame.FINGERDOWN, {"finger_id": f, "x": sx, "y": sy, "dx": 0.0, "dy": 0.0, "synthetic": syn_flag}))
                 for f in range(max(1, int(fingers))):
-                    pygame.event.post(pygame.event.Event(pygame.FINGERUP, {"finger_id": f, "x": sx, "y": sy, "dx": 0.0, "dy": 0.0}))
+                    pygame.event.post(pygame.event.Event(pygame.FINGERUP, {"finger_id": f, "x": sx, "y": sy, "dx": 0.0, "dy": 0.0, "synthetic": syn_flag}))
             return True
 
         # 2. Giả lập Pinch / Turn
@@ -412,8 +587,8 @@ class WindowBase:
 
     def touchCount(self): return len(self.touches)
     def get_focused_window(self): return self._focused
-    def set_global_sound(self, value): return sound_pool.set_global_sound(value)
-    def get_global_sound(self): return sound_pool.get_global_sound()
+    def set_global_sound(self, value): return _get_sound_pool().set_global_sound(value)
+    def get_global_sound(self): return _get_sound_pool().get_global_sound()
 
     def wait(self, msec):
         timer = Timer()
@@ -436,8 +611,8 @@ class WindowBase:
         from . import inputBox
         return inputBox.dialogMessage(title, message, inputBox.INFO if type is None else type)
 
-    def load_sound(self, name, h="both"): return control.load_sound_file(name, key=name, target=h)
-    def sound_cast(self, name, data, h="both"): return control.save_mem_buffer(name, data, target=h)
+    def load_sound(self, name, h="both"): return _get_control().load_sound_file(name, key=name, target=h)
+    def sound_cast(self, name, data, h="both"): return _get_control().save_mem_buffer(name, data, target=h)
     cast_sound = sound_cast
     def make_spak(self, source, output_path=None, password="", **kwargs):
         from . import utils
@@ -447,14 +622,14 @@ class WindowBase:
         return utils.load_spak(spak_path, password=password, mode=mode, target=target, **kwargs)
 
     def beep(self, frequency, duration):
-        if system.get_platform()["os"] == "windows":
+        if self._os == "windows":
             import ctypes
             ctypes.windll.kernel32.Beep(int(frequency), int(duration))
         else:
             import struct
             rate = 44100
             pcm = b"".join(struct.pack("<h", int(5000 * math.sin(2 * math.pi * frequency * i / rate))) for i in range(int(rate * duration / 1000)))
-            tone = sound_pool.sound()
+            tone = _get_sound_pool().sound()
             tone.freq = rate
             tone.stream("", draw=True, mono=True)
             tone.push(pcm); tone.play()

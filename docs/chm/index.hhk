@@ -3,7 +3,11 @@
 <UL>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="window.WindowBase"><param name="Local" value="..\html\modules\window.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="WindowBase.__init__ (window)"><param name="Local" value="..\html\modules\window.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="WindowBase.speech (window)"><param name="Local" value="..\html\modules\window.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="WindowBase.init (window)"><param name="Local" value="..\html\modules\window.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="WindowBase.set_fullscreen (window)"><param name="Local" value="..\html\modules\window.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="WindowBase.get_fullscreen (window)"><param name="Local" value="..\html\modules\window.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="WindowBase.set_gesture_mode (window)"><param name="Local" value="..\html\modules\window.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="WindowBase.touchPos (window)"><param name="Local" value="..\html\modules\window.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="WindowBase.in_zone (window)"><param name="Local" value="..\html\modules\window.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="WindowBase.frameUpdate (window)"><param name="Local" value="..\html\modules\window.html"></OBJECT>
@@ -16,6 +20,9 @@
   <LI><OBJECT type="text/sitemap"><param name="Name" value="WindowBase.mousePressing (window)"><param name="Local" value="..\html\modules\window.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="WindowBase.tap (window)"><param name="Local" value="..\html\modules\window.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="WindowBase.double_tap (window)"><param name="Local" value="..\html\modules\window.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="WindowBase.tap_pos (window)"><param name="Local" value="..\html\modules\window.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="WindowBase.explore_pos (window)"><param name="Local" value="..\html\modules\window.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="WindowBase.explore_end_pos (window)"><param name="Local" value="..\html\modules\window.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="WindowBase.long_press (window)"><param name="Local" value="..\html\modules\window.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="WindowBase.keySlide (window)"><param name="Local" value="..\html\modules\window.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="WindowBase.swipe (window)"><param name="Local" value="..\html\modules\window.html"></OBJECT>
@@ -74,11 +81,302 @@
   <LI><OBJECT type="text/sitemap"><param name="Name" value="Speech.get_speech_auto_pause (speech)"><param name="Local" value="..\html\modules\speech.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="Speech.set_speech_auto_pause (speech)"><param name="Local" value="..\html\modules\speech.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="Speech.list_voices (speech)"><param name="Local" value="..\html\modules\speech.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Speech.list_engines (speech)"><param name="Local" value="..\html\modules\speech.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Speech.get_speech_engine (speech)"><param name="Local" value="..\html\modules\speech.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Speech.set_speech_engine (speech)"><param name="Local" value="..\html\modules\speech.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Speech.list_voice_languages (speech)"><param name="Local" value="..\html\modules\speech.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Speech.get_speech_voice_language (speech)"><param name="Local" value="..\html\modules\speech.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Speech.set_speech_voice_language (speech)"><param name="Local" value="..\html\modules\speech.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Speech.get_speech_use_system_default (speech)"><param name="Local" value="..\html\modules\speech.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Speech.set_speech_use_system_default (speech)"><param name="Local" value="..\html\modules\speech.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="Speech.get_outputs (speech)"><param name="Local" value="..\html\modules\speech.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="Speech.get_output (speech)"><param name="Local" value="..\html\modules\speech.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="Speech.get_active_screen_reader (speech)"><param name="Local" value="..\html\modules\speech.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="Speech.set_output (speech)"><param name="Local" value="..\html\modules\speech.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="Speech.get_capabilities (speech)"><param name="Local" value="..\html\modules\speech.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="g2access.create_providers"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="g2access.load_native_lib"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="g2access.pcm_to_wav"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="g2access.AndroidScreenReader"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidScreenReader.is_active (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidScreenReader.speak (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="g2access.AndroidTTS"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.__init__ (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.is_active (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.speak (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.speak3d (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.silence (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.get_sound (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.list_engines (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.get_engine (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.set_engine (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.list_voice_languages (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.get_voice_language (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.set_voice_language (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.list_voices (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.get_voice (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.set_voice (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.get_use_system_default (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.set_use_system_default (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.get_rate (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.set_rate (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.get_pitch (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.set_pitch (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.get_volume (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.set_volume (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.get_pan (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.set_pan (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.get_sound_pitch (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.set_sound_pitch (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.get_output_device (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.set_output_device (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.get_mono (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.set_mono (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.get_hrtf (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.set_hrtf (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.get_fx (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.set_fx (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.set_zone_fx_provider (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.get_auto_pause (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AndroidTTS.set_auto_pause (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="g2access.AudioPipeline"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AudioPipeline.__init__ (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AudioPipeline.clear_cache (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AudioPipeline.enqueue (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AudioPipeline.stop (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="AudioPipeline.get_sound (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="g2access.Provider"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.is_active (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.speak (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.braille (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.silence (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.speak3d (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.get_capabilities (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.get_sound (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.list_voices (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.list_engines (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.list_voice_languages (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.get_rate (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.set_rate (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.get_pitch (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.set_pitch (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.get_volume (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.set_volume (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.get_voice (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.set_voice (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.get_pan (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.set_pan (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.get_sound_pitch (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.set_sound_pitch (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.get_output_device (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.set_output_device (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.get_mono (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.set_mono (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.get_hrtf (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.set_hrtf (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.get_fx (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.set_fx (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.set_zone_fx_provider (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.get_auto_pause (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.set_auto_pause (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.get_engine (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.set_engine (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.get_voice_language (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.set_voice_language (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.get_use_system_default (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Provider.set_use_system_default (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="g2access.IOSVoiceOver"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="IOSVoiceOver.is_active (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="IOSVoiceOver.speak (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="g2access.IOSSpeech"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="IOSSpeech.__init__ (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="IOSSpeech.is_active (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="IOSSpeech.speak (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="IOSSpeech.silence (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="IOSSpeech.get_rate (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="IOSSpeech.set_rate (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="IOSSpeech.get_pitch (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="IOSSpeech.set_pitch (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="IOSSpeech.get_volume (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="IOSSpeech.set_volume (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="g2access.SpeechDispatcherProvider"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SpeechDispatcherProvider.__init__ (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SpeechDispatcherProvider.is_active (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SpeechDispatcherProvider.speak (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SpeechDispatcherProvider.silence (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="g2access.ESpeakProvider"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ESpeakProvider.__init__ (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ESpeakProvider.is_active (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ESpeakProvider.speak (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ESpeakProvider.speak3d (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ESpeakProvider.silence (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ESpeakProvider.get_sound (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ESpeakProvider.list_voices (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ESpeakProvider.get_voice (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ESpeakProvider.set_voice (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ESpeakProvider.get_rate (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ESpeakProvider.set_rate (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ESpeakProvider.get_pitch (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ESpeakProvider.set_pitch (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ESpeakProvider.get_volume (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ESpeakProvider.set_volume (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ESpeakProvider.get_pan (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ESpeakProvider.set_pan (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ESpeakProvider.get_sound_pitch (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ESpeakProvider.set_sound_pitch (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ESpeakProvider.get_output_device (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ESpeakProvider.set_output_device (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ESpeakProvider.get_mono (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ESpeakProvider.set_mono (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ESpeakProvider.get_hrtf (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ESpeakProvider.set_hrtf (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ESpeakProvider.get_fx (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ESpeakProvider.set_fx (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ESpeakProvider.set_zone_fx_provider (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ESpeakProvider.get_auto_pause (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ESpeakProvider.set_auto_pause (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="g2access.MacOSSpeech"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MacOSSpeech.__init__ (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MacOSSpeech.is_active (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MacOSSpeech.speak (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MacOSSpeech.speak3d (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MacOSSpeech.silence (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MacOSSpeech.get_sound (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MacOSSpeech.list_voices (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MacOSSpeech.get_voice (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MacOSSpeech.set_voice (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MacOSSpeech.get_rate (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MacOSSpeech.set_rate (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MacOSSpeech.get_pitch (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MacOSSpeech.set_pitch (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MacOSSpeech.get_volume (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MacOSSpeech.set_volume (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MacOSSpeech.get_pan (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MacOSSpeech.set_pan (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MacOSSpeech.get_sound_pitch (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MacOSSpeech.set_sound_pitch (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MacOSSpeech.get_output_device (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MacOSSpeech.set_output_device (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MacOSSpeech.get_mono (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MacOSSpeech.set_mono (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MacOSSpeech.get_hrtf (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MacOSSpeech.set_hrtf (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MacOSSpeech.get_fx (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MacOSSpeech.set_fx (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MacOSSpeech.set_zone_fx_provider (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MacOSSpeech.get_auto_pause (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MacOSSpeech.set_auto_pause (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="g2access.Router"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.__init__ (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.output (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.speak (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.braille (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.silence (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.speak3d (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.get_outputs (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.get_output (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.get_active_output (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.set_output (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.get_capabilities (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.list_fx (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.get_sound (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.get_volume (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.set_volume (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.get_pitch (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.set_pitch (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.get_rate (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.set_rate (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.get_voice (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.set_voice (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.get_pan (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.set_pan (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.get_sound_pitch (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.set_sound_pitch (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.get_output_device (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.set_output_device (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.get_mono (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.set_mono (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.get_hrtf (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.set_hrtf (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.get_fx (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.set_fx (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.set_zone_fx_provider (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.get_auto_pause (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.set_auto_pause (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.list_voices (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.list_engines (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.get_engine (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.set_engine (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.list_voice_languages (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.get_voice_language (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.set_voice_language (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.get_use_system_default (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Router.set_use_system_default (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="g2access.NVDAProvider"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="NVDAProvider.__init__ (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="NVDAProvider.is_active (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="NVDAProvider.speak (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="NVDAProvider.braille (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="NVDAProvider.silence (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="g2access.ZDSRProvider"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ZDSRProvider.__init__ (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ZDSRProvider.is_active (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ZDSRProvider.speak (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ZDSRProvider.silence (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="g2access.JAWSProvider"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="JAWSProvider.__init__ (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="JAWSProvider.is_active (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="JAWSProvider.speak (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="JAWSProvider.braille (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="JAWSProvider.silence (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="g2access.SystemAccessProvider"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SystemAccessProvider.__init__ (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SystemAccessProvider.is_active (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SystemAccessProvider.speak (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SystemAccessProvider.braille (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SystemAccessProvider.silence (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="g2access.DolphinProvider"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="DolphinProvider.__init__ (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="DolphinProvider.is_active (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="DolphinProvider.speak (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="DolphinProvider.silence (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="g2access.PCTalkerProvider"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="PCTalkerProvider.__init__ (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="PCTalkerProvider.is_active (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="PCTalkerProvider.speak (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="PCTalkerProvider.silence (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="g2access.SAPI5Provider"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SAPI5Provider.__init__ (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SAPI5Provider.is_active (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SAPI5Provider.speak (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SAPI5Provider.speak3d (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SAPI5Provider.silence (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SAPI5Provider.get_sound (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SAPI5Provider.list_voices (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SAPI5Provider.get_voice (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SAPI5Provider.set_voice (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SAPI5Provider.get_rate (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SAPI5Provider.set_rate (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SAPI5Provider.get_pitch (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SAPI5Provider.set_pitch (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SAPI5Provider.get_volume (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SAPI5Provider.set_volume (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SAPI5Provider.get_pan (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SAPI5Provider.set_pan (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SAPI5Provider.get_sound_pitch (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SAPI5Provider.set_sound_pitch (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SAPI5Provider.get_output_device (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SAPI5Provider.set_output_device (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SAPI5Provider.get_mono (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SAPI5Provider.set_mono (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SAPI5Provider.get_hrtf (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SAPI5Provider.set_hrtf (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SAPI5Provider.get_fx (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SAPI5Provider.set_fx (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SAPI5Provider.set_zone_fx_provider (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SAPI5Provider.get_auto_pause (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SAPI5Provider.set_auto_pause (g2access)"><param name="Local" value="..\html\modules\g2access.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_pool.prewarm_hrtf_async"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_pool.set_hrtf_frame_size"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_pool.get_hrtf_frame_size"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_pool.set_hrtf_distance_model"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
@@ -95,6 +393,9 @@
   <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_pool.get_output_device"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_pool.set_input_device"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_pool.get_input_device"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_pool.scale_pcm16"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_pool.encode_audio_frame"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_pool.decode_audio_frame"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_pool.clean_oneshots"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_pool.playsingle"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_pool.OutputManager"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
@@ -142,6 +443,39 @@
   <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.set_steam_physical_params (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.set_steam_directivity (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.set_steam_mode (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.set_hrtf_distance_limits (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.set_hrtf_source_radius (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.set_hrtf_air_absorption_bands (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.set_hrtf_spatial_blend (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.set_hrtf_stereo_input (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.slide_hrtf_position (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.slide_hrtf_attribute (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.set_hrtf_world_position (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.set_hrtf_live_stream_mode (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.reset_hrtf (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.set_steam_direct_enabled (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.set_steam_reflection_enabled (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.set_steam_path_enabled (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.tempo (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.set_tempo (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.get_tempo (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.tone (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.set_tone (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.get_tone (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.set_reverse_direction (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.get_bpm (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.get_tags (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.start_loudness (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.get_loudness (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.stop_loudness (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.start_encode (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.set_encode_paused (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.stop_encode (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.on_sync (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.remove_sync (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.clear_syncs (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.set_matrix (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.split (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.get_data (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.get_length (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundBase.volume (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
@@ -162,6 +496,15 @@
   <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_pool.vst"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="vst.__init__ (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="vst.create_instrument (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="vst.attach_dsp (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="vst.set_vst_param (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="vst.get_vst_param (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="vst.get_vst_param_count (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="vst.set_vst_program (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="vst.get_vst_program (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="vst.get_vst_program_count (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="vst.set_vst_bypass (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="vst.get_vst_bypass (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="vst.play (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="vst.stop (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="vst.close (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
@@ -176,8 +519,11 @@
   <LI><OBJECT type="text/sitemap"><param name="Name" value="mixer.close (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_pool.record"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="record.__init__ (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="record.set_gain (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="record.start (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="record.stream (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="record.push (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="record.read_pcm (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="record.get_sample (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="record.clear_sample (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="record.stop (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
@@ -185,6 +531,10 @@
   <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_pool.musical"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="musical.__init__ (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="musical.load_font (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="musical.create_realtime (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="musical.send_event (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="musical.note_on (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="musical.note_off (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="musical.stream (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="musical.play (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="musical.stop (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
@@ -199,9 +549,19 @@
   <LI><OBJECT type="text/sitemap"><param name="Name" value="sound.stop (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="sound.close (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="sound.push (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound.read_pcm (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_pool.music"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="music.load (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="music.stream (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_pool.WasapiManager"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="WasapiManager.devices (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="WasapiManager.init (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="WasapiManager.start (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="WasapiManager.stop (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="WasapiManager.free (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="WasapiManager.get_volume (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="WasapiManager.set_volume (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="WasapiManager.set_mute (sound_pool)"><param name="Local" value="..\html\modules\sound_pool.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_fx.Basic"><param name="Local" value="..\html\modules\sound_fx.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="Basic.__init__ (sound_fx)"><param name="Local" value="..\html\modules\sound_fx.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="Basic.get_fx (sound_fx)"><param name="Local" value="..\html\modules\sound_fx.html"></OBJECT>
@@ -255,6 +615,14 @@
   <LI><OBJECT type="text/sitemap"><param name="Name" value="Basic.pitch_monster (sound_fx)"><param name="Local" value="..\html\modules\sound_fx.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="Basic.pitch_chipmunk (sound_fx)"><param name="Local" value="..\html\modules\sound_fx.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="Basic.pitch_deep_voice (sound_fx)"><param name="Local" value="..\html\modules\sound_fx.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Basic.echo4_multitap (sound_fx)"><param name="Local" value="..\html\modules\sound_fx.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Basic.rotate_stereo (sound_fx)"><param name="Local" value="..\html\modules\sound_fx.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Basic.dx8_chorus (sound_fx)"><param name="Local" value="..\html\modules\sound_fx.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Basic.dx8_flanger (sound_fx)"><param name="Local" value="..\html\modules\sound_fx.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Basic.dx8_compressor (sound_fx)"><param name="Local" value="..\html\modules\sound_fx.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Basic.dx8_distortion (sound_fx)"><param name="Local" value="..\html\modules\sound_fx.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Basic.dx8_i3dl2_hall (sound_fx)"><param name="Local" value="..\html\modules\sound_fx.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="Basic.dx8_parameq_boost (sound_fx)"><param name="Local" value="..\html\modules\sound_fx.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="Basic.peakeq_bass_boost (sound_fx)"><param name="Local" value="..\html\modules\sound_fx.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="Basic.bqf_lowpass_wall (sound_fx)"><param name="Local" value="..\html\modules\sound_fx.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="Basic.lpf_underwater (sound_fx)"><param name="Local" value="..\html\modules\sound_fx.html"></OBJECT>
@@ -268,6 +636,45 @@
   <LI><OBJECT type="text/sitemap"><param name="Name" value="Basic.bqf_highshelf_air (sound_fx)"><param name="Local" value="..\html\modules\sound_fx.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="Basic.bqf_notch_hum (sound_fx)"><param name="Local" value="..\html\modules\sound_fx.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="Basic.parse_fx_string (sound_fx)"><param name="Local" value="..\html\modules\sound_fx.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_modules.control.parse_flags"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_modules.control.bass_call"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_modules.control.encode_path"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_modules.control.register_hstream"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_modules.control.unregister_hstream"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_modules.control.make_wav_header"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_modules.control.get_sound_preload"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_modules.control.sound_preload_perform"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_modules.control.preload_encoded"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_modules.control.preload"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_modules.control.trigger_preload_async"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_modules.control.sound_preload_release"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_modules.control.sound_preloads_clean"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_modules.control.extract_raw_bytes"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_modules.control.save_mem_buffer"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_modules.control.register_spak_lazy"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_modules.control.resolve_memory_source"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_modules.control.get_cached_sample"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_modules.control.release_sample"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_modules.control.load_sound_file"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_modules.control.get_mem_buffer"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_modules.control.free_mem_buffer"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_modules.control.clear_all_buffers"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_modules.control.load_codec_plugins"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_modules.control.init_sound"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_modules.control.shutdown_sound"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_modules.control.HStreamEntry"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="HStreamEntry.__init__ (sound_modules.control)"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_modules.control.SoundPreload"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundPreload.__init__ (sound_modules.control)"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="SoundPreload.close (sound_modules.control)"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="sound_modules.control.MixerNode"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MixerNode.__init__ (sound_modules.control)"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MixerNode.add_mixer (sound_modules.control)"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MixerNode.remove_mixer (sound_modules.control)"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MixerNode.add_channel (sound_modules.control)"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MixerNode.remove_channel (sound_modules.control)"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MixerNode.set_mixer (sound_modules.control)"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="MixerNode.free (sound_modules.control)"><param name="Local" value="..\html\modules\sound_modules.control.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="menu.menu"><param name="Local" value="..\html\modules\menu.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="menu.__init__ (menu)"><param name="Local" value="..\html\modules\menu.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="menu.initialize (menu)"><param name="Local" value="..\html\modules\menu.html"></OBJECT>
@@ -299,6 +706,11 @@
   <LI><OBJECT type="text/sitemap"><param name="Name" value="menu.setCancelSound (menu)"><param name="Local" value="..\html\modules\menu.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="menu.getEnterSound (menu)"><param name="Local" value="..\html\modules\menu.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="menu.setEnterSound (menu)"><param name="Local" value="..\html\modules\menu.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="vb.register_keyboard_layout"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="vb.register_composer"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="vb.compose_unicode_nfc"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="vb.detect_os_keyboard_languages"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="vb.navigate_text"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="vb.dialog"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="vb.message"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="vb.get_conput"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
@@ -314,6 +726,23 @@
   <LI><OBJECT type="text/sitemap"><param name="Name" value="vb.error_box"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="vb.choice_box"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="vb.progress_box"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="vb.ClipboardHistory"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ClipboardHistory.__init__ (vb)"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ClipboardHistory.push (vb)"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="ClipboardHistory.list_items (vb)"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="vb.VirtualKeyboard"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="VirtualKeyboard.__init__ (vb)"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="VirtualKeyboard.current_lang (vb)"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="VirtualKeyboard.current_rows (vb)"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="VirtualKeyboard.display_label (vb)"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="VirtualKeyboard.spoken_label (vb)"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="VirtualKeyboard.key_at (vb)"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="VirtualKeyboard.cycle_shift (vb)"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="VirtualKeyboard.cycle_lang (vb)"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="VirtualKeyboard.compose_char (vb)"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="VirtualKeyboard.activate_key (vb)"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="VirtualKeyboard.flush_pending (vb)"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="VirtualKeyboard.handle_touch (vb)"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="vb.form"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="form.__init__ (vb)"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="form.add (vb)"><param name="Local" value="..\html\modules\vb.html"></OBJECT>
@@ -490,6 +919,15 @@
   <LI><OBJECT type="text/sitemap"><param name="Name" value="AudioWindow.close (gui)"><param name="Local" value="..\html\modules\gui.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="AudioWindow.frameUpdate (gui)"><param name="Local" value="..\html\modules\gui.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="gui.Window"><param name="Local" value="..\html\modules\gui.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="inputBox.check_qt"><param name="Local" value="..\html\modules\inputBox.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="inputBox.check"><param name="Local" value="..\html\modules\inputBox.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="inputBox.kbt"><param name="Local" value="..\html\modules\inputBox.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="inputBox.kbc"><param name="Local" value="..\html\modules\inputBox.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="inputBox.dialogMessage"><param name="Local" value="..\html\modules\inputBox.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="key.token"><param name="Local" value="..\html\modules\key.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="key.code"><param name="Local" value="..\html\modules\key.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="key.chord"><param name="Local" value="..\html\modules\key.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="key.match"><param name="Local" value="..\html\modules\key.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="timer.get_ticks"><param name="Local" value="..\html\modules\timer.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="timer.get_ticks_us"><param name="Local" value="..\html\modules\timer.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="timer.get_ticks_sec"><param name="Local" value="..\html\modules\timer.html"></OBJECT>
@@ -702,6 +1140,7 @@
   <LI><OBJECT type="text/sitemap"><param name="Name" value="InputMap.load (input_map)"><param name="Local" value="..\html\modules\input_map.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="file.File"><param name="Local" value="..\html\modules\file.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="File.__init__ (file)"><param name="Local" value="..\html\modules\file.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="File.cipher (file)"><param name="Local" value="..\html\modules\file.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="File.generate_key (file)"><param name="Local" value="..\html\modules\file.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="File.dokey (file)"><param name="Local" value="..\html\modules\file.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="File.aes_encrypt (file)"><param name="Local" value="..\html\modules\file.html"></OBJECT>
@@ -764,6 +1203,8 @@
   <LI><OBJECT type="text/sitemap"><param name="Name" value="SpakArchive.__init__ (utils)"><param name="Local" value="..\html\modules\utils.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="SpakArchive.read_entry (utils)"><param name="Local" value="..\html\modules\utils.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="SpakArchive.close (utils)"><param name="Local" value="..\html\modules\utils.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="common.run"><param name="Local" value="..\html\modules\common.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="common.mkdir"><param name="Local" value="..\html\modules\common.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="system.is_frozen"><param name="Local" value="..\html\modules\system.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="system.embedded_data_path"><param name="Local" value="..\html\modules\system.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="system.abspath"><param name="Local" value="..\html\modules\system.html"></OBJECT>
@@ -777,6 +1218,7 @@
   <LI><OBJECT type="text/sitemap"><param name="Name" value="system.get_arch_dir"><param name="Local" value="..\html\modules\system.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="system.get_ext"><param name="Local" value="..\html\modules\system.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="system.load_dll"><param name="Local" value="..\html\modules\system.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="compile.preflight_check"><param name="Local" value="..\html\modules\compile.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="compile.prepare_android"><param name="Local" value="..\html\modules\compile.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="compile.build_android"><param name="Local" value="..\html\modules\compile.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="compile.prepare_beeware"><param name="Local" value="..\html\modules\compile.html"></OBJECT>
@@ -791,6 +1233,7 @@
   <LI><OBJECT type="text/sitemap"><param name="Name" value="compile.resolve_gcc_binary"><param name="Local" value="..\html\modules\compile.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="compile.build_command"><param name="Local" value="..\html\modules\compile.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="compile.run_build_step"><param name="Local" value="..\html\modules\compile.html"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Name" value="compile.build_g2rt_windows"><param name="Local" value="..\html\modules\compile.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="compile.build"><param name="Local" value="..\html\modules\compile.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="compile.create_template"><param name="Local" value="..\html\modules\compile.html"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Name" value="compile.interactive_make"><param name="Local" value="..\html\modules\compile.html"></OBJECT>

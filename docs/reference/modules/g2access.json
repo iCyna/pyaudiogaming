@@ -1,0 +1,3304 @@
+{
+  "module": "g2access",
+  "classes": [
+    {
+      "name": "AndroidScreenReader",
+      "doc": "",
+      "methods": [
+        {
+          "name": "is_active",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "speak",
+          "kind": "method",
+          "signature": "text, interrupt=False",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "interrupt",
+              "type": "any",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "AndroidTTS",
+      "doc": "",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "is_active",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "speak",
+          "kind": "method",
+          "signature": "text, interrupt=False",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "interrupt",
+              "type": "any",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "speak3d",
+          "kind": "method",
+          "signature": "text, lx, ly, lz, sx, sy, sz, interrupt=False, **kwargs",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "lx",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "ly",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "lz",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "sx",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "sy",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "sz",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "interrupt",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "**kwargs",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "silence",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_sound",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "list_engines",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_engine",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_engine",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "list_voice_languages",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_voice_language",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_voice_language",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "list_voices",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_voice",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_voice",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_use_system_default",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_use_system_default",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_rate",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_rate",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_pitch",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_pitch",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_volume",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_volume",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_pan",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_pan",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_sound_pitch",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_sound_pitch",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_output_device",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_output_device",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_mono",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_mono",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_hrtf",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_hrtf",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_fx",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_fx",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_zone_fx_provider",
+          "kind": "method",
+          "signature": "provider",
+          "params": [
+            {
+              "name": "provider",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_auto_pause",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_auto_pause",
+          "kind": "method",
+          "signature": "enabled",
+          "params": [
+            {
+              "name": "enabled",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "AudioPipeline",
+      "doc": "Shared zero-duplication BASS PCM playback, LRU cache, and 3D/HRTF/FX engine.",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "synth_fn, cache_max=64",
+          "params": [
+            {
+              "name": "synth_fn",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "cache_max",
+              "type": "any",
+              "default": "64"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "clear_cache",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "enqueue",
+          "kind": "method",
+          "signature": "text, cache_key, interrupt=True, spatial=None",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "cache_key",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "interrupt",
+              "type": "any",
+              "default": "True"
+            },
+            {
+              "name": "spatial",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "stop",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_sound",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "Provider",
+      "doc": "Minimal capability-driven base class for all g2access speech/braille drivers.",
+      "methods": [
+        {
+          "name": "is_active",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "speak",
+          "kind": "method",
+          "signature": "text, interrupt=False",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "interrupt",
+              "type": "any",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "braille",
+          "kind": "method",
+          "signature": "text",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "silence",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "speak3d",
+          "kind": "method",
+          "signature": "text, lx, ly, lz, sx, sy, sz, interrupt=False, **kwargs",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "lx",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "ly",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "lz",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "sx",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "sy",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "sz",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "interrupt",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "**kwargs",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_capabilities",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_sound",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "list_voices",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "list_engines",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "list_voice_languages",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_rate",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_rate",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_pitch",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_pitch",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_volume",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_volume",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_voice",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_voice",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_pan",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_pan",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_sound_pitch",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_sound_pitch",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_output_device",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_output_device",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_mono",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_mono",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_hrtf",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_hrtf",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_fx",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_fx",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_zone_fx_provider",
+          "kind": "method",
+          "signature": "provider",
+          "params": [
+            {
+              "name": "provider",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_auto_pause",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_auto_pause",
+          "kind": "method",
+          "signature": "enabled",
+          "params": [
+            {
+              "name": "enabled",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_engine",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_engine",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_voice_language",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_voice_language",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_use_system_default",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_use_system_default",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "IOSVoiceOver",
+      "doc": "",
+      "methods": [
+        {
+          "name": "is_active",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "speak",
+          "kind": "method",
+          "signature": "text, interrupt=False",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "interrupt",
+              "type": "any",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "IOSSpeech",
+      "doc": "",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "is_active",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "speak",
+          "kind": "method",
+          "signature": "text, interrupt=False",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "interrupt",
+              "type": "any",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "silence",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_rate",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_rate",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_pitch",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_pitch",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_volume",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_volume",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "SpeechDispatcherProvider",
+      "doc": "",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "is_active",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "speak",
+          "kind": "method",
+          "signature": "text, interrupt=False",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "interrupt",
+              "type": "any",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "silence",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "ESpeakProvider",
+      "doc": "",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "is_active",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "speak",
+          "kind": "method",
+          "signature": "text, interrupt=False",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "interrupt",
+              "type": "any",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "speak3d",
+          "kind": "method",
+          "signature": "text, lx, ly, lz, sx, sy, sz, interrupt=False, **kwargs",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "lx",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "ly",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "lz",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "sx",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "sy",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "sz",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "interrupt",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "**kwargs",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "silence",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_sound",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "list_voices",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_voice",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_voice",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_rate",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_rate",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_pitch",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_pitch",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_volume",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_volume",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_pan",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_pan",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_sound_pitch",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_sound_pitch",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_output_device",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_output_device",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_mono",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_mono",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_hrtf",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_hrtf",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_fx",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_fx",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_zone_fx_provider",
+          "kind": "method",
+          "signature": "provider",
+          "params": [
+            {
+              "name": "provider",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_auto_pause",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_auto_pause",
+          "kind": "method",
+          "signature": "enabled",
+          "params": [
+            {
+              "name": "enabled",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "MacOSSpeech",
+      "doc": "",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "is_active",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "speak",
+          "kind": "method",
+          "signature": "text, interrupt=False",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "interrupt",
+              "type": "any",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "speak3d",
+          "kind": "method",
+          "signature": "text, lx, ly, lz, sx, sy, sz, interrupt=False, **kwargs",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "lx",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "ly",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "lz",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "sx",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "sy",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "sz",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "interrupt",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "**kwargs",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "silence",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_sound",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "list_voices",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_voice",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_voice",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_rate",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_rate",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_pitch",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_pitch",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_volume",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_volume",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_pan",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_pan",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_sound_pitch",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_sound_pitch",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_output_device",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_output_device",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_mono",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_mono",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_hrtf",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_hrtf",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_fx",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_fx",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_zone_fx_provider",
+          "kind": "method",
+          "signature": "provider",
+          "params": [
+            {
+              "name": "provider",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_auto_pause",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_auto_pause",
+          "kind": "method",
+          "signature": "enabled",
+          "params": [
+            {
+              "name": "enabled",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "Router",
+      "doc": "Lightweight speech/braille router selecting the best active driver per OS.",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "output",
+          "kind": "method",
+          "signature": "text, interrupt=False",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "interrupt",
+              "type": "any",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "speak",
+          "kind": "method",
+          "signature": "text, interrupt=False",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "interrupt",
+              "type": "any",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "braille",
+          "kind": "method",
+          "signature": "text",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "silence",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "speak3d",
+          "kind": "method",
+          "signature": "text, lx, ly, lz, sx, sy, sz, interrupt=False, **kwargs",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "lx",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "ly",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "lz",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "sx",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "sy",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "sz",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "interrupt",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "**kwargs",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_outputs",
+          "kind": "method",
+          "signature": "active_only=False",
+          "params": [
+            {
+              "name": "active_only",
+              "type": "any",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_output",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_active_output",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_output",
+          "kind": "method",
+          "signature": "name=None",
+          "params": [
+            {
+              "name": "name",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_capabilities",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "list_fx",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_sound",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_volume",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_volume",
+          "kind": "method",
+          "signature": "v",
+          "params": [
+            {
+              "name": "v",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_pitch",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_pitch",
+          "kind": "method",
+          "signature": "v",
+          "params": [
+            {
+              "name": "v",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_rate",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_rate",
+          "kind": "method",
+          "signature": "v",
+          "params": [
+            {
+              "name": "v",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_voice",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_voice",
+          "kind": "method",
+          "signature": "v",
+          "params": [
+            {
+              "name": "v",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_pan",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_pan",
+          "kind": "method",
+          "signature": "v",
+          "params": [
+            {
+              "name": "v",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_sound_pitch",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_sound_pitch",
+          "kind": "method",
+          "signature": "v",
+          "params": [
+            {
+              "name": "v",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_output_device",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_output_device",
+          "kind": "method",
+          "signature": "v",
+          "params": [
+            {
+              "name": "v",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_mono",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_mono",
+          "kind": "method",
+          "signature": "v",
+          "params": [
+            {
+              "name": "v",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_hrtf",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_hrtf",
+          "kind": "method",
+          "signature": "v",
+          "params": [
+            {
+              "name": "v",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_fx",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_fx",
+          "kind": "method",
+          "signature": "v",
+          "params": [
+            {
+              "name": "v",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_zone_fx_provider",
+          "kind": "method",
+          "signature": "provider",
+          "params": [
+            {
+              "name": "provider",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_auto_pause",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_auto_pause",
+          "kind": "method",
+          "signature": "v",
+          "params": [
+            {
+              "name": "v",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "list_voices",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "list_engines",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_engine",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_engine",
+          "kind": "method",
+          "signature": "v",
+          "params": [
+            {
+              "name": "v",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "list_voice_languages",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_voice_language",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_voice_language",
+          "kind": "method",
+          "signature": "v",
+          "params": [
+            {
+              "name": "v",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_use_system_default",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_use_system_default",
+          "kind": "method",
+          "signature": "v",
+          "params": [
+            {
+              "name": "v",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "NVDAProvider",
+      "doc": "",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "is_active",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "speak",
+          "kind": "method",
+          "signature": "text, interrupt=False",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "interrupt",
+              "type": "any",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "braille",
+          "kind": "method",
+          "signature": "text",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "silence",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "ZDSRProvider",
+      "doc": "",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "is_active",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "speak",
+          "kind": "method",
+          "signature": "text, interrupt=False",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "interrupt",
+              "type": "any",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "silence",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "JAWSProvider",
+      "doc": "",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "is_active",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "speak",
+          "kind": "method",
+          "signature": "text, interrupt=False",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "interrupt",
+              "type": "any",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "braille",
+          "kind": "method",
+          "signature": "text",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "silence",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "SystemAccessProvider",
+      "doc": "",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "is_active",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "speak",
+          "kind": "method",
+          "signature": "text, interrupt=False",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "interrupt",
+              "type": "any",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "braille",
+          "kind": "method",
+          "signature": "text",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "silence",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "DolphinProvider",
+      "doc": "",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "is_active",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "speak",
+          "kind": "method",
+          "signature": "text, interrupt=False",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "interrupt",
+              "type": "any",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "silence",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "PCTalkerProvider",
+      "doc": "",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "is_active",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "speak",
+          "kind": "method",
+          "signature": "text, interrupt=False",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "interrupt",
+              "type": "any",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "silence",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "SAPI5Provider",
+      "doc": "",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "is_active",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "speak",
+          "kind": "method",
+          "signature": "text, interrupt=False",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "interrupt",
+              "type": "any",
+              "default": "False"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "speak3d",
+          "kind": "method",
+          "signature": "text, lx, ly, lz, sx, sy, sz, interrupt=False, **kwargs",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "lx",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "ly",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "lz",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "sx",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "sy",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "sz",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "interrupt",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "**kwargs",
+              "type": "dict",
+              "default": "optional"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "silence",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_sound",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "list_voices",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_voice",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_voice",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_rate",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_rate",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_pitch",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_pitch",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_volume",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_volume",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_pan",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_pan",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_sound_pitch",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_sound_pitch",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_output_device",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_output_device",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_mono",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_mono",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_hrtf",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_hrtf",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_fx",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_fx",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_zone_fx_provider",
+          "kind": "method",
+          "signature": "provider",
+          "params": [
+            {
+              "name": "provider",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_auto_pause",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_auto_pause",
+          "kind": "method",
+          "signature": "enabled",
+          "params": [
+            {
+              "name": "enabled",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "name": "create_providers",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "any",
+      "doc": ""
+    },
+    {
+      "name": "load_native_lib",
+      "kind": "function",
+      "signature": "name32, name64=None",
+      "params": [
+        {
+          "name": "name32",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "name64",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": "Load a native screen-reader shared library by architecture without console spam."
+    },
+    {
+      "name": "pcm_to_wav",
+      "kind": "function",
+      "signature": "pcm_bytes, sample_rate=22050, channels=1, bits=16",
+      "params": [
+        {
+          "name": "pcm_bytes",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "sample_rate",
+          "type": "any",
+          "default": "22050"
+        },
+        {
+          "name": "channels",
+          "type": "any",
+          "default": "1"
+        },
+        {
+          "name": "bits",
+          "type": "any",
+          "default": "16"
+        }
+      ],
+      "returns": "any",
+      "doc": "Wrap raw PCM bytes with a standard 44-byte RIFF/WAVE header."
+    }
+  ],
+  "title": "g2access — Compact High-Performance Screen Reader & BASS-Routed TTS Engine",
+  "summary": "Zero-bloat accessibility & TTS router with shared AudioPipeline (BASS PCM, LRU cache, 3D/HRTF/FX) and dedicated OS drivers: windows.py, android.py, ios.py, macos.py, linux.py."
+}

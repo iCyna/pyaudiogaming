@@ -1,15 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Cross-platform System Notifications & Lock-Screen Wake / Full-Screen Call/Alarm helper.
-
-Supports:
-- Android: ``NotificationManager`` + ``NotificationChannel`` + ``setFullScreenIntent``
-  + ``setShowWhenLocked`` / ``setTurnScreenOn`` (via Chaquopy or pyjnius)
-- Windows: WinRT Toast Notification (zero external deps) + Win32 ``SetThreadExecutionState``
-  monitor wake + ``SetForegroundWindow`` / ``HWND_TOPMOST`` window bring-to-front
-- macOS: ``osascript`` notification / ``UNUserNotificationCenter``
-- Linux: ``notify-send`` (with ``low`` / ``normal`` / ``critical`` urgency)
-- iOS: ``UNUserNotificationCenter`` (via rubicon-objc when available)
-"""
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# System notifications, lock-screen wake, and full-screen alert helper.
+# Supports Windows, Linux, macOS, Android, and iOS.
 
 import ctypes
 import os

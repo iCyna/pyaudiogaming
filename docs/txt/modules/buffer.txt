@@ -1,0 +1,8 @@
+========================================================================
+MODULE: pyaudiogaming.buffer
+buffer — Shared Runtime Registries & Handle Buffers
+========================================================================
+
+SUMMARY:
+Central in-memory registry holding the active window frame, audio device handles, stream/sample buffers, and active sound pool references.
+

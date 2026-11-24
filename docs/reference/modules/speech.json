@@ -391,6 +391,88 @@
           "doc": ""
         },
         {
+          "name": "list_engines",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_speech_engine",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_speech_engine",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "list_voice_languages",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_speech_voice_language",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_speech_voice_language",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "get_speech_use_system_default",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "set_speech_use_system_default",
+          "kind": "method",
+          "signature": "value",
+          "params": [
+            {
+              "name": "value",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
           "name": "get_outputs",
           "kind": "method",
           "signature": "active_only=False",

@@ -1491,3 +1491,18 @@ BASS_DEVICENOTIFY_DEFAULTCOM = 3
 BASS_DEVICENOTIFY_REC_DEFAULTCOM = 4
 BASS_IOSNOTIFY_INTERRUPT = 1
 BASS_IOSNOTIFY_INTERRUPT_END = 2
+
+# Additional BASS 2.4.17 HLS tag constants & volume FX struct
+BASS_TAG_HLS_EXTINF = 0x14000
+BASS_TAG_HLS_STREAMINF = 0x14001
+BASS_TAG_HLS_DATE = 0x14002
+
+
+class BASS_FX_VOLUME_PARAM(ctypes.Structure):
+    _fields_ = [
+        ('fTarget', ctypes.c_float),
+        ('fCurrent', ctypes.c_float),
+        ('fTime', ctypes.c_float),
+        ('lCurve', ctypes.c_uint32),
+    ]
+

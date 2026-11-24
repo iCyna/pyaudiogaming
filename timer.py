@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
-"""High-precision, cross-platform game timer & scheduling toolkit for PyAudioGaming.
-
-Works identically on Windows, Linux, macOS, Android, iOS, Web, and headless servers
-without requiring pygame to be initialized. Fully backwards-compatible with the
-original ``Timer`` API (``Timer()``, ``restart()``, ``elapsed``, ``startTick``).
-"""
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# High-precision game timer, cooldown, and frame scheduler.
+# Supports Windows, Linux, macOS, Android, iOS, and Web.
 
 import heapq
 import time

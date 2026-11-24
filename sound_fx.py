@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
-# Unified Audio FX Engine: BASS DX8, BASS_FX (BFX), and Steam Audio (BASS_HRTF) Presets & Parameter Manager.
+# Unified audio FX presets and parameter manager (BASS DX8, BASS_FX, Steam Audio).
+# Supports Windows, Linux, macOS, Android, and iOS.
 
 import math
 from .sound_modules.pybass import *
@@ -155,6 +156,16 @@ class Basic:
 			"pitch_monster": {"engine": "bass", "name": BASS_FX_BFX_PITCHSHIFT, "param": self.pitch_monster},
 			"pitch_chipmunk": {"engine": "bass", "name": BASS_FX_BFX_PITCHSHIFT, "param": self.pitch_chipmunk},
 			"pitch_deep_voice": {"engine": "bass", "name": BASS_FX_BFX_PITCHSHIFT, "param": self.pitch_deep_voice},
+
+			# Additional DX8 & BASS_FX (Echo4, Rotate, I3DL2Reverb, DX8 Chorus/Flanger/Compressor/Distortion/ParamEQ)
+			"echo4_multitap": {"engine": "bass", "name": BASS_FX_BFX_ECHO4, "param": self.echo4_multitap},
+			"rotate_stereo": {"engine": "bass", "name": BASS_FX_BFX_ROTATE, "param": self.rotate_stereo},
+			"dx8_chorus": {"engine": "bass", "name": BASS_FX_DX8_CHORUS, "param": self.dx8_chorus},
+			"dx8_flanger": {"engine": "bass", "name": BASS_FX_DX8_FLANGER, "param": self.dx8_flanger},
+			"dx8_compressor": {"engine": "bass", "name": BASS_FX_DX8_COMPRESSOR, "param": self.dx8_compressor},
+			"dx8_distortion": {"engine": "bass", "name": BASS_FX_DX8_DISTORTION, "param": self.dx8_distortion},
+			"dx8_i3dl2_hall": {"engine": "bass", "name": BASS_FX_DX8_I3DL2REVERB, "param": self.dx8_i3dl2_hall},
+			"dx8_parameq_boost": {"engine": "bass", "name": BASS_FX_DX8_PARAMEQ, "param": self.dx8_parameq_boost},
 		}
 
 		self.filters = {
@@ -218,6 +229,7 @@ class Basic:
 			"steam_pathing_muffled_vent": {"engine": "steam", "fx_type": hrtf_mod.BASS_HRTF_FX_PATHING, "preset_id": 0, "params": {"path_eq_low": 0.70, "path_eq_mid": 0.35, "path_eq_high": 0.08, "path_wet": 0.50}},
 
 			# 4. Steam Audio Virtual Surround, Ambisonics & Panning FX
+			"steam_virtual_surround_mono": {"engine": "steam", "fx_type": hrtf_mod.BASS_HRTF_FX_VIRTUAL_SURROUND, "preset_id": hrtf_mod.BASS_HRTF_LAYOUT_MONO, "params": {}},
 			"steam_virtual_surround": {"engine": "steam", "fx_type": hrtf_mod.BASS_HRTF_FX_VIRTUAL_SURROUND, "preset_id": hrtf_mod.BASS_HRTF_LAYOUT_STEREO, "params": {}},
 			"steam_virtual_surround_quad": {"engine": "steam", "fx_type": hrtf_mod.BASS_HRTF_FX_VIRTUAL_SURROUND, "preset_id": hrtf_mod.BASS_HRTF_LAYOUT_QUAD, "params": {}},
 			"steam_virtual_surround_5_1": {"engine": "steam", "fx_type": hrtf_mod.BASS_HRTF_FX_VIRTUAL_SURROUND, "preset_id": hrtf_mod.BASS_HRTF_LAYOUT_SURROUND_5_1, "params": {}},
@@ -226,6 +238,9 @@ class Basic:
 			"steam_ambisonics_2nd": {"engine": "steam", "fx_type": hrtf_mod.BASS_HRTF_FX_AMBISONICS, "preset_id": 2, "params": {"ambi_order": 2}},
 			"steam_ambisonics_3rd": {"engine": "steam", "fx_type": hrtf_mod.BASS_HRTF_FX_AMBISONICS, "preset_id": 3, "params": {"ambi_order": 3}},
 			"steam_panning": {"engine": "steam", "fx_type": hrtf_mod.BASS_HRTF_FX_PANNING, "preset_id": 0, "params": {}},
+			"steam_occlusion_light": {"engine": "steam", "fx_type": hrtf_mod.BASS_HRTF_FX_DIRECT, "preset_id": hrtf_mod.BASS_HRTF_MAT_GENERIC, "params": {"occlusion": 0.35}},
+			"steam_occlusion_heavy": {"engine": "steam", "fx_type": hrtf_mod.BASS_HRTF_FX_DIRECT, "preset_id": hrtf_mod.BASS_HRTF_MAT_CONCRETE, "params": {"occlusion": 0.88}},
+			"steam_air_absorption": {"engine": "steam", "fx_type": hrtf_mod.BASS_HRTF_FX_DIRECT, "preset_id": hrtf_mod.BASS_HRTF_MAT_AIR, "params": {"air_absorption": 3.0}},
 		}
 
 	def get_fx(self, fx_key):
@@ -379,6 +394,27 @@ class Basic:
 	def pitch_chipmunk(self): return self._pitchshift(1.0, 6.0, 1024, 8)
 	def pitch_deep_voice(self): return self._pitchshift(1.0, -3.5, 1024, 8)
 
+	def echo4_multitap(self):
+		p = BASS_BFX_ECHO4(); p.fDryMix, p.fWetMix, p.fFeedback, p.fDelay, p.bStereo, p.lChannel = 0.90, 0.45, 0.40, 0.30, True, BASS_BFX_CHANALL; return p
+	def rotate_stereo(self):
+		p = BASS_BFX_ROTATE(); p.fRate, p.lChannel = 0.5, BASS_BFX_CHANALL; return p
+	def dx8_chorus(self):
+		p = BASS_DX8_CHORUS(); p.fWetDryMix, p.fDepth, p.fFeedback, p.fFrequency, p.lWaveform, p.fDelay, p.lPhase = 45.0, 20.0, 20.0, 1.2, 1, 12.0, BASS_DX8_PHASE_90; return p
+	def dx8_flanger(self):
+		p = BASS_DX8_FLANGER(); p.fWetDryMix, p.fDepth, p.fFeedback, p.fFrequency, p.lWaveform, p.fDelay, p.lPhase = 45.0, 75.0, -35.0, 0.4, 1, 2.5, BASS_DX8_PHASE_ZERO; return p
+	def dx8_compressor(self):
+		p = BASS_DX8_COMPRESSOR(); p.fGain, p.fAttack, p.fRelease, p.fThreshold, p.fRatio, p.fPredelay = 2.0, 10.0, 180.0, -18.0, 3.0, 4.0; return p
+	def dx8_distortion(self):
+		p = BASS_DX8_DISTORTION(); p.fGain, p.fEdge, p.fPostEQCenterFrequency, p.fPostEQBandwidth, p.fPreLowpassCutoff = -12.0, 35.0, 2400.0, 2400.0, 4000.0; return p
+	def dx8_i3dl2_hall(self):
+		p = BASS_DX8_I3DL2REVERB()
+		p.lRoom, p.lRoomHF, p.flRoomRolloffFactor, p.flDecayTime, p.flDecayHFRatio = -1000, -400, 0.0, 2.2, 0.7
+		p.lReflections, p.flReflectionsDelay, p.lReverb, p.flReverbDelay = -800, 0.015, 200, 0.022
+		p.flDiffusion, p.flDensity, p.flHFReference = 100.0, 100.0, 5000.0
+		return p
+	def dx8_parameq_boost(self):
+		p = BASS_DX8_PARAMEQ(); p.fCenter, p.fBandwidth, p.fGain = 1000.0, 12.0, 6.0; return p
+
 	# --- PEAK EQ & BIQUAD FILTERS ---
 	def _peakeq(self, band, center, gain, bw=0.0):
 		p = BASS_BFX_PEAKEQ(); p.lBand, p.fBandwidth, p.fCenter, p.fGain, p.lChannel = int(band), float(bw), float(center), float(gain), int(BASS_BFX_CHANALL); return p
@@ -457,4 +493,27 @@ class Basic:
 			if len(f) >= 4: params["path_wet"] = f[3]
 			desc = {"engine": "steam", "id": fx_id or "steam_path", "fx_type": hrtf_mod.BASS_HRTF_FX_PATHING, "preset_id": 0, "params": params}
 			return fx_id, desc, params
+		if cmd == "steam_directivity":
+			params = {}
+			if len(f) >= 1: params["dipole_weight"] = f[0]
+			if len(f) >= 2: params["dipole_power"] = f[1]
+			desc = {"engine": "steam", "id": fx_id or "steam_directivity", "fx_type": hrtf_mod.BASS_HRTF_FX_DIRECT, "preset_id": -1, "params": params}
+			return fx_id, desc, params
+		if cmd == "steam_surround":
+			layout = int(f[0]) if len(f) >= 1 else hrtf_mod.BASS_HRTF_LAYOUT_STEREO
+			desc = {"engine": "steam", "id": fx_id or "steam_surround", "fx_type": hrtf_mod.BASS_HRTF_FX_VIRTUAL_SURROUND, "preset_id": layout, "params": {"surround_layout": layout}}
+			return fx_id, desc, desc["params"]
+		if cmd == "steam_ambisonics":
+			order = max(1, min(3, int(f[0]))) if len(f) >= 1 else 1
+			desc = {"engine": "steam", "id": fx_id or "steam_ambisonics", "fx_type": hrtf_mod.BASS_HRTF_FX_AMBISONICS, "preset_id": order, "params": {"ambi_order": order}}
+			return fx_id, desc, desc["params"]
+		if cmd == "steam_panning":
+			desc = {"engine": "steam", "id": fx_id or "steam_panning", "fx_type": hrtf_mod.BASS_HRTF_FX_PANNING, "preset_id": 0, "params": {}}
+			return fx_id, desc, desc["params"]
+		if cmd == "rotate" and len(f) >= 1:
+			p = BASS_BFX_ROTATE(); p.fRate, p.lChannel = float(f[0]), BASS_BFX_CHANALL
+			return fx_id, BASS_FX_BFX_ROTATE, p
+		if cmd == "echo4" and len(f) >= 4:
+			p = BASS_BFX_ECHO4(); p.fDryMix, p.fWetMix, p.fFeedback, p.fDelay, p.bStereo, p.lChannel = f[0], f[1], f[2], f[3], (bool(f[4]) if len(f) > 4 else True), BASS_BFX_CHANALL
+			return fx_id, BASS_FX_BFX_ECHO4, p
 		return fx_id, None, None

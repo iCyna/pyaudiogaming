@@ -306,16 +306,15 @@ def build_app_vault(app_root, entry_script, out_vault_path, extra_py_dirs=(), em
         if fullname in seen:
             return
         seen.add(fullname)
-        src = py_path.read_text(encoding="utf-8", errors="replace")
+        src = py_path.read_text(encoding="utf-8-sig", errors="replace")
         hasher.update(fullname.encode("utf-8"))
         hasher.update(src.encode("utf-8"))
         try:
             code_obj = compile(src, f"<app:{fullname}>", "exec", optimize=1)
             payload = b"\x00" * 16 + marshal.dumps(code_obj)
             is_pyc = True
-        except SyntaxError:
-            payload = src.encode("utf-8")
-            is_pyc = False
+        except SyntaxError as exc:
+            raise SyntaxError(f"[G2RT] Syntax error in {py_path}: line {exc.lineno}: {exc.msg}") from exc
         entries.append((fullname, is_pkg, is_pyc, payload))
 
     def _scan_dir(base_dir, pkg_prefix=""):
@@ -904,7 +903,7 @@ def build_g2rt_target(project, name, target_os, data=(), arch=None, args=(), ren
                 "android": [],
                 "linux": ["pygame", "pycryptodome", "cryptography", "polib"],
                 "macos": ["pygame", "pycryptodome", "cryptography", "polib"],
-                "ios": ["polib"],
+                "ios": ["polib", "rubicon-objc"],
             }
             existing_low = {r.lower().split("==")[0].split(">=")[0] for r in extra_reqs}
             for req in default_reqs_by_os.get(norm_os, []):

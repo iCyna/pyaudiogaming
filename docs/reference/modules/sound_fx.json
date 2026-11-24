@@ -445,6 +445,70 @@
           "doc": ""
         },
         {
+          "name": "echo4_multitap",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "rotate_stereo",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "dx8_chorus",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "dx8_flanger",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "dx8_compressor",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "dx8_distortion",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "dx8_i3dl2_hall",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "dx8_parameq_boost",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
           "name": "peakeq_bass_boost",
           "kind": "method",
           "signature": "",
@@ -558,6 +622,6 @@
     }
   ],
   "functions": [],
-  "title": "sound_fx — Real-Time Audio Effects (Reverb, EQ, Echo, Distortion, Chorus)",
-  "summary": "High-level DSP effect presets and real-time BASS_FX / DX8 effect chains attached to any sound or mixer channel."
+  "title": "sound_fx — Unified FX Engine (BASS DX8, BASS_FX & 45 Steam Audio Presets)",
+  "summary": "High-level DSP & Steam Audio acoustic FX catalog: 17 DX8 Reverbs, Freeverb, Echo/Echo2/Echo3/Echo4, Rotate, Chorus, Flanger, Phaser, AutoWah, Compressor, Distortion, PitchShift, 12 Biquad Filters, 45 Steam Audio presets, and dynamic colon-string parser."
 }

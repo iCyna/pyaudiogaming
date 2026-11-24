@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-"""pygame.key shim."""
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# pygame.key state and modifier shim.
+# Supports Android and iOS.
+
 from . import locals as _L
 
 _FOCUSED = True
@@ -138,13 +141,19 @@ def name(code):
 
 
 def start_text_input():
-    from . import _android_bridge
+    from . import _android_bridge, _ios_bridge
     _android_bridge.show_keyboard()
+    _ios_bridge.show_keyboard()
 
 
 def stop_text_input():
-    from . import _android_bridge
+    from . import _android_bridge, _ios_bridge
     _android_bridge.hide_keyboard()
+    _ios_bridge.hide_keyboard()
+
+
+def set_text_input_rect(rect=None):
+    return None
 
 
 def set_repeat(delay=0, interval=0):

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-# instant support utility toolkit
-# copyright 2025 belong ihcyna (Labubu)<phucnggo29@gmail.com>.
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# Core utility toolkit: URL detection, tokens, and SPAK archive packing.
+# Supports Windows, Linux, macOS, Android, and iOS.
 
 import platform
 import os
@@ -86,9 +87,11 @@ import hashlib
 import threading
 
 _SPAK_MAGIC = b"SPAK"
-_SPAK_VERSION = 1
+_SPAK_VERSION = 2
 _SPAK_FLAG_ZLIB = 0x01
 _SPAK_FLAG_ENC = 0x02
+_SPAK_FLAG_MAC = 0x04
+_SPAK_ENTRY_ZLIB = 0x01
 _SPAK_DEFAULT_EXTS = (".ogg", ".wav", ".mp3", ".flac", ".mid", ".midi", ".sf2", ".opus")
 
 
@@ -108,32 +111,39 @@ def _derive_spak_key(password, salt):
 	return hashlib.blake2b(pw_bytes, salt=salt[:16], person=b"AGY_SPAK", digest_size=32).digest()
 
 
-def _spak_stream_xor(data_bytes, key32, context_bytes):
+def _spak_stream_xor(data_bytes, key32, context_bytes, version=1):
 	# Ultra-fast C-backed integer XOR stream cipher using BLAKE2b counter blocks
 	length = len(data_bytes)
 	if length == 0:
 		return b""
-	# Generate up to 4096 bytes of unique keystream per context, then cycle if full-file encryption is used
-	block_cap = min(length, 4096)
-	n_blocks = (block_cap + 63) // 64
-	ks_parts = [
-		hashlib.blake2b(context_bytes + struct.pack("<I", i), key=key32, digest_size=64).digest()
-		for i in range(n_blocks)
-	]
-	ks = b"".join(ks_parts)
-	if length > len(ks):
-		ks = (ks * ((length // len(ks)) + 1))[:length]
+	if version >= 2:
+		# SPAK v2: Full non-repeating BLAKE2b-512 counter stream (zero keystream reuse)
+		n_blocks = (length + 63) // 64
+		ks = b"".join(
+			hashlib.blake2b(context_bytes + struct.pack("<I", i), key=key32, digest_size=64).digest()
+			for i in range(n_blocks)
+		)[:length]
 	else:
-		ks = ks[:length]
+		# SPAK v1 legacy compatibility (4096-byte cyclic keystream)
+		block_cap = min(length, 4096)
+		n_blocks = (block_cap + 63) // 64
+		ks = b"".join(
+			hashlib.blake2b(context_bytes + struct.pack("<I", i), key=key32, digest_size=64).digest()
+			for i in range(n_blocks)
+		)
+		if length > len(ks):
+			ks = (ks * ((length // len(ks)) + 1))[:length]
+		else:
+			ks = ks[:length]
 	return (int.from_bytes(data_bytes, "little") ^ int.from_bytes(ks, "little")).to_bytes(length, "little")
 
 
-def _transform_spak_chunk(raw_bytes, enc_len, key32, rel_offset, size):
+def _transform_spak_chunk(raw_bytes, enc_len, key32, rel_offset, size, version=1, entry_flags=0):
 	if enc_len <= 0 or not raw_bytes:
 		return bytes(raw_bytes)
 	actual_enc = min(len(raw_bytes), int(enc_len))
-	ctx = struct.pack("<QQ", int(rel_offset), int(size))
-	head_dec = _spak_stream_xor(bytes(raw_bytes[:actual_enc]), key32, ctx)
+	ctx = struct.pack("<QQI", int(rel_offset), int(size), int(entry_flags)) if version >= 2 else struct.pack("<QQ", int(rel_offset), int(size))
+	head_dec = _spak_stream_xor(bytes(raw_bytes[:actual_enc]), key32, ctx, version=version)
 	if actual_enc >= len(raw_bytes):
 		return head_dec
 	if isinstance(raw_bytes, memoryview):
@@ -145,21 +155,25 @@ def _transform_spak_chunk(raw_bytes, enc_len, key32, rel_offset, size):
 
 class SpakArchive:
 	"""Manages a loaded .spak package and provides thread-safe O(1) seek & slice reading."""
-	def __init__(self, spak_path, data_offset, key32, header_info):
+	def __init__(self, spak_path, data_offset, key32, header_info, version=1):
 		self.spak_path = os.fspath(spak_path)
 		self.data_offset = int(data_offset)
 		self.key32 = key32
 		self.header_info = header_info
+		self.version = int(version)
 		self._lock = threading.RLock()
 		self._fobj = open(self.spak_path, "rb")
 
-	def read_entry(self, rel_offset, size, enc_len):
+	def read_entry(self, rel_offset, size, enc_len, entry_flags=0):
 		with self._lock:
 			if self._fobj is None or self._fobj.closed:
 				self._fobj = open(self.spak_path, "rb")
 			self._fobj.seek(self.data_offset + int(rel_offset))
 			chunk = self._fobj.read(int(size))
-		return _transform_spak_chunk(chunk, enc_len, self.key32, rel_offset, size)
+		data = _transform_spak_chunk(chunk, enc_len, self.key32, rel_offset, size, version=self.version, entry_flags=entry_flags)
+		if entry_flags & _SPAK_ENTRY_ZLIB:
+			data = zlib.decompress(data)
+		return data
 
 	def close(self):
 		with self._lock:
@@ -178,7 +192,7 @@ def make_spak(
 	header_path=None,
 	prefix=None,
 	extensions=_SPAK_DEFAULT_EXTS,
-	encrypt_bytes=256,
+	encrypt_bytes=-1,
 ):
 	"""
 	Đóng gói một thư mục âm thanh (bao gồm toàn bộ thư mục con) hoặc danh sách/dict các file
@@ -187,13 +201,12 @@ def make_spak(
 	- source: Đường dẫn thư mục (quét đệ quy mọi thư mục con, tự động kẹp tên thư mục phía trước tên file),
 	          hoặc list đường dẫn file, hoặc dict {tên_file_ảo: đường_dẫn_hoặc_bytes}.
 	- output_path: Đường dẫn file gói đầu ra (mặc định: <tên_thư_mục>.spak).
-	- password: Mật khẩu mã hóa gói (mã hóa 100% header + mã hóa phần đầu mỗi file âm thanh).
+	- password: Mật khẩu mã hóa gói (tự động nén thông minh từng file + mã hóa 100% header & dữ liệu + MAC xác thực).
 	- header_path: Nếu None (mặc định) -> nhúng thẳng header vào đầu file .spak.
 	               Nếu truyền đường dẫn (ví dụ "header.inf") hoặc True -> xuất file header.inf riêng.
 	- prefix: Tiền tố thư mục tùy chọn muốn gắn vào trước tên từng file trong gói.
 	- extensions: Tuple các đuôi file âm thanh cần gom (None = lấy mọi file).
-	- encrypt_bytes: Số byte đầu của mỗi file .ogg cần mã hóa để phá header OggS/Vorbis và giải mã tức thì
-	                 (mặc định 256 byte; truyền -1 nếu muốn mã hóa toàn bộ 100% dung lượng từng file).
+	- encrypt_bytes: Số byte mã hóa mỗi file (mặc định -1 = mã hóa 100% toàn bộ dung lượng từng file).
 	"""
 	items = []  # List of (virtual_rel_name, raw_bytes)
 	root_prefix = ""
@@ -279,7 +292,16 @@ def make_spak(
 	curr_offset = 0
 
 	for vname, raw_data in items:
-		size = len(raw_data)
+		# Smart compression: only store zlib-compressed if it saves >= 5% (shrinks WAV/SF2/JSON; skips already-compressed OGG/OPUS/MP3)
+		entry_flags = 0
+		payload = raw_data
+		if len(raw_data) >= 64:
+			comp = zlib.compress(raw_data, level=9)
+			if len(comp) < int(len(raw_data) * 0.95):
+				payload = comp
+				entry_flags |= _SPAK_ENTRY_ZLIB
+
+		size = len(payload)
 		if encrypt_bytes is None or int(encrypt_bytes) == 0:
 			enc_len = 0
 		elif int(encrypt_bytes) < 0:
@@ -287,9 +309,9 @@ def make_spak(
 		else:
 			enc_len = min(size, int(encrypt_bytes))
 
-		enc_chunk = _transform_spak_chunk(raw_data, enc_len, key32, curr_offset, size)
+		enc_chunk = _transform_spak_chunk(payload, enc_len, key32, curr_offset, size, version=_SPAK_VERSION, entry_flags=entry_flags)
 		encrypted_chunks.append(enc_chunk)
-		file_entries.append([vname, curr_offset, size, enc_len])
+		file_entries.append([vname, curr_offset, size, enc_len, entry_flags])
 		curr_offset += size
 
 	header_dict = {
@@ -301,10 +323,12 @@ def make_spak(
 	}
 	raw_header = json.dumps(header_dict, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
 	comp_header = zlib.compress(raw_header, level=9)
-	enc_header = _spak_stream_xor(comp_header, key32, b"SPAK_HEADER_V1")
+	enc_header = _spak_stream_xor(comp_header, key32, b"SPAK_HEADER_V2", version=_SPAK_VERSION)
+	hdr_mac = hashlib.blake2b(salt + enc_header, key=key32, digest_size=16).digest()
+	enc_header_with_mac = hdr_mac + enc_header
 
-	flags = _SPAK_FLAG_ZLIB | _SPAK_FLAG_ENC
-	header_envelope = struct.pack("<4sBBI16s", _SPAK_MAGIC, _SPAK_VERSION, flags, len(enc_header), salt) + enc_header
+	flags = _SPAK_FLAG_ZLIB | _SPAK_FLAG_ENC | _SPAK_FLAG_MAC
+	header_envelope = struct.pack("<4sBBI16s", _SPAK_MAGIC, _SPAK_VERSION, flags, len(enc_header_with_mac), salt) + enc_header_with_mac
 
 	out_dir = os.path.dirname(os.path.abspath(output_path))
 	if out_dir and not os.path.exists(out_dir):
@@ -467,7 +491,17 @@ def load_spak(
 	key32 = _derive_spak_key(password, salt)
 
 	try:
-		comp_hdr = _spak_stream_xor(enc_hdr, key32, b"SPAK_HEADER_V1") if (flags & _SPAK_FLAG_ENC) else enc_hdr
+		if flags & _SPAK_FLAG_MAC:
+			if len(enc_hdr) < 16:
+				raise ValueError("Truncated SPAK MAC")
+			got_mac, enc_body = enc_hdr[:16], enc_hdr[16:]
+			exp_mac = hashlib.blake2b(salt + enc_body, key=key32, digest_size=16).digest()
+			if not secrets.compare_digest(got_mac, exp_mac):
+				raise ValueError("MAC verification failed")
+		else:
+			enc_body = enc_hdr
+		hdr_ctx = b"SPAK_HEADER_V2" if ver >= 2 else b"SPAK_HEADER_V1"
+		comp_hdr = _spak_stream_xor(enc_body, key32, hdr_ctx, version=ver) if (flags & _SPAK_FLAG_ENC) else enc_body
 		raw_hdr = zlib.decompress(comp_hdr) if (flags & _SPAK_FLAG_ZLIB) else comp_hdr
 		header_info = json.loads(raw_hdr.decode("utf-8"))
 	except Exception as ex:
@@ -487,14 +521,15 @@ def load_spak(
 	registered_keys = []
 
 	if is_lazy:
-		archive = SpakArchive(spak_path, data_offset, key32, header_info)
+		archive = SpakArchive(spak_path, data_offset, key32, header_info, version=ver)
 		total = len(file_entries)
 		for idx, item in enumerate(file_entries, 1):
 			vname, rel_offset, size, enc_len = item[0], item[1], item[2], item[3]
+			eflags = item[4] if len(item) > 4 else 0
 			primary_key, aliases = _build_spak_aliases(vname, root_prefix, orig_spak_arg, custom_prefix=prefix)
 
-			def _make_loader(arc=archive, roff=rel_offset, sz=size, elen=enc_len):
-				return lambda: arc.read_entry(roff, sz, elen)
+			def _make_loader(arc=archive, roff=rel_offset, sz=size, elen=enc_len, flg=eflags):
+				return lambda: arc.read_entry(roff, sz, elen, flg)
 
 			control.register_spak_lazy(primary_key, aliases, _make_loader(), target=target, archive_obj=archive)
 			registered_keys.append(primary_key)
@@ -507,9 +542,12 @@ def load_spak(
 		total = len(file_entries)
 		for idx, item in enumerate(file_entries, 1):
 			vname, rel_offset, size, enc_len = item[0], item[1], item[2], item[3]
+			eflags = item[4] if len(item) > 4 else 0
 			primary_key, aliases = _build_spak_aliases(vname, root_prefix, orig_spak_arg, custom_prefix=prefix)
 			raw_slice = blob[rel_offset : rel_offset + size]
-			dec_bytes = _transform_spak_chunk(raw_slice, enc_len, key32, rel_offset, size)
+			dec_bytes = _transform_spak_chunk(raw_slice, enc_len, key32, rel_offset, size, version=ver, entry_flags=eflags)
+			if eflags & _SPAK_ENTRY_ZLIB:
+				dec_bytes = zlib.decompress(dec_bytes)
 			control.save_mem_buffer(primary_key, dec_bytes, target=target, aliases=aliases)
 			if preload_sample and target in ("hsample", "both") and control.sound_initialized:
 				smp, ch, _, _ = control.get_cached_sample(primary_key)

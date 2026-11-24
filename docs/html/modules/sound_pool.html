@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>sound_pool — BASS Audio Engine, 3D HRTF, Steam Audio &amp; Recording — PyAudioGaming</title>
+  <title>sound_pool — BASS Audio Engine, 3D HRTF, Tempo/Tone, URL Streaming &amp; Recording — PyAudioGaming</title>
   <link rel="stylesheet" href="../style.css">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to main content</a>
   <header role="banner">
-    <h1>sound_pool — BASS Audio Engine, 3D HRTF, Steam Audio &amp; Recording — PyAudioGaming</h1>
+    <h1>sound_pool — BASS Audio Engine, 3D HRTF, Tempo/Tone, URL Streaming &amp; Recording — PyAudioGaming</h1>
     <nav aria-label="Documentation Navigation">
     <a href="../index.html" class="">Home</a>
     <a href="../01_getting_started.html" class="">01. Getting Started</a>
@@ -23,26 +23,27 @@
   </header>
   <main id="main-content" role="main">
 <p><a href="../api_reference.html">&larr; Back to All Modules</a></p>
-<div class="callout"><strong>Summary:</strong> Full-featured BASS audio engine: output/input device management, streaming &amp; cached samples, fading, binaural HRTF, Steam Audio wall occlusion, push streams, and microphone recording.</div>
+<div class="callout"><strong>Summary:</strong> Complete BASS audio engine: playback, 3D binaural HRTF &amp; Steam Audio occlusion, Tempo/Tone (0..100+%), Reverse, URL streaming, LUFS loudness, native WAV/MP3/OGG/FLAC/OPUS encoding, Tags, Sync callbacks, Mixer/Split/Matrix, MIDI, VST, WASAPI, and live recording.</div>
 <h2>Usage Guide &amp; Examples</h2>
 
 <h3>How to Use</h3>
 <ol>
-  <li>Initialize audio output once with <code>out = output(device=-1)</code>.</li>
-  <li>Create a <code>sound()</code> object, call <code>stream(path)</code>, configure <code>volume</code>/<code>pan</code>/<code>pitch</code>, and call <code>play()</code> or <code>play_looped()</code>.</li>
-  <li>For 3D binaural audio, pass <code>mono=True</code>, call <code>attach_hrtf_dsp()</code>, and call <code>update_hrtf_listener(...)</code> each frame.</li>
-  <li>For real-time voice chat or procedural audio, use <code>record(mono=True, draw=True)</code> and <code>sound.stream("", mono=True, draw=True)</code> + <code>push(pcm_bytes)</code>.</li>
+  <li>Initialize audio output once with <code>out = output(ThreeD=True)</code> (HRTF prewarms automatically without blocking startup).</li>
+  <li>Stream local files, SPAK buffers, or <strong>HTTP/HTTPS URLs</strong> seamlessly via <code>s.stream(path_or_url, ThreeD=True, tempo=True, reverse=False)</code> — <code>utils.is_url()</code> automatically routes URLs through <code>BASS_StreamCreateURL</code>.</li>
+  <li>Adjust speed without pitch via <code>s.set_tempo(125)</code> and pitch without speed via <code>s.set_tone(150)</code> on the intuitive <code>0..100+</code> scale (<code>100</code> = normal; <code>set_tone</code> even works on regular streams without <code>tempo=True</code>!).</li>
+  <li>Move 3D sounds smoothly with <code>s.set3d(...)</code>, <code>s.slide3d(...)</code> (uses native C <code>BASS_HRTF_SlidePosition</code> for one-shot slides), <code>s.slide_hrtf_position(...)</code>, and <code>s.slide_hrtf_attribute(...)</code>.</li>
+  <li>Read metadata with <code>s.get_tags()</code>, measure EBU R128 loudness via <code>s.start_loudness()</code> / <code>s.get_loudness()</code>, encode to WAV/MP3/OGG/FLAC/OPUS via <code>s.start_encode(...)</code>, attach event callbacks with <code>s.on_sync("end", cb)</code>, or use <code>WasapiManager</code> on Windows.</li>
 </ol>
-<pre><code>from pyaudiogaming.sound_pool import output, sound, update_hrtf_listener
+<pre><code>from pyaudiogaming.sound_pool import output, sound, add_hrtf_env_box, update_hrtf_listener
 
-out = output(device=-1, frequency=44100)
+out = output(ThreeD=True)
 s = sound()
-s.stream("res/sounds/beacon.ogg", mono=True)
-s.attach_hrtf_dsp()
-s.volume = 80
-s.play_looped()
-
-update_hrtf_listener(0, 0, 1.7, 0, 1, 0, 0, 0, 1)</code></pre>
+s.stream("res/sounds/beacon.ogg", mono=True, ThreeD=True, tempo=True)
+s.set_tempo(120)          # 1.2x speed, unchanged pitch
+s.set_tone(115)           # +15% pitch, unchanged speed
+s.setfx("steam_cave")     # Steam Audio acoustic reverb
+s.slide3d(0, 0, 0, -8, 2, 0, 8, 2, 0, 1500, "once")
+s.play()</code></pre>
 
 <h2>Parameter &amp; API Tables</h2>
 <label for="mod-search">Filter symbols in this module:</label>
@@ -51,6 +52,7 @@ update_hrtf_listener(0, 0, 1.7, 0, 1, 0, 0, 0, 1)</code></pre>
 <table class="api-tbl" id="tbl_sound_pool_funcs">
   <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
   <tbody>
+    <tr><td><span class="badge">function</span><code>prewarm_hrtf_async(sample_rate=None, delay=0.0)</code></td><td><code>sample_rate</code> (any, default: <code>None</code>)<br><code>delay</code> (any, default: <code>0.0</code>)</td><td><code>any</code></td><td>Pre-initialize Steam Audio HRTF on a background thread so startup &amp; first 3D sound never stall.</td></tr>
     <tr><td><span class="badge">function</span><code>set_hrtf_frame_size(frame_size=512)</code></td><td><code>frame_size</code> (any, default: <code>512</code>)</td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">function</span><code>get_hrtf_frame_size()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">function</span><code>set_hrtf_distance_model(min_dist=1.0, max_dist=50.0, rolloff=0.12, blend_step=0.25)</code></td><td><code>min_dist</code> (any, default: <code>1.0</code>)<br><code>max_dist</code> (any, default: <code>50.0</code>)<br><code>rolloff</code> (any, default: <code>0.12</code>)<br><code>blend_step</code> (any, default: <code>0.25</code>)</td><td><code>any</code></td><td>—</td></tr>
@@ -67,6 +69,9 @@ update_hrtf_listener(0, 0, 1.7, 0, 1, 0, 0, 0, 1)</code></pre>
     <tr><td><span class="badge">function</span><code>get_output_device()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">function</span><code>set_input_device(device)</code></td><td><code>device</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">function</span><code>get_input_device()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">function</span><code>scale_pcm16(pcm_bytes, gain=1.0)</code></td><td><code>pcm_bytes</code> (any, default: <code>required</code>)<br><code>gain</code> (any, default: <code>1.0</code>)</td><td><code>any</code></td><td>Apply linear gain to signed 16-bit little-endian PCM bytes.</td></tr>
+    <tr><td><span class="badge">function</span><code>encode_audio_frame(pcm_bytes)</code></td><td><code>pcm_bytes</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>Encode 16-bit mono PCM bytes into a self-contained 4:1 IMA-ADPCM frame.</td></tr>
+    <tr><td><span class="badge">function</span><code>decode_audio_frame(encoded_bytes)</code></td><td><code>encoded_bytes</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>Decode a self-contained 4:1 IMA-ADPCM frame back into 16-bit mono PCM bytes.</td></tr>
     <tr><td><span class="badge">function</span><code>clean_oneshots(force=False)</code></td><td><code>force</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">function</span><code>playsingle(filename, volume=100, pitch=100, pan=0, mono=False, ThreeD=False, **kwargs)</code></td><td><code>filename</code> (any, default: <code>required</code>)<br><code>volume</code> (any, default: <code>100</code>)<br><code>pitch</code> (any, default: <code>100</code>)<br><code>pan</code> (any, default: <code>0</code>)<br><code>mono</code> (any, default: <code>False</code>)<br><code>ThreeD</code> (any, default: <code>False</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
   </tbody>
@@ -129,6 +134,39 @@ update_hrtf_listener(0, 0, 1.7, 0, 1, 0, 0, 0, 1)</code></pre>
     <tr><td><span class="badge">method</span><code>set_steam_physical_params(x=0.0, y=0.0, z=0.0, occlusion=0.0, air_absorption=1.0, trans_low=None, trans_mid=None, trans_high=None)</code></td><td><code>x</code> (any, default: <code>0.0</code>)<br><code>y</code> (any, default: <code>0.0</code>)<br><code>z</code> (any, default: <code>0.0</code>)<br><code>occlusion</code> (any, default: <code>0.0</code>)<br><code>air_absorption</code> (any, default: <code>1.0</code>)<br><code>trans_low</code> (any, default: <code>None</code>)<br><code>trans_mid</code> (any, default: <code>None</code>)<br><code>trans_high</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">method</span><code>set_steam_directivity(directivity=1.0, dipole_weight=None, dipole_power=1.0, ahead=(0.0, 1.0, 0.0))</code></td><td><code>directivity</code> (any, default: <code>1.0</code>)<br><code>dipole_weight</code> (any, default: <code>None</code>)<br><code>dipole_power</code> (any, default: <code>1.0</code>)<br><code>ahead</code> (any, default: <code>(0.0, 1.0, 0.0)</code>)</td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">method</span><code>set_steam_mode(mode=0, ambi_order=1, surround_layout=1)</code></td><td><code>mode</code> (any, default: <code>0</code>)<br><code>ambi_order</code> (any, default: <code>1</code>)<br><code>surround_layout</code> (any, default: <code>1</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_hrtf_distance_limits(min_dist=1.0, max_dist=50.0, rolloff=0.12, blend_step=0.25)</code></td><td><code>min_dist</code> (any, default: <code>1.0</code>)<br><code>max_dist</code> (any, default: <code>50.0</code>)<br><code>rolloff</code> (any, default: <code>0.12</code>)<br><code>blend_step</code> (any, default: <code>0.25</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_hrtf_source_radius(radius=0.0)</code></td><td><code>radius</code> (any, default: <code>0.0</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_hrtf_air_absorption_bands(low=1.0, mid=1.0, high=1.0)</code></td><td><code>low</code> (any, default: <code>1.0</code>)<br><code>mid</code> (any, default: <code>1.0</code>)<br><code>high</code> (any, default: <code>1.0</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_hrtf_spatial_blend(blend=1.0)</code></td><td><code>blend</code> (any, default: <code>1.0</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_hrtf_stereo_input(enabled=True)</code></td><td><code>enabled</code> (any, default: <code>True</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>slide_hrtf_position(x, y, z, time_ms=250.0)</code></td><td><code>x</code> (any, default: <code>required</code>)<br><code>y</code> (any, default: <code>required</code>)<br><code>z</code> (any, default: <code>required</code>)<br><code>time_ms</code> (any, default: <code>250.0</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>slide_hrtf_attribute(attr, target, time_ms=250.0)</code></td><td><code>attr</code> (any, default: <code>required</code>)<br><code>target</code> (any, default: <code>required</code>)<br><code>time_ms</code> (any, default: <code>250.0</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_hrtf_world_position(x, y, z, bilinear=True)</code></td><td><code>x</code> (any, default: <code>required</code>)<br><code>y</code> (any, default: <code>required</code>)<br><code>z</code> (any, default: <code>required</code>)<br><code>bilinear</code> (any, default: <code>True</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_hrtf_live_stream_mode(enabled=True, low_latency_flush=True)</code></td><td><code>enabled</code> (any, default: <code>True</code>)<br><code>low_latency_flush</code> (any, default: <code>True</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>reset_hrtf()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_steam_direct_enabled(enabled=True)</code></td><td><code>enabled</code> (any, default: <code>True</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_steam_reflection_enabled(enabled=True)</code></td><td><code>enabled</code> (any, default: <code>True</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_steam_path_enabled(enabled=True)</code></td><td><code>enabled</code> (any, default: <code>True</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">property</span><code>tempo()</code></td><td><em>None</em></td><td><code>any</code></td><td>Playback speed percentage without changing pitch (100 = normal, 50 = half, 200 = 2x).</td></tr>
+    <tr><td><span class="badge">method</span><code>set_tempo(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>Set playback speed percentage (0..100+, 100 = normal) without changing pitch (requires tempo=True stream).</td></tr>
+    <tr><td><span class="badge">method</span><code>get_tempo()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">property</span><code>tone()</code></td><td><em>None</em></td><td><code>any</code></td><td>Pitch percentage without changing speed (100 = normal, 50 = -1 octave, 200 = +1 octave).</td></tr>
+    <tr><td><span class="badge">method</span><code>set_tone(value)</code></td><td><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>Set pitch percentage (0..100+, 100 = normal) without changing playback speed.</td></tr>
+    <tr><td><span class="badge">method</span><code>get_tone()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_reverse_direction(reverse=True)</code></td><td><code>reverse</code> (any, default: <code>True</code>)</td><td><code>any</code></td><td>Switch playback direction on a reverse=True stream (-1 = reverse, +1 = forward).</td></tr>
+    <tr><td><span class="badge">method</span><code>get_bpm(start_sec=0.0, end_sec=None, min_bpm=45, max_bpm=230)</code></td><td><code>start_sec</code> (any, default: <code>0.0</code>)<br><code>end_sec</code> (any, default: <code>None</code>)<br><code>min_bpm</code> (any, default: <code>45</code>)<br><code>max_bpm</code> (any, default: <code>230</code>)</td><td><code>any</code></td><td>Detect BPM of a decode stream via BASS_FX_BPM_DecodeGet.</td></tr>
+    <tr><td><span class="badge">method</span><code>get_tags(fmt=None)</code></td><td><code>fmt</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>Read audio tags via TAGS (ID3/OGG/FLAC/MP4/WMA/MOD) or URL StreamTitle metadata.</td></tr>
+    <tr><td><span class="badge">method</span><code>start_loudness(flags=None, priority=0)</code></td><td><code>flags</code> (any, default: <code>None</code>)<br><code>priority</code> (any, default: <code>0</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_loudness(mode=&#x27;integrated&#x27;)</code></td><td><code>mode</code> (any, default: <code>&#x27;integrated&#x27;</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>stop_loudness()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>start_encode(output_path=None, fmt=&#x27;wav&#x27;, options=&#x27;&#x27;, flags=0, callback=None)</code></td><td><code>output_path</code> (any, default: <code>None</code>)<br><code>fmt</code> (any, default: <code>&#x27;wav&#x27;</code>)<br><code>options</code> (any, default: <code>&#x27;&#x27;</code>)<br><code>flags</code> (any, default: <code>0</code>)<br><code>callback</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_encode_paused(paused=True)</code></td><td><code>paused</code> (any, default: <code>True</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>stop_encode()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>on_sync(sync_type, callback, param=0, onetime=False)</code></td><td><code>sync_type</code> (any, default: <code>required</code>)<br><code>callback</code> (any, default: <code>required</code>)<br><code>param</code> (any, default: <code>0</code>)<br><code>onetime</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>remove_sync(hsync)</code></td><td><code>hsync</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>clear_syncs()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_matrix(matrix)</code></td><td><code>matrix</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>Set BASSmix channel mixing matrix (2D list of floats or flat list of floats).</td></tr>
+    <tr><td><span class="badge">method</span><code>split(flags=0, chanmap=None)</code></td><td><code>flags</code> (any, default: <code>0</code>)<br><code>chanmap</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>Create a BASS_Split_StreamCreate clone from a decode stream.</td></tr>
     <tr><td><span class="badge">method</span><code>get_data(frame_size=None, data_type=&#x27;raw&#x27;)</code></td><td><code>frame_size</code> (any, default: <code>None</code>)<br><code>data_type</code> (any, default: <code>&#x27;raw&#x27;</code>)</td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">method</span><code>get_length()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">property</span><code>volume()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
@@ -154,6 +192,15 @@ update_hrtf_listener(0, 0, 1.7, 0, 1, 0, 0, 0, 1)</code></pre>
   <tbody>
     <tr><td><span class="badge">constructor</span><code>__init__()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">method</span><code>create_instrument(dll_path, frequency=44100, channels=2, flags=0, ThreeD=False, decode=False, **kwargs)</code></td><td><code>dll_path</code> (any, default: <code>required</code>)<br><code>frequency</code> (any, default: <code>44100</code>)<br><code>channels</code> (any, default: <code>2</code>)<br><code>flags</code> (any, default: <code>0</code>)<br><code>ThreeD</code> (any, default: <code>False</code>)<br><code>decode</code> (any, default: <code>False</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>attach_dsp(target_sound, dll_path, flags=0, priority=0)</code></td><td><code>target_sound</code> (any, default: <code>required</code>)<br><code>dll_path</code> (any, default: <code>required</code>)<br><code>flags</code> (any, default: <code>0</code>)<br><code>priority</code> (any, default: <code>0</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_vst_param(index, value)</code></td><td><code>index</code> (any, default: <code>required</code>)<br><code>value</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_vst_param(index)</code></td><td><code>index</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_vst_param_count()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_vst_program(index)</code></td><td><code>index</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_vst_program()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_vst_program_count()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_vst_bypass(bypass=True)</code></td><td><code>bypass</code> (any, default: <code>True</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_vst_bypass()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">method</span><code>play()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">method</span><code>stop()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">method</span><code>close()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
@@ -178,8 +225,11 @@ update_hrtf_listener(0, 0, 1.7, 0, 1, 0, 0, 0, 1)</code></pre>
   <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
   <tbody>
     <tr><td><span class="badge">constructor</span><code>__init__()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_gain(gain)</code></td><td><code>gain</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>start(freq=24000, chans=1, period_ms=20, callback=None, device=-1, gain=1.0, noise_suppress=False)</code></td><td><code>freq</code> (any, default: <code>24000</code>)<br><code>chans</code> (any, default: <code>1</code>)<br><code>period_ms</code> (any, default: <code>20</code>)<br><code>callback</code> (any, default: <code>None</code>)<br><code>device</code> (any, default: <code>-1</code>)<br><code>gain</code> (any, default: <code>1.0</code>)<br><code>noise_suppress</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>Start live microphone recording (16-bit PCM). Pure audio capture via BASS_RecordStart (or Android NoiseSuppressor).</td></tr>
     <tr><td><span class="badge">method</span><code>stream(filename, draw=False, mono=False, ThreeD=False, decode=False, autofree=False, use_dsp_hrtf=True, preload=True, frame_size=None, **kwargs)</code></td><td><code>filename</code> (any, default: <code>required</code>)<br><code>draw</code> (any, default: <code>False</code>)<br><code>mono</code> (any, default: <code>False</code>)<br><code>ThreeD</code> (any, default: <code>False</code>)<br><code>decode</code> (any, default: <code>False</code>)<br><code>autofree</code> (any, default: <code>False</code>)<br><code>use_dsp_hrtf</code> (any, default: <code>True</code>)<br><code>preload</code> (any, default: <code>True</code>)<br><code>frame_size</code> (any, default: <code>None</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">method</span><code>push(data)</code></td><td><code>data</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>read_pcm(num_bytes=960)</code></td><td><code>num_bytes</code> (any, default: <code>960</code>)</td><td><code>any</code></td><td>Read decoded PCM bytes from a decode=True stream (returns b&#x27;&#x27; on EOF).</td></tr>
     <tr><td><span class="badge">method</span><code>get_sample()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">method</span><code>clear_sample()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">method</span><code>stop()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
@@ -192,6 +242,10 @@ update_hrtf_listener(0, 0, 1.7, 0, 1, 0, 0, 0, 1)</code></pre>
   <tbody>
     <tr><td><span class="badge">constructor</span><code>__init__()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">method</span><code>load_font(font_path, flags=0, **kwargs)</code></td><td><code>font_path</code> (any, default: <code>required</code>)<br><code>flags</code> (any, default: <code>0</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>create_realtime(channels=16, flags=0, ThreeD=False, decode=False, use_dsp_hrtf=True, **kwargs)</code></td><td><code>channels</code> (any, default: <code>16</code>)<br><code>flags</code> (any, default: <code>0</code>)<br><code>ThreeD</code> (any, default: <code>False</code>)<br><code>decode</code> (any, default: <code>False</code>)<br><code>use_dsp_hrtf</code> (any, default: <code>True</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>send_event(chan, event, param)</code></td><td><code>chan</code> (any, default: <code>required</code>)<br><code>event</code> (any, default: <code>required</code>)<br><code>param</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>note_on(chan, note, velocity=100)</code></td><td><code>chan</code> (any, default: <code>required</code>)<br><code>note</code> (any, default: <code>required</code>)<br><code>velocity</code> (any, default: <code>100</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>note_off(chan, note)</code></td><td><code>chan</code> (any, default: <code>required</code>)<br><code>note</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">method</span><code>stream(filename, mono=False, ThreeD=False, decode=False, use_dsp_hrtf=True, **kwargs)</code></td><td><code>filename</code> (any, default: <code>required</code>)<br><code>mono</code> (any, default: <code>False</code>)<br><code>ThreeD</code> (any, default: <code>False</code>)<br><code>decode</code> (any, default: <code>False</code>)<br><code>use_dsp_hrtf</code> (any, default: <code>True</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">method</span><code>play()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">method</span><code>stop()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
@@ -203,7 +257,7 @@ update_hrtf_listener(0, 0, 1.7, 0, 1, 0, 0, 0, 1)</code></pre>
   <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
   <tbody>
     <tr><td><span class="badge">constructor</span><code>__init__()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
-    <tr><td><span class="badge">method</span><code>stream(filename=&#x27;&#x27;, draw=False, mono=False, ThreeD=False, decode=False, autofree=False, use_dsp_hrtf=False, preload=False, frame_size=None, **kwargs)</code></td><td><code>filename</code> (any, default: <code>&#x27;&#x27;</code>)<br><code>draw</code> (any, default: <code>False</code>)<br><code>mono</code> (any, default: <code>False</code>)<br><code>ThreeD</code> (any, default: <code>False</code>)<br><code>decode</code> (any, default: <code>False</code>)<br><code>autofree</code> (any, default: <code>False</code>)<br><code>use_dsp_hrtf</code> (any, default: <code>False</code>)<br><code>preload</code> (any, default: <code>False</code>)<br><code>frame_size</code> (any, default: <code>None</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>stream(filename=&#x27;&#x27;, draw=False, mono=False, ThreeD=False, decode=False, autofree=False, use_dsp_hrtf=False, preload=False, frame_size=None, tempo=False, reverse=False, **kwargs)</code></td><td><code>filename</code> (any, default: <code>&#x27;&#x27;</code>)<br><code>draw</code> (any, default: <code>False</code>)<br><code>mono</code> (any, default: <code>False</code>)<br><code>ThreeD</code> (any, default: <code>False</code>)<br><code>decode</code> (any, default: <code>False</code>)<br><code>autofree</code> (any, default: <code>False</code>)<br><code>use_dsp_hrtf</code> (any, default: <code>False</code>)<br><code>preload</code> (any, default: <code>False</code>)<br><code>frame_size</code> (any, default: <code>None</code>)<br><code>tempo</code> (any, default: <code>False</code>)<br><code>reverse</code> (any, default: <code>False</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">method</span><code>music(filename, mono=False, ThreeD=False, decode=False, autofree=False, use_dsp_hrtf=True, prescan=True, ramp=True, frame_size=None, **kwargs)</code></td><td><code>filename</code> (any, default: <code>required</code>)<br><code>mono</code> (any, default: <code>False</code>)<br><code>ThreeD</code> (any, default: <code>False</code>)<br><code>decode</code> (any, default: <code>False</code>)<br><code>autofree</code> (any, default: <code>False</code>)<br><code>use_dsp_hrtf</code> (any, default: <code>True</code>)<br><code>prescan</code> (any, default: <code>True</code>)<br><code>ramp</code> (any, default: <code>True</code>)<br><code>frame_size</code> (any, default: <code>None</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>Load MOD/XM/IT/S3M/MO3 tracker music (HMUSIC) with full HRTF DSP &amp; Decode Stream compatibility.</td></tr>
     <tr><td><span class="badge">method</span><code>load(filename=&#x27;&#x27;, mono=False, ThreeD=False, decode=False, use_dsp_hrtf=True, frame_size=None, **kwargs)</code></td><td><code>filename</code> (any, default: <code>&#x27;&#x27;</code>)<br><code>mono</code> (any, default: <code>False</code>)<br><code>ThreeD</code> (any, default: <code>False</code>)<br><code>decode</code> (any, default: <code>False</code>)<br><code>use_dsp_hrtf</code> (any, default: <code>True</code>)<br><code>frame_size</code> (any, default: <code>None</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">method</span><code>play(reset_loop=True)</code></td><td><code>reset_loop</code> (any, default: <code>True</code>)</td><td><code>any</code></td><td>—</td></tr>
@@ -211,6 +265,7 @@ update_hrtf_listener(0, 0, 1.7, 0, 1, 0, 0, 0, 1)</code></pre>
     <tr><td><span class="badge">method</span><code>stop()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">method</span><code>close()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">method</span><code>push(data)</code></td><td><code>data</code> (any, default: <code>required</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>read_pcm(num_bytes=960)</code></td><td><code>num_bytes</code> (any, default: <code>960</code>)</td><td><code>any</code></td><td>Read decoded PCM bytes from a decode=True stream (returns b&#x27;&#x27; on EOF).</td></tr>
   </tbody>
 </table>
 <h3>Class <code>music</code></h3>
@@ -220,6 +275,21 @@ update_hrtf_listener(0, 0, 1.7, 0, 1, 0, 0, 0, 1)</code></pre>
   <tbody>
     <tr><td><span class="badge">method</span><code>load(filename=&#x27;&#x27;, mono=False, ThreeD=False, decode=False, use_dsp_hrtf=True, **kwargs)</code></td><td><code>filename</code> (any, default: <code>&#x27;&#x27;</code>)<br><code>mono</code> (any, default: <code>False</code>)<br><code>ThreeD</code> (any, default: <code>False</code>)<br><code>decode</code> (any, default: <code>False</code>)<br><code>use_dsp_hrtf</code> (any, default: <code>True</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
     <tr><td><span class="badge">method</span><code>stream(filename=&#x27;&#x27;, mono=False, ThreeD=False, decode=False, use_dsp_hrtf=True, **kwargs)</code></td><td><code>filename</code> (any, default: <code>&#x27;&#x27;</code>)<br><code>mono</code> (any, default: <code>False</code>)<br><code>ThreeD</code> (any, default: <code>False</code>)<br><code>decode</code> (any, default: <code>False</code>)<br><code>use_dsp_hrtf</code> (any, default: <code>True</code>)<br><code>**kwargs</code> (dict, default: <code>optional</code>)</td><td><code>any</code></td><td>—</td></tr>
+  </tbody>
+</table>
+<h3>Class <code>WasapiManager</code></h3>
+<p>Windows WASAPI low-latency output &amp; loopback capture wrapper (pybasswasapi).</p>
+<table class="api-tbl" id="tbl_sound_pool_WasapiManager">
+  <thead><tr><th>Symbol &amp; Signature</th><th>Parameters (Type &amp; Default)</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge">method</span><code>devices()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>init(device=-1, freq=0, chans=0, flags=0, buffer_sec=0.05, period_sec=0.0, proc=None, user=None)</code></td><td><code>device</code> (any, default: <code>-1</code>)<br><code>freq</code> (any, default: <code>0</code>)<br><code>chans</code> (any, default: <code>0</code>)<br><code>flags</code> (any, default: <code>0</code>)<br><code>buffer_sec</code> (any, default: <code>0.05</code>)<br><code>period_sec</code> (any, default: <code>0.0</code>)<br><code>proc</code> (any, default: <code>None</code>)<br><code>user</code> (any, default: <code>None</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>start()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>stop(reset=False)</code></td><td><code>reset</code> (any, default: <code>False</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>free()</code></td><td><em>None</em></td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>get_volume(mode=0)</code></td><td><code>mode</code> (any, default: <code>0</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_volume(volume, mode=0)</code></td><td><code>volume</code> (any, default: <code>required</code>)<br><code>mode</code> (any, default: <code>0</code>)</td><td><code>any</code></td><td>—</td></tr>
+    <tr><td><span class="badge">method</span><code>set_mute(mute=True, mode=0)</code></td><td><code>mute</code> (any, default: <code>True</code>)<br><code>mode</code> (any, default: <code>0</code>)</td><td><code>any</code></td><td>—</td></tr>
   </tbody>
 </table>
 <script>

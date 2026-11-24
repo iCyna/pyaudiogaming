@@ -1,22 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Unified Cross-Platform Accessible GUI Toolkit for PyAudioGaming (Full 4-Backend API).
-
-Supports 4 automatic backends with one identical, simplified API:
-1. ``wx``    — Native Win32/Cocoa/GTK via wxPython (best NVDA/JAWS screen-reader support on Windows)
-2. ``qt``    — Native Qt via PySide6 / PyQt6 (great accessibility on Linux, macOS, Windows)
-3. ``tk``    — Python built-in Tkinter (zero extra dependencies on desktop)
-4. ``audio`` — PyAudioGaming ``vb.form`` (works on Android, iOS, Web, and any pygame/SDL2 window)
-
-Complete common API across ALL 4 backends:
-- Controls: ``button``, ``print``/``label``, ``input``, ``checkbox``, ``switch``,
-  ``slider``, ``spin``, ``combo``, ``listbox``, ``radio``, ``progress``, ``table``,
-  ``link``, ``separator``.
-- Layouts (via ``with``): ``with w.row():``, ``with w.group("Title"):``, ``with w.page("Tab"):``.
-- State & Accessibility: ``get``, ``set``, ``values``, ``enable``, ``show``, ``focus``,
-  ``edit``, ``remove``, ``set_title``, ``on_close``, ``after``, ``shortcut``, ``build(schema)``.
-- Dialogs: ``alert``, ``confirm``, ``prompt``, ``open_file``, ``save_file``, ``open_folder``.
-- Lifecycle: ``run`` / ``frameUpdate``, ``close``.
-"""
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# Accessible GUI toolkit with wx, Qt, Tkinter, and audio form backends.
+# Supports Windows, Linux, macOS, Android, and iOS.
 
 import os
 import sys

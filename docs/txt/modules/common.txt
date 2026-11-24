@@ -1,0 +1,12 @@
+========================================================================
+MODULE: pyaudiogaming.common
+common — System & Process Utility Helpers
+========================================================================
+
+SUMMARY:
+Lightweight filesystem, process execution, and environment utilities shared across PyAudioGaming modules.
+
+[MODULE FUNCTIONS]
+----------------------------------------
+* run(cmd, sh=False) -> any
+* mkdir(fld) -> any

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-# copyright 2026 belong ihcyna (Labubu)<phucnggo29@gmail.com>.
-#keys callback value
+# Copyright 2026 belong ihcyna (Labubu) <phucnggo29@gmail.com>.
+# Key name and pygame keycode mapping table.
+# Supports Windows, Linux, macOS, Android, and iOS.
 
 from pygame.locals import *
 ksum = {

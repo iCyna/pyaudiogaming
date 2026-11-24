@@ -2,6 +2,263 @@
   "module": "vb",
   "classes": [
     {
+      "name": "ClipboardHistory",
+      "doc": "",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "max_items=15",
+          "params": [
+            {
+              "name": "max_items",
+              "type": "any",
+              "default": "15"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "push",
+          "kind": "method",
+          "signature": "text",
+          "params": [
+            {
+              "name": "text",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "list_items",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "VirtualKeyboard",
+      "doc": "Language-neutral OS-aware 4-row touch virtual keyboard with 3-state Shift, 1-tap lift / 2-tap double-tap modes, Unicode NFC diacritics, and pluggable composers.",
+      "methods": [
+        {
+          "name": "__init__",
+          "kind": "constructor",
+          "signature": "number_only=False, single_tap_type=True, langs=None, composers=None, top_ratio=0.42",
+          "params": [
+            {
+              "name": "number_only",
+              "type": "any",
+              "default": "False"
+            },
+            {
+              "name": "single_tap_type",
+              "type": "any",
+              "default": "True"
+            },
+            {
+              "name": "langs",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "composers",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "top_ratio",
+              "type": "any",
+              "default": "0.42"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "current_lang",
+          "kind": "property",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "current_rows",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "display_label",
+          "kind": "method",
+          "signature": "tok",
+          "params": [
+            {
+              "name": "tok",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "spoken_label",
+          "kind": "method",
+          "signature": "tok",
+          "params": [
+            {
+              "name": "tok",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "key_at",
+          "kind": "method",
+          "signature": "nx, ny",
+          "params": [
+            {
+              "name": "nx",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "ny",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "cycle_shift",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "cycle_lang",
+          "kind": "method",
+          "signature": "",
+          "params": [],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "compose_char",
+          "kind": "method",
+          "signature": "prefix, ch",
+          "params": [
+            {
+              "name": "prefix",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "ch",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "activate_key",
+          "kind": "method",
+          "signature": "tok",
+          "params": [
+            {
+              "name": "tok",
+              "type": "any",
+              "default": "required"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        },
+        {
+          "name": "flush_pending",
+          "kind": "method",
+          "signature": "say_fn=None",
+          "params": [
+            {
+              "name": "say_fn",
+              "type": "any",
+              "default": "None"
+            }
+          ],
+          "returns": "any",
+          "doc": "Commit pending 1-tap focus after double-tap timeout (TalkBack TouchExplorer model)."
+        },
+        {
+          "name": "handle_touch",
+          "kind": "method",
+          "signature": "ev_type, finger_id, nx, ny, say_fn=None, fdown=1792, fup=1793, fmotion=1794",
+          "params": [
+            {
+              "name": "ev_type",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "finger_id",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "nx",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "ny",
+              "type": "any",
+              "default": "required"
+            },
+            {
+              "name": "say_fn",
+              "type": "any",
+              "default": "None"
+            },
+            {
+              "name": "fdown",
+              "type": "any",
+              "default": "1792"
+            },
+            {
+              "name": "fup",
+              "type": "any",
+              "default": "1793"
+            },
+            {
+              "name": "fmotion",
+              "type": "any",
+              "default": "1794"
+            }
+          ],
+          "returns": "any",
+          "doc": ""
+        }
+      ]
+    },
+    {
       "name": "form",
       "doc": "NVDA & Android TalkBack accessible form with Rich Controls, Table, Tree, Dialog & Auto-Submit.",
       "methods": [
@@ -423,6 +680,110 @@
     }
   ],
   "functions": [
+    {
+      "name": "register_keyboard_layout",
+      "kind": "function",
+      "signature": "lang_code, rows, label=None",
+      "params": [
+        {
+          "name": "lang_code",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "rows",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "label",
+          "type": "any",
+          "default": "None"
+        }
+      ],
+      "returns": "any",
+      "doc": "Register or override a language keyboard layout (4 rows of key tokens)."
+    },
+    {
+      "name": "register_composer",
+      "kind": "function",
+      "signature": "lang_code, composer_fn",
+      "params": [
+        {
+          "name": "lang_code",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "composer_fn",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": "Register an optional input composer fn(prefix, ch) -> (new_prefix, composed_bool) for any language."
+    },
+    {
+      "name": "compose_unicode_nfc",
+      "kind": "function",
+      "signature": "prefix, ch",
+      "params": [
+        {
+          "name": "prefix",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "ch",
+          "type": "any",
+          "default": "required"
+        }
+      ],
+      "returns": "any",
+      "doc": "Universal Unicode NFC combining-mark composer (works for all scripts with zero language bias)."
+    },
+    {
+      "name": "detect_os_keyboard_languages",
+      "kind": "function",
+      "signature": "",
+      "params": [],
+      "returns": "any",
+      "doc": "Auto-detect enabled keyboard languages from OS (Android / iOS / Windows / locale)."
+    },
+    {
+      "name": "navigate_text",
+      "kind": "function",
+      "signature": "lines, x, y, direction, granularity='character'",
+      "params": [
+        {
+          "name": "lines",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "x",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "y",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "direction",
+          "type": "any",
+          "default": "required"
+        },
+        {
+          "name": "granularity",
+          "type": "any",
+          "default": "'character'"
+        }
+      ],
+      "returns": "any",
+      "doc": "Move cursor by direction (-1/+1) at granularity (character/word/line/sentence/paragraph)."
+    },
     {
       "name": "dialog",
       "kind": "function",

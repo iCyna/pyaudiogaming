@@ -10,9 +10,10 @@ File helper supporting JSON, Pickle, and plain-text serialization with optional 
 [CLASS File]
 ----------------------------------------
 * File.__init__(password: str, encode: bool=False, aes: bool=False) -> any [constructor]
+* File.cipher() -> any [property]
 * File.generate_key(password: str) -> bytes [method]
   Tạo key từ mật khẩu bằng cách băm SHA-256.
-* File.dokey(key: bytes) -> Fernet [method]
+* File.dokey(key: bytes) -> any [method]
   Tạo đối tượng Fernet từ key.
 * File.aes_encrypt(data: bytes) -> bytes [method]
   Mã hóa dữ liệu bằng AES.
